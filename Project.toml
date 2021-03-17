@@ -1,0 +1,4 @@
+name = "GeneratorArrays"
+uuid = "613c443e-d742-454e-bfc6-1d7f8dd76566"
+authors = ["rheintzmann <heintzmann@gmail.com>"]
+version = "0.1.0"
