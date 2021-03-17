@@ -3,15 +3,30 @@ module GeneratorArrays
 export GeneratorArray
 
  # T refers to the result type
-struct GeneratorArray{T,N,F} <: AbstractArray{T, N} where {F}
+struct GeneratorArray{T,N,F, } <: AbstractArray{T, N} where {F}
     # stores the generator function to be applied to the indices. 
     generator::F     
     #a offset which is subtracted (.-) from the indices
-    offset::NTuple{N, T}
+    offset::NTuple{N, eltype(T)}
     #a scaling which is applied after subtraction (.*) s
-    scale::NTuple{N, T}
+    scale::NTuple{N, eltype(T)}
     # output size of the array 
     size::NTuple{N, Int}
+
+    function GeneratorArray(::Type{T}, gen::F, 
+                            ofs::NTuple{N, G}, sca::NTuple{N, H}, 
+                            size::NTuple{N,Int}) where {T,N,F,G,H}
+        if typeof(gen(size)) != T
+            error("The generator function does not have Type T as indicated")
+        end
+        #
+        ofs = convert(NTuple{N, eltype(T)}, ofs)
+        sca = convert(NTuple{N, eltype(T)}, sca)
+        gen2(x) = gen(sca .* (x .- ofs))
+        F_new = typeof(gen2)
+        return new{T, N, F_new}(gen2, ofs, sca, size) 
+    end
+
 end
 
 
@@ -138,17 +153,6 @@ function GeneratorArray(gen::F,
     return GeneratorArray(T, gen, ofs, sca, size)
 end
 
-function GeneratorArray(::Type{T}, gen::F, 
-                        ofs::NTuple{N, G}, sca::NTuple{N, H}, 
-                        size::NTuple{N,Int}) where {T,N,F,G,H}
-    if typeof(gen(size)) != T
-        error("The generator function does not have Type T as indicated")
-    end
-    ofs = convert(NTuple{N, T}, ofs)
-    sca = convert(NTuple{N, T}, sca)
-    return GeneratorArray{T, N, F}(gen, ofs, sca, size) 
-end
-
 
 
 # define AbstractArray function to allow to treat the generator as an array
@@ -158,9 +162,16 @@ Base.similar(A::GeneratorArray, ::Type{T}, size::Dims) where {T} = begin
     GeneratorArray(A.generator, A.offset, A.scale, size)
 end
 
+@inline ind_manip(I, scale, offset) = scale .* (I .- offset)
+
 # subtract offset and apply scaling afterwards
 Base.getindex(A::GeneratorArray{T,N}, I::Vararg{Int, N}) where {T,N} = begin
-    A.generator(A.scale .* (I .- A.offset))
+    # moving the index maninpulation into the generator
+    # increases performance
+    #inds = ind_manip(I, A.scale, A.offset)
+    #A.generator(inds)
+    #return A.generator(A.scale .* (I .- A.offset))
+    return A.generator(I)
 end
 
 # not possible
