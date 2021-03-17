@@ -7,9 +7,9 @@ struct GeneratorArray{T,N,F} <: AbstractArray{T, N} where {F}
     # stores the generator function to be applied to the indices. 
     generator::F     
     #a offset which is subtracted (.-) from the indices
-    offset::NTuple{N, T}
+    offset::NTuple{N, eltype(T)}
     #a scaling which is applied after subtraction (.*) s
-    scale::NTuple{N, T}
+    scale::NTuple{N, eltype(T)}
     # output size of the array 
     size::NTuple{N, Int}
 
