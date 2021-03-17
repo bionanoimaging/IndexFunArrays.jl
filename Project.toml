@@ -1,4 +1,10 @@
 name = "GeneratorArrays"
 uuid = "613c443e-d742-454e-bfc6-1d7f8dd76566"
-authors = ["rheintzmann <heintzmann@gmail.com>"]
+authors = ["Rainer Heintzmann <heintzmann@gmail.com>"]
 version = "0.1.0"
+
+[compat]
+julia = "1, 1.3, 1.5, 1.6"
+
+[targets]
+test = ["Test", "Random"]
