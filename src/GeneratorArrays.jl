@@ -3,13 +3,13 @@ module GeneratorArrays
 export GeneratorArray
 
  # T refers to the result type
-struct GeneratorArray{T,N,F} <: AbstractArray{T, N} where {F}
+struct GeneratorArray{T,N,F,H} <: AbstractArray{T, N} where {F}
     # stores the generator function to be applied to the indices. 
     generator::F     
     #a offset which is subtracted (.-) from the indices
-    offset::NTuple{N, eltype(T)}
+    offset::NTuple{N,H}
     #a scaling which is applied after subtraction (.*) s
-    scale::NTuple{N, eltype(T)}
+    scale::NTuple{N, H}
     # output size of the array 
     size::NTuple{N, Int}
 
@@ -23,7 +23,7 @@ struct GeneratorArray{T,N,F} <: AbstractArray{T, N} where {F}
         sca = convert(NTuple{N, eltype(T)}, sca)
         gen2(x) = gen(sca .* (x .- ofs))
         F_new = typeof(gen2)
-        return new{T, N, F_new}(gen2, ofs, sca, size) 
+        return new{T, N, F_new, eltype(T)}(gen2, ofs, sca, size) 
     end
 
 end
@@ -167,8 +167,6 @@ end
 Base.getindex(A::GeneratorArray{T,N}, I::Vararg{Int, N}) where {T,N} = begin
     # moving the index maninpulation into the generator
     # increases performance
-    # this statement somehow introduces large memory allocations
-    # Before we wrapped the eltype(T) tuple, it was fine
     #return A.generator((I .- A.offset))
     return A.generator(I)
 end
