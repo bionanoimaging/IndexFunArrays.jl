@@ -1,9 +1,6 @@
 using Test
 using Random
 
+using GeneratorArrays
 
-
-@testset "Check GeneratorArray initializer" begin
-end    
-
-
+include("constructors.jl")
