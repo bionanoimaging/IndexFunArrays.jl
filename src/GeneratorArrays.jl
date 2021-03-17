@@ -19,9 +19,8 @@ struct GeneratorArray{T,N,F} <: AbstractArray{T, N} where {F}
         if typeof(gen(size)) != T
             error("The generator function does not have Type T as indicated")
         end
-        #
-#        ofs = convert(NTuple{N, eltype(T)}, ofs)
-#        sca = convert(NTuple{N, eltype(T)}, sca)
+        ofs = convert(NTuple{N, eltype(T)}, ofs)
+        sca = convert(NTuple{N, eltype(T)}, sca)
         gen2(x) = gen(sca .* (x .- ofs))
         F_new = typeof(gen2)
         return new{T, N, F_new}(gen2, ofs, sca, size) 
@@ -170,8 +169,8 @@ Base.getindex(A::GeneratorArray{T,N}, I::Vararg{Int, N}) where {T,N} = begin
     # increases performance
     # this statement somehow introduces large memory allocations
     # Before we wrapped the eltype(T) tuple, it was fine
-    return A.generator((I .- A.offset))
-    #return A.generator(I)
+    #return A.generator((I .- A.offset))
+    return A.generator(I)
 end
 
 # not possible
