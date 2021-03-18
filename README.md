@@ -4,7 +4,7 @@ This package allows to generate complex array expressions which do not allocate 
 
 | **Build Status**                          | **Code Coverage**               |
 |:-----------------------------------------:|:-------------------------------:|
-|[![][docs-dev-img]][docs-dev-url] | [![][CI-img]][CI-url] | [![][codecov-img]][codecov-url] |
+| [![][CI-img]][CI-url]                     | [![][codecov-img]][codecov-url] |
 
 
 
