@@ -55,8 +55,6 @@ function generate_functions_expr()
 end
 
 function generate_window_functions_expr()
-    # offset and scale is already wrapped in the generator function
-    x_expr = :(scale .* (x .- offset))
     x_exprW = :(min.(1.0, max.(0, - border_in .+ abs.(scale .* (x .- offset)))./(border_out-border_in)))
 
     functions = [
@@ -128,13 +126,3 @@ for F in generate_window_functions_expr()
 
     @eval export $(F[1])
 end 
-
-export getPropagator  # This has actually does evaluate. It should be programmed as a point-wise operation
-function getPropagator(x, k0, dZ) 
-    return exp.(2im.*π.* sqrt.(max.(0.0,k0^2 .- rr2(x,offset=CtrFT))))
-end
-
-#rr(size::NTuple{N,Int},::Type{T}=Float64,::Type{CT}=CtrCorner) where{T,N,CT} = GeneratorArray(x->sum(abs2.(x)), get_offset(size,CT), T, size) 
-#rr(size::NTuple{N,Int}, ::Type{CT}=CtrCorner) where{N,CT} = rr(size, Float64, CT)
-#rr(arr::AbstractArray{T,N},::Type{T}) where{T,N,CT} = rr(size(arr),T,CtrCorner) 
-#rr(arr::AbstractArray{T,N},::Type{CT}=CtrCorner) where{T,N,CT} = rr(arr, Float64,CT)
