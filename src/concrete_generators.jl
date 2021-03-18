@@ -1,3 +1,8 @@
+export rr, rr2
+export xx, yy, zz
+export phiphi
+
+# define types to specify where the center point is
 abstract type Ctr end  # Center of the array
 struct Ctr_Corner <: Ctr end  # corner voxel is zero
 struct Ctr_FFT <: Ctr end # corresponding to FFTs
@@ -34,9 +39,9 @@ Fkts = [
 ]
 for F in Fkts
     @eval $(F[1])(size::NTuple{N,Int}, offset::NTuple{N,Int}, scale::NTuple{N,Int}, ::Type{T}=Float64,) where{T,N,CT} = GeneratorArray(T, $(F[2]), convert(NTuple{N,T},offset), convert(NTuple{N,T},scale), size) 
-    @eval $(F[1])(size::NTuple{N,Int},::Type{CT}=Ctr_FT,::Type{SC}=Sca_Unit, ::Type{T}=Float64,) where{T,N,CT} = GeneratorArray(T, $(F[2]), get_offset(size,CT), get_scale(size,SC), size) 
+    @eval $(F[1])(size::NTuple{N,Int},::Type{CT}=Ctr_FT,::Type{SC}=Sca_Unit, ::Type{T}=Float64,) where{T,N,CT, SC} = GeneratorArray(T, $(F[2]), get_offset(size,CT), get_scale(size,SC), size) 
     @eval $(F[1])(anArray::AbstractArray{T,N}, offset::NTuple{N,Int},scale::NTuple{N,Int}, ::Type{T}=Float64,) where{T,N,CT} = GeneratorArray(T, $(F[2]), convert(NTuple{N,T},offset), convert(NTuple{N,T},scale), size(anArray)) 
-    @eval $(F[1])(anArray::AbstractArray{T,N},::Type{CT}=Ctr_FT,::Type{SC}=Sca_Unit,::Type{T}=Float64,) where{T,N,CT} = GeneratorArray(T, $(F[2]), get_offset(size(anArray),CT), get_scale(size,SC), size(anArray)) 
+    @eval $(F[1])(anArray::AbstractArray{T,N},::Type{CT}=Ctr_FT,::Type{SC}=Sca_Unit,::Type{T}=Float64,) where{T,N,CT, SC} = GeneratorArray(T, $(F[2]), get_offset(size(anArray),CT), get_scale(size,SC), size(anArray)) 
     @eval export $(F[1])
 end 
 

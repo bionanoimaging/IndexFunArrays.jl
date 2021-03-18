@@ -2,6 +2,8 @@ module GeneratorArrays
 
 export GeneratorArray
 
+include("concrete_generators.jl")
+
  # T refers to the result type
 struct GeneratorArray{T,N,F,H} <: AbstractArray{T, N} where {F}
     # stores the generator function to be applied to the indices. 
