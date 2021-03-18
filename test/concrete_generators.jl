@@ -53,7 +53,7 @@
 
     # simple hanning test
     @testset "Hanning window test" begin
-        hanning((10, ), border_in=0, border_out=1) ≈ sinpi.(range(0, 1, length=11)[begin:end-1]).^2
+        hanning((10, ), border_in=0, border_out=1) ≈ sinpi.(range(0, 1, length=11)[1:end-1]).^2
         hanning((10, ), border_in=0.4, border_out=0.499) ≈ [0, 0, 0, 1, 1, 1, 1, 1, 0, 0]
         
         x = hanning(Int, (10, ), border_in=0.4, border_out=0.499) 
