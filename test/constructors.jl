@@ -5,73 +5,32 @@
     int_types_to_test = [Int16, Int32, Int64]
     
     
-    function test_arr(arr, f, T, s, offset, scale)
+    function test_arr(arr, f, T, s)
         @test typeof(arr[s...]) == T
-        @test last(arr) ≈ sqrt(sum(abs2.(scale .* (s .- offset))))
+        @test last(arr) ≈ sqrt(sum(abs2.((s))))
         @test arr.size == s
-        @test arr.offset === offset
-        @test arr.scale === scale
-        @test first(arr) ≈ sqrt(sum(abs2.(scale .* (ntuple(x -> 1, length(s)) .- offset))))
+        @test first(arr) ≈ sqrt(sum(abs2.((ntuple(x -> 1, length(s))))))
         @test typeof(arr) <: GeneratorArray{T, length(s), F} where F
     end
     
     
-    @testset "Check GeneratorArray initializer with gen and size for types and boundaries" begin
+    @testset "Check GeneratorArray initializer for types and boundaries" begin
     
         sizes = [(10, 10), (2,2,2), (3,3,3,3)]
         for s in sizes
             for T in float_types_to_test 
                 f(ind) = T(sqrt(sum(abs2.(ind))))
                 arr = GeneratorArray(f, s)
-                ofs = ntuple(x -> T(0), length(s)) 
-                scale = ntuple(x -> T(1), length(s)) 
-                test_arr(arr, f, T, s, ofs, scale)
+                test_arr(arr, f, T, s)
                 arr = GeneratorArray(T, f, s)
-                test_arr(arr, f, T, s, ofs, scale)
+                test_arr(arr, f, T, s)
             end
         end
     end    
     
-    @testset "Check GeneratorArray initializer with gen, size, offset, scale for types and boundaries" begin
-    
-        sizes = [(10, 10), (2,2,2) ]
-        for s in sizes
-            for T in float_types_to_test 
-                f(ind) = T(sqrt(sum(abs2.(ind))))
-                
-                offset = ntuple(x -> T(rand(1:10)), length(s))
-                scale = ntuple(x -> T(rand(1:10)), length(s))
-                
-                arr = GeneratorArray(f, offset, scale, s)
-                test_arr(arr, f, T, s, offset, scale)
-               
-                arr = GeneratorArray(T, f, offset, scale, s)
-                test_arr(arr, f, T, s, offset, scale)
-            end
-        end
-    end    
-    
-    @testset "Check GeneratorArray initializer with gen, size and offset  for types and boundaries" begin
-    
-        sizes = [(10, 10), (2,2,2) ]
-        for s in sizes
-            for T in float_types_to_test 
-                f(ind) = T(sqrt(sum(abs2.(ind))))
-                
-                offset = ntuple(x -> T(rand(1:10)), length(s))
-                scale = ntuple(x -> T(1), length(s))
-                
-                arr = GeneratorArray(f, offset, s)
-                test_arr(arr, f, T, s, offset, scale)
-               
-                arr = GeneratorArray(T, f, offset, s)
-                test_arr(arr, f, T, s, offset, scale)
-            end
-        end
-    end    
 
-    @testset "Certain special cases" begin
-        @test GeneratorArray(x -> x, (1,0), (1,1), (3, 3)) == [(0, 1) (0, 2) (0, 3); (1, 1) (1, 2) (1, 3); (2, 1) (2, 2) (2, 3)]
-
-    end
+#    @testset "Certain special cases" begin
+#        @test GeneratorArray(x -> x, (1,0), (1,1), (3, 3)) == [(0, 1) (0, 2) (0, 3); (1, 1) (1, 2) (1, 3); (2, 1) (2, 2) (2, 3)]
+#
+#    end
 end
