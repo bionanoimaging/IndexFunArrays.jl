@@ -34,8 +34,6 @@ end
         return true
     end
 
-
-
     @test f()
     @test g()
 end
