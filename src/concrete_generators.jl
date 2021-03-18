@@ -57,10 +57,10 @@ end
 function generate_window_functions_expr()
     # offset and scale is already wrapped in the generator function
     x_expr = :(scale .* (x .- offset))
-    x_exprW = :(min.(1.0,max.(0,borderI.-abs.(scale .* (x .- offset)))./(borderO-borderI)))
+    x_exprW = :(min.(1.0, max.(0, - border_in .+ abs.(scale .* (x .- offset)))./(border_out-border_in)))
 
     functions = [
-        (:(hanning),  :(x -> T(prod(sin.(pi/2.0 .* ($x_exprW)).^2)))),
+        (:(hanning),  :(x -> T(prod(cospi.(0.5 .* ($x_exprW)).^2)))),
     ]
     return functions
 end
@@ -105,7 +105,7 @@ for F in generate_window_functions_expr()
     # default functions with certain offset and scaling behavior
     @eval function $(F[1])(::Type{T}, size::NTuple{N, Int};
                            offset=CtrFT,
-                           scale=ScaFTEdge, borderI=0.8, borderO=1.0) where{N, T} 
+                           scale=ScaFTEdge, border_in=0.8, border_out=1.0) where{N, T} 
         offset = get_offset(size, offset)
         scale = get_scale(size, scale)
         GeneratorArray(T, $(F[2]), size) 
@@ -114,16 +114,16 @@ for F in generate_window_functions_expr()
     # change order of offset and scale
     @eval function $(F[1])(size::NTuple{N, Int}; 
                            offset=CtrFT, 
-                           scale=ScaFTEdge, borderI=0.8, borderO=1.0) where{N} 
+                           scale=ScaFTEdge, border_in=0.8, border_out=1.0) where{N} 
         T = $default_T 
-        $(F[1])(T, size, scale=scale, offset=offset, borderI=borderI, borderO=borderO) 
+        $(F[1])(T, size, scale=scale, offset=offset, border_in=border_in, border_out=border_out) 
     end
 
     # convenient wrapper to provide an array as input
     @eval function $(F[1])(arr::AbstractArray{T, N}; 
                            offset=CtrFT, 
-                           scale=ScaFTEdge, borderI=0.8, borderO=1.0) where{N, T} 
-        $(F[1])(T, size(arr), scale=scale, offset=offset, borderI=borderI, borderO=borderO)
+                           scale=ScaFTEdge, border_in=0.8, border_out=1.0) where{N, T} 
+        $(F[1])(T, size(arr), scale=scale, offset=offset, border_in=border_in, border_out=border_out)
     end
 
     @eval export $(F[1])
