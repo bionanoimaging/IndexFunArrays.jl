@@ -65,9 +65,7 @@ end
 # define AbstractArray function to allow to treat the generator as an array
 # See https://docs.julialang.org/en/v1/manual/interfaces/#man-interface-array
 Base.size(A::GeneratorArray) = A.size
-Base.similar(A::GeneratorArray, ::Type{T}, size::Dims) where {T} = begin
-    GeneratorArray(A.generator, size)
-end
+Base.similar(A::GeneratorArray, ::Type{T}, size::Dims) where {T} = GeneratorArray(A.generator, size)
 
 Base.getindex(A::GeneratorArray{T,N}, I::Vararg{Int, N}) where {T,N} = return A.generator(I)
 
