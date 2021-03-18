@@ -23,6 +23,6 @@ julia> ] add https://github.com/RainerHeintzmann/GeneratorArrays.jl
 [CI-img]: https://github.com/RainerHeintzmann/GeneratorArrays.jl/actions/workflows/ci.yml/badge.svg
 [CI-url]: https://github.com/RainerHeintzmann/GeneratorArrays.jl/actions/workflows/ci.yml
 
-[codecov-img]: 
-[codecov-url]: 
+[codecov-img]: https://codecov.io/gh/bionanoimaging/GeneratorArrays.jl/branch/master/graph/badge.svg?token=P0YYCPKXI1
+[codecov-url]: https://codecov.io/gh/bionanoimaging/GeneratorArrays.jl
 
