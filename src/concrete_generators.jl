@@ -28,7 +28,7 @@ struct ScaFT <: Sca end # reciprocal Fourier coordinates
 
 export Sca,ScaUnit,ScaNorm,ScaFT
 
-get_scale(size, ::Type{ScaUnit}) = 1
+get_scale(size, ::Type{ScaUnit}) = ntuple(_ -> one(Int), length(size))
 get_scale(size, ::Type{ScaNorm}) = 1 ./ (size .- 1)
 get_scale(size, ::Type{ScaFT}) = 1 ./ size  # needs revision!
 get_scale(size, t::NTuple) = t  # needs revision!
@@ -62,83 +62,24 @@ for F in generate_functions_expr()
     # default functions with certain offset and scaling behavior
     @eval function $(F[1])(::Type{T}, size::NTuple{N, Int};
                            offset=CtrFT,
-                           scale=ScaUnit) where{SC, CT, N, T} 
+                           scale=ScaUnit) where{N, T} 
         offset = get_offset(size, offset)
-        scale = get_scale(size, ScaUnit)
+        scale = get_scale(size, scale)
         GeneratorArray(T, $(F[2]), size) 
     end
     
-
-    # default functions with certain offset and scaling behavior
-    @eval function $(F[1])(::Type{T}, size::NTuple{N, Int},
-                           offset::Type{CT}=CtrFT,
-                           scale::Type{SC}=ScaUnit) where{SC, CT, N, T} 
-        offset = get_offset(size, CT)
-        scale = get_scale(size, SC)
-        GeneratorArray(T, $(F[2]), size) 
-    end
-
     # change order of offset and scale
-    @eval function $(F[1])(size::NTuple{N, Int},
-                           offset::Type{CT}=CtrFT,
-                           scale::Type{SC}=ScaUnit) where{SC, CT, N} 
+    @eval function $(F[1])(size::NTuple{N, Int}; 
+                           offset=CtrFT, scale=ScaUnit) where {N}
         T = $default_T 
-        $(F[1])(T, size, offset, scale) 
+        $(F[1])(T, size, scale=scale, offset=offset) 
     end
 
-    @eval function $(F[1])(size::NTuple{N, Int},
-                           scale::Type{SC}=ScaUnit,
-                           offset::Type{CT}=CtrFT,
-                          ) where{SC, CT, N} 
-        T = $default_T 
-        $(F[1])(T, size, offset, scale) 
-    end
-
-    # tuple based offset and scale
-    @eval function $(F[1])(::Type{T}, size::NTuple{N, Int},
-                           offset::NTuple,
-                           scale::NTuple) where{SC, CT, N, T} 
-        GeneratorArray(T, $(F[2]), size) 
-    end
-
-    @eval function $(F[1])(size::NTuple{N, Int},
-                           offset::NTuple,
-                           scale::NTuple) where{SC, CT, N} 
-        T = $default_T 
-        $(F[1])(T, size, offset, scale) 
-    end
-
-    # only offset provided 
-    @eval function $(F[1])(::Type{T}, size::NTuple{N, Int},
-                           offset::NTuple) where{SC, CT, N, T} 
-        scale = ntuple(_ -> one(T), length(size))
-        GeneratorArray(T, $(F[2]), size) 
-    end
-
-    @eval function $(F[1])(size::NTuple{N, Int},
-                           offset::NTuple) where{SC, CT, N} 
-        T = $default_T 
-        $(F[1])(T, size, offset) 
-    end
-
-
-    # only offset provided 
-    @eval function $(F[1])(::Type{T}, size::NTuple{N, Int},
-                           offset::NTuple) where{SC, CT, N, T} 
-        scale = ntuple(_ -> one(T), length(size))
-        GeneratorArray(T, $(F[2]), size) 
-    end
-
-    @eval function $(F[1])(size::NTuple{N, Int},
-                           offset::NTuple) where{SC, CT, N} 
-        T = $default_T 
-        $(F[1])(T, size, offset) 
-    end
-    
 
     # convenient wrapper to provide an array as input
-    @eval function $(F[1])(arr::AbstractArray{T, N}) where {T, N}
-        $(F[1])(T, size(arr))
+    @eval function $(F[1])(arr::AbstractArray{T, N}; 
+                           offset=CtrFT, scale=ScaUnit) where {T, N}
+        $(F[1])(T, size(arr), scale=scale, offset=offset)
     end
 
     @eval export $(F[1])
