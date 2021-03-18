@@ -94,8 +94,7 @@ for F in generate_functions_expr()
     @eval export $(F[1])
 end 
 
-# we automatically generate the functions for rr2, rr, ...
-# We set the types for the arguments correctly in the default cases
+# we automatically generate the functions for different windows like hanning 
 for F in generate_window_functions_expr() 
     # fallback type of GeneratorArray
     default_T = Float64
