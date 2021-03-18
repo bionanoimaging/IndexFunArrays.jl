@@ -4,6 +4,11 @@ struct Ctr_FFT <: Ctr end # corresponding to FFTs
 struct Ctr_FT <: Ctr end # corresponding to FTs  (meaning shifted FFTs)
 struct Ctr_Mid <: Ctr end # middle of the array
 struct Ctr_End <: Ctr end # other corner voxel is zero
+get_offset(size, ::Type{Ctr_Corner}) = size.*0 .+ 1.0
+get_offset(size, ::Type{Ctr_FT}) = size.÷2 .+ 1.0
+get_offset(size, ::Type{Ctr_FFT}) = size.*0 .+ 1.0
+get_offset(size, ::Type{Ctr_Mid}) = (size.+1)./2.0
+get_offset(size, ::Type{Ctr_End}) = size.+0.0
 
 export Ctr,Ctr_Corner,Ctr_FFT,Ctr_FT,Ctr_Mid,Ctr_End
 
@@ -14,11 +19,9 @@ struct Sca_FT <: Sca end # reciprocal Fourier coordinates
 
 export Sca,Sca_Unit,Sca_Norm,Sca_FT
 
-get_offset(size, ::Type{Ctr_Corner}) = size.*0 .+ 1.0
-get_offset(size, ::Type{Ctr_FT}) = size.÷2 .+ 1.0
-get_offset(size, ::Type{Ctr_FFT}) = size.*0 .+ 1.0
-get_offset(size, ::Type{Ctr_Mid}) = (size.+1)./2.0
-get_offset(size, ::Type{Ctr_End}) = size.+0.0
+get_scale(size, ::Type{Sca_Unit}) = size.*0 .+ 1.0
+get_scale(size, ::Type{Sca_Norm}) = 1.0./size
+get_scale(size, ::Type{Sca_FT}) = 1.0./size  # needs revision!
 
 # List of functions and names
 Fkts = [
@@ -30,10 +33,10 @@ Fkts = [
     (:(phiphi), :(x->atan.(x[2],x[1]))),
 ]
 for F in Fkts
-    @eval $(F[1])(size::NTuple{N,Int}, offset::NTuple{N,Int}, ::Type{T}=Float64,) where{T,N,CT} = GeneratorArray($(F[2]), convert(NTuple{N,T},offset), T, size) 
-    @eval $(F[1])(size::NTuple{N,Int},::Type{CT}=Ctr_FT, ::Type{T}=Float64,) where{T,N,CT} = GeneratorArray($(F[2]), get_offset(size,CT), T, size) 
-    @eval $(F[1])(anArray::AbstractArray{T,N}, offset::NTuple{N,Int},::Type{T}=Float64,) where{T,N,CT} = GeneratorArray($(F[2]), convert(NTuple{N,T},offset), T, size(anArray)) 
-    @eval $(F[1])(anArray::AbstractArray{T,N},::Type{CT}=Ctr_FT,::Type{T}=Float64,) where{T,N,CT} = GeneratorArray($(F[2]), get_offset(size(anArray),CT), T, size(anArray)) 
+    @eval $(F[1])(size::NTuple{N,Int}, offset::NTuple{N,Int}, scale::NTuple{N,Int}, ::Type{T}=Float64,) where{T,N,CT} = GeneratorArray(T, $(F[2]), convert(NTuple{N,T},offset), convert(NTuple{N,T},scale), size) 
+    @eval $(F[1])(size::NTuple{N,Int},::Type{CT}=Ctr_FT,::Type{SC}=Sca_Unit, ::Type{T}=Float64,) where{T,N,CT} = GeneratorArray(T, $(F[2]), get_offset(size,CT), get_scale(size,SC), size) 
+    @eval $(F[1])(anArray::AbstractArray{T,N}, offset::NTuple{N,Int},scale::NTuple{N,Int}, ::Type{T}=Float64,) where{T,N,CT} = GeneratorArray(T, $(F[2]), convert(NTuple{N,T},offset), convert(NTuple{N,T},scale), size(anArray)) 
+    @eval $(F[1])(anArray::AbstractArray{T,N},::Type{CT}=Ctr_FT,::Type{SC}=Sca_Unit,::Type{T}=Float64,) where{T,N,CT} = GeneratorArray(T, $(F[2]), get_offset(size(anArray),CT), get_scale(size,SC), size(anArray)) 
     @eval export $(F[1])
 end 
 
