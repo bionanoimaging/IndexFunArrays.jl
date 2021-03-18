@@ -4,33 +4,33 @@ export phiphi
 
 # define types to specify where the center point is
 abstract type Ctr end  # Center of the array
-struct Ctr_Corner <: Ctr end  # corner voxel is zero
-struct Ctr_FFT <: Ctr end # corresponding to FFTs
-struct Ctr_FT <: Ctr end # corresponding to FTs  (meaning shifted FFTs)
-struct Ctr_Mid <: Ctr end # middle of the array
-struct Ctr_End <: Ctr end # other corner voxel is zero
+struct CtrCorner <: Ctr end  # corner voxel is zero
+struct CtrFFT <: Ctr end # corresponding to FFTs
+struct CtrFT <: Ctr end # corresponding to FTs  (meaning shifted FFTs)
+struct CtrMid <: Ctr end # middle of the array
+struct CtrEnd <: Ctr end # other corner voxel is zero
 
 
-get_offset(size, ::Type{Ctr_Corner}) = size.*0 .+ 1.0
-get_offset(size, ::Type{Ctr_FT}) = size.÷2 .+ 1.0
-get_offset(size, ::Type{Ctr_FFT}) = size.*0 .+ 1.0
-get_offset(size, ::Type{Ctr_Mid}) = (size.+1)./2.0
-get_offset(size, ::Type{Ctr_End}) = size.+0.0
+get_offset(size, ::Type{CtrCorner}) = size.*0 .+ 1.0
+get_offset(size, ::Type{CtrFT}) = size.÷2 .+ 1.0
+get_offset(size, ::Type{CtrFFT}) = size.*0 .+ 1.0
+get_offset(size, ::Type{CtrMid}) = (size.+1)./2.0
+get_offset(size, ::Type{CtrEnd}) = size.+0.0
 get_offset(size, t::NTuple) =  t
 
 
-export Ctr,Ctr_Corner,Ctr_FFT,Ctr_FT,Ctr_Mid,Ctr_End
+export Ctr,CtrCorner,CtrFFT,CtrFT,CtrMid,CtrEnd
 
 abstract type Sca end # scaling of the array
-struct Sca_Unit <: Sca end # pixel distance is one
-struct Sca_Norm <: Sca end # total size along each dimension normalized to 1.0
-struct Sca_FT <: Sca end # reciprocal Fourier coordinates
+struct ScaUnit <: Sca end # pixel distance is one
+struct ScaNorm <: Sca end # total size along each dimension normalized to 1.0
+struct ScaFT <: Sca end # reciprocal Fourier coordinates
 
-export Sca,Sca_Unit,Sca_Norm,Sca_FT
+export Sca,ScaUnit,ScaNorm,ScaFT
 
-get_scale(size, ::Type{Sca_Unit}) = size .* 0 .+ 1.0
-get_scale(size, ::Type{Sca_Norm}) = 1.0 ./ size
-get_scale(size, ::Type{Sca_FT}) = 1.0 ./ size  # needs revision!
+get_scale(size, ::Type{ScaUnit}) = 1
+get_scale(size, ::Type{ScaNorm}) = 1 ./ (size .- 1)
+get_scale(size, ::Type{ScaFT}) = 1 ./ size  # needs revision!
 get_scale(size, t::NTuple) = t  # needs revision!
 
 # List of functions and names we want to predefine
@@ -58,18 +58,38 @@ for F in generate_functions_expr()
     # fallback type of GeneratorArray
     default_T = Float64
 
+
+    # default functions with certain offset and scaling behavior
+    @eval function $(F[1])(::Type{T}, size::NTuple{N, Int};
+                           offset=CtrFT,
+                           scale=ScaUnit) where{SC, CT, N, T} 
+        offset = get_offset(size, offset)
+        scale = get_scale(size, ScaUnit)
+        GeneratorArray(T, $(F[2]), size) 
+    end
+    
+
     # default functions with certain offset and scaling behavior
     @eval function $(F[1])(::Type{T}, size::NTuple{N, Int},
-                           offset::Type{CT}=Ctr_FT,
-                           scale::Type{SC}=Sca_Unit) where{SC, CT, N, T} 
+                           offset::Type{CT}=CtrFT,
+                           scale::Type{SC}=ScaUnit) where{SC, CT, N, T} 
         offset = get_offset(size, CT)
         scale = get_scale(size, SC)
         GeneratorArray(T, $(F[2]), size) 
     end
 
+    # change order of offset and scale
     @eval function $(F[1])(size::NTuple{N, Int},
-                           offset::Type{CT}=Ctr_FT,
-                           scale::Type{SC}=Sca_Unit) where{SC, CT, N} 
+                           offset::Type{CT}=CtrFT,
+                           scale::Type{SC}=ScaUnit) where{SC, CT, N} 
+        T = $default_T 
+        $(F[1])(T, size, offset, scale) 
+    end
+
+    @eval function $(F[1])(size::NTuple{N, Int},
+                           scale::Type{SC}=ScaUnit,
+                           offset::Type{CT}=CtrFT,
+                          ) where{SC, CT, N} 
         T = $default_T 
         $(F[1])(T, size, offset, scale) 
     end
@@ -101,16 +121,35 @@ for F in generate_functions_expr()
         $(F[1])(T, size, offset) 
     end
 
+
+    # only offset provided 
+    @eval function $(F[1])(::Type{T}, size::NTuple{N, Int},
+                           offset::NTuple) where{SC, CT, N, T} 
+        scale = ntuple(_ -> one(T), length(size))
+        GeneratorArray(T, $(F[2]), size) 
+    end
+
+    @eval function $(F[1])(size::NTuple{N, Int},
+                           offset::NTuple) where{SC, CT, N} 
+        T = $default_T 
+        $(F[1])(T, size, offset) 
+    end
+    
+
+    # convenient wrapper to provide an array as input
+    @eval function $(F[1])(arr::AbstractArray{T, N}) where {T, N}
+        $(F[1])(T, size(arr))
+    end
+
     @eval export $(F[1])
 end 
 
 export getPropagator  # This has actually does evaluate. It should be programmed as a point-wise operation
 function getPropagator(k0, dZ) 
-    return x -> exp.(2im.*π.* sqrt.(max.(0.0,k0^2 .- rr2(x,Ctr_FT))))
+    return x -> exp.(2im.*π.* sqrt.(max.(0.0,k0^2 .- rr2(x,CtrFT))))
 end
 
-#rr(size::NTuple{N,Int},::Type{T}=Float64,::Type{CT}=Ctr_Corner) where{T,N,CT} = GeneratorArray(x->sum(abs2.(x)), get_offset(size,CT), T, size) 
-#rr(size::NTuple{N,Int}, ::Type{CT}=Ctr_Corner) where{N,CT} = rr(size, Float64, CT)
-#rr(arr::AbstractArray{T,N},::Type{T}) where{T,N,CT} = rr(size(arr),T,Ctr_Corner) 
-#rr(arr::AbstractArray{T,N},::Type{CT}=Ctr_Corner) where{T,N,CT} = rr(arr, Float64,CT)
-
+#rr(size::NTuple{N,Int},::Type{T}=Float64,::Type{CT}=CtrCorner) where{T,N,CT} = GeneratorArray(x->sum(abs2.(x)), get_offset(size,CT), T, size) 
+#rr(size::NTuple{N,Int}, ::Type{CT}=CtrCorner) where{N,CT} = rr(size, Float64, CT)
+#rr(arr::AbstractArray{T,N},::Type{T}) where{T,N,CT} = rr(size(arr),T,CtrCorner) 
+#rr(arr::AbstractArray{T,N},::Type{CT}=CtrCorner) where{T,N,CT} = rr(arr, Float64,CT)
