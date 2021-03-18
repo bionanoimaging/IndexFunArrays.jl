@@ -1,19 +1,36 @@
 using GeneratorArrays
+using BenchmarkTools
+
+function foo()
+    x = ones(1000,1000);
+    qq2(index)=sum(Tuple(index));
+    ww2=qq2.(CartesianIndices(x));
+    y = rr2(x) .+ sqrt.(1.2.*rr2(x).*rr2(x));
+    @btime $y .= rr2($x) .+ sqrt.(1.2.*rr2($x).*rr2($x));
+    @btime $y .= rr2($x) .+ sqrt.(1.2.*rr2($x).*rr2($x));
+    @btime $y .= ($qq2).(CartesianIndices($x)) .+ sqrt.(1.2.*($qq2).(CartesianIndices($x)).*($qq2).(CartesianIndices($x)));
+    @btime $y .= ($qq2).(CartesianIndices($x)) .+ sqrt.(1.2.*($qq2).(CartesianIndices($x)).*($qq2).(CartesianIndices($x)));
+    @btime $y .= $ww2 .+ sqrt.(1.2.*$ww2.*$ww2);
+    @btime $y .= $ww2 .+ sqrt.(1.2.*$ww2.*$ww2);
+end 
 
 function rr_test(s)
     x = ones(s)
-    @time y = rr2(x) .+ sqrt.(1.2 .* rr2(x, scale=(1,1), offset=CtrCorner));
-    @time y .= rr2(x) .+ sqrt.(1.2 .* rr2(x, scale=(1,1), offset=CtrCorner));
-    @time y .= rr2(x) .+ sqrt.(1.2 .* rr2(x, scale=(1,1), offset=CtrCorner));
-    @time y .= rr2(x) .+ sqrt.(1.2 .* rr2(x, scale=(1,1), offset=CtrCorner));
+    y = rr2(x) .+ sqrt.(1.2 .* rr2(x, scale=(1,1), offset=CtrCorner));
+    @btime $y .= rr2($x) .+ sqrt.(1.2 .* rr2($x, scale=(1,1), offset=CtrCorner));
+    @btime $y .= rr2($x) .+ sqrt.(1.2 .* rr2($x, scale=(1,1), offset=CtrCorner));
+    @btime $y .= rr2($x) .+ sqrt.(1.2 .* rr2($x, scale=(1,1), offset=CtrCorner));
     return 
 end
 
 
 function xx_test(s)
     x = ones(s)
-    @time y = xx(x) .+ sqrt.(1.2 .* abs.(xx(x)));
-    @time y .= xx(x) .+ sqrt.(1.2 .* abs.(xx(x)));
-    @time y .= xx(x) .+ sqrt.(1.2 .* abs.(xx(x)));
+    y = xx(x) .+ sqrt.(1.2 .* abs.(xx(x)));
+    @btime $y .= xx($x) .+ sqrt.(1.2 .* abs.(xx($x)));
+    @btime $y .= xx($x) .+ sqrt.(1.2 .* abs.(xx($x)));
     return 
 end
+
+# foo();
+
