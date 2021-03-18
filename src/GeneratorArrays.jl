@@ -69,9 +69,7 @@ Base.similar(A::GeneratorArray, ::Type{T}, size::Dims) where {T} = begin
     GeneratorArray(A.generator, size)
 end
 
-Base.getindex(A::GeneratorArray{T,N}, I::Vararg{Int, N}) where {T,N} = begin
-    return A.generator(I)
-end
+Base.getindex(A::GeneratorArray{T,N}, I::Vararg{Int, N}) where {T,N} = return A.generator(I)
 
 # not possible
 Base.setindex!(A::GeneratorArray{T,N}, v, I::Vararg{Int,N}) where {T,N} = begin 
