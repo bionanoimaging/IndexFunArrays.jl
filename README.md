@@ -16,8 +16,16 @@ julia> ] add https://github.com/RainerHeintzmann/GeneratorArrays.jl
 ```
 
 
-## Examples
+## Quick Examples
 
+
+## Why this package?
+In image processing and other applications you often encounter position-dependent functions some of which can be a bit of work to code.
+It helps the thinking to picture such functions as arrays, which contain the index-dependent values. A good examples are windowing functions.
+Another more complicated example is a complex-values free-space propagator.
+Yet storing such arrays can be memory intensive and slow and one would ideally perform such calculations "on-the-fly", e.g. only when applying the filter
+to the Fourier-transformation. Julia has a great mechanism for this: syntactic loop fusion and broadcasting (e.g. using ".*").
+Using CartesianIndices() it is possible to write such index-expressions yet they do not "feel" like arrays.
 
 
 [docs-dev-img]: https://img.shields.io/badge/docs-dev-pink.svg 
