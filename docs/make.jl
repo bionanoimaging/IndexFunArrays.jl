@@ -11,4 +11,4 @@ makedocs(modules = [GeneratorArrays],
          ]
         )
 
-deploydocs(repo = "github.com/bionanoimaging/GeneratorArrays.jl", devbranch="master")
+deploydocs(repo = "github.com/bionanoimaging/GeneratorArrays.jl.git", devbranch="master")
