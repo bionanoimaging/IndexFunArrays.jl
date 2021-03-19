@@ -64,21 +64,21 @@
 
 
 
-    # simple hanning test
-    @testset "Hanning window test" begin
-        hanning((10, ), border_in=0, border_out=1) ≈ sinpi.(range(0, 1, length=11)[1:end-1]).^2
-        hanning((10, ), border_in=0.4, border_out=0.499) ≈ [0, 0, 0, 1, 1, 1, 1, 1, 0, 0]
+    # simple window_hanning test
+    @testset "window_hanning window test" begin
+        window_hanning((10, ), border_in=0, border_out=1) ≈ sinpi.(range(0, 1, length=11)[1:end-1]).^2
+        window_hanning((10, ), border_in=0.4, border_out=0.499) ≈ [0, 0, 0, 1, 1, 1, 1, 1, 0, 0]
         
-        x = hanning(Int, (10, ), border_in=0.4, border_out=0.499) 
+        x = window_hanning(Int, (10, ), border_in=0.4, border_out=0.499) 
         @test x ≈ [0, 0, 0, 1, 1, 1, 1, 1, 0, 0]
         @test typeof(x) <: GeneratorArray{Int, 1, T} where T
         
-        x = hanning(ComplexF32, (10, ), border_in=0.4, border_out=0.499) 
+        x = window_hanning(ComplexF32, (10, ), border_in=0.4, border_out=0.499) 
         @test x ≈ [0, 0, 0, 1, 1, 1, 1, 1, 0, 0]
         @test typeof(x) <: GeneratorArray{ComplexF32, 1, T} where T
         
 
-        x = hanning(Float32.(randn((10, ))), border_in=0.4, border_out=0.499) 
+        x = window_hanning(Float32.(randn((10, ))), border_in=0.4, border_out=0.499) 
         @test x ≈ [0, 0, 0, 1, 1, 1, 1, 1, 0, 0]
         @test typeof(x) <: GeneratorArray{Float32, 1, T} where T
         
