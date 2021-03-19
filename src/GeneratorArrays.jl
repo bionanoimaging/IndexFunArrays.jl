@@ -80,6 +80,29 @@ Base.setindex!(A::GeneratorArray{T,N}, v, I::Vararg{Int,N}) where {T,N} = begin
     error("Attempt to assign entries to GeneratorArray which is immutable.")
 end
 
+
+
+"""
+    size(x::AbstractArray,dim::NTuple; keep_dims=true)
+
+Overloads `Base.size` and allows to access the size at several dimensions
+in one call.
+
+# Examples
+```jldoctest
+julia> x = ones((2,4,6,8, 10));
+
+julia> size(x, (2,3))
+(1, 4, 6, 1, 1)
+
+julia> size(x, (2,3,4), keep_dims=false)
+(4, 6, 8)
+
+julia> size(x, (4,3,2), keep_dims=false)
+(8, 6, 4)
+```
+
+"""
 function size(x::AbstractArray{T},dim::NTuple{N,Int}; keep_dims=true) where{T,N}
     if ~keep_dims
         return map(n->size(x,n),dim)
