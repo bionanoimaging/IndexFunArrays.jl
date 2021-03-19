@@ -1,8 +1,7 @@
 module GeneratorArrays
 
 export GeneratorArray
-import Base.size
-export size
+export selectsizes 
 
 include("concrete_generators.jl")
 
@@ -83,7 +82,7 @@ end
 
 
 """
-    size(x::AbstractArray,dim::NTuple; keep_dims=true)
+    selectsizes(x::AbstractArray,dim::NTuple; keep_dims=true)
 
 Overloads `Base.size` and allows to access the size at several dimensions
 in one call.
@@ -92,24 +91,25 @@ in one call.
 ```jldoctest
 julia> x = ones((2,4,6,8, 10));
 
-julia> size(x, (2,3))
+julia> selectsizes(x, (2,3))
 (1, 4, 6, 1, 1)
 
-julia> size(x, (2,3,4), keep_dims=false)
+julia> selectsizes(x, (2,3,4), keep_dims=false)
 (4, 6, 8)
 
-julia> size(x, (4,3,2), keep_dims=false)
+julia> selectsizes(x, (4,3,2), keep_dims=false)
 (8, 6, 4)
 ```
 
 """
-function size(x::AbstractArray{T},dim::NTuple{N,Int}; keep_dims=true) where{T,N}
+function selectsizes(x::AbstractArray{T},dim::NTuple{N,Int};
+                    keep_dims=true) where{T,N}
     if ~keep_dims
         return map(n->size(x,n),dim)
     end
-    sz=ones(Int, ndims(x))
+    sz = ones(Int, ndims(x))
     for n in dim
-        sz[n]=size(x,n) 
+        sz[n] = size(x,n) 
     end
     return Tuple(sz)
 end 
