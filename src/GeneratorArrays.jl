@@ -84,7 +84,7 @@ end
 """
     selectsizes(x::AbstractArray,dim::NTuple; keep_dims=true)
 
-Overloads `Base.size` and allows to access the size at several dimensions
+Additional size method to access the size at several dimensions
 in one call.
 
 # Examples
