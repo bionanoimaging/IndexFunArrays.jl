@@ -68,6 +68,7 @@ function generate_window_functions_expr()
         (:(window_radial_linear),  :(x -> T($x_exprRW))),
         (:(window_radial_edge),  :(x -> T(($x_exprRW).>0.5))),
         (:(window_radial_hanning),  :(x -> T(sinpi.(0.5 .* ($x_exprRW)).^2))),
+        (:(window_radial_hamming),  :(x -> T((0.54.-0.46.*cospi.(($x_exprRW)))))),
         (:(window_radial_blackman_harris),  :(x -> T((0.35875-0.48829.*cospi.($x_exprRW).+0.14128.*cospi.(2 .*$x_exprRW).-0.01168.*cospi.(3 .*$x_exprRW))))),
     ]
     return functions
