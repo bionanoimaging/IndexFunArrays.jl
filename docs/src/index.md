@@ -11,3 +11,11 @@ The abstract `GeneratorArray` definition
 GeneratorArray
 ```
 
+
+## Helpful Array Function
+In addition to normal `size` one can imagine a `selectsizes` which returns the sizes
+of several dimensions simultaneously.
+
+```@docs
+selectsizes
+```
