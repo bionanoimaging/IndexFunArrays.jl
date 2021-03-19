@@ -1,3 +1,5 @@
+export Sca,ScaUnit,ScaNorm,ScaFT,ScaFTEdge
+export Ctr,CtrCorner,CtrFFT,CtrFT,CtrMid,CtrEnd
 export rr, rr2
 export xx, yy, zz
 export phiphi
@@ -10,6 +12,19 @@ struct CtrFT <: Ctr end # corresponding to FTs  (meaning shifted FFTs)
 struct CtrMid <: Ctr end # middle of the array
 struct CtrEnd <: Ctr end # other corner voxel is zero
 
+"""
+    Ctr
+
+Abstract type to specify the reference position
+from which several other types subtype.
+
+# Possible subtypes
+* `CtrCorner`: Set the reference pixel in the corner
+* `CtrFFT`: Set the reference pixel to the FFT center.
+* `CtrMid`: Set the reference pixel to real mid. For uneven arrays it is the center pixel, for even arrays it is the centered around a half pixel.
+* `CtrEnd` Set the reference to the end corner (last pixel)
+"""
+Ctr
 
 get_offset(size, ::Type{CtrCorner}) = size.*0 .+ 1.0
 get_offset(size, ::Type{CtrFT}) = size.÷2 .+ 1.0
@@ -19,7 +34,6 @@ get_offset(size, ::Type{CtrEnd}) = size.+0.0
 get_offset(size, t::NTuple) =  t
 
 
-export Ctr,CtrCorner,CtrFFT,CtrFT,CtrMid,CtrEnd
 
 abstract type Sca end # scaling of the array
 struct ScaUnit <: Sca end # pixel distance is one
@@ -27,7 +41,18 @@ struct ScaNorm <: Sca end # total size along each dimension normalized to 1.0
 struct ScaFT <: Sca end # reciprocal Fourier coordinates
 struct ScaFTEdge <: Sca end # such that the edge of the Fourier space is 1.0
 
-export Sca,ScaUnit,ScaNorm,ScaFT,ScaFTEdge
+"""
+    Sca 
+
+Abstract type to indicate a scaling from which several other types subtype.
+
+# Possible subtypes
+* `ScaUnit`: No scaling of the indices 
+* `ScaNorm`: Total length along each dimension is normalized to 1
+* `ScaFT`: Reciprocal Fourier coordinates
+* `ScaFTEdge`: Such that the edge (in FFT sense) of the pixel is 1.0
+"""
+Sca
 
 get_scale(size, ::Type{ScaUnit}) = ntuple(_ -> one(Int), length(size))
 get_scale(size, ::Type{ScaNorm}) = 1 ./ (size .- 1)
