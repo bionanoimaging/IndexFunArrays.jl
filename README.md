@@ -20,6 +20,8 @@ julia> ] add https://github.com/bionanoimaging/IndexFunArrays.jl
 
 ## Quick Examples
 ```julia
+julia> using IndexFunArrays
+
 julia> rr2((4,4), offset=CtrMid)  # IndexFunArray containing the square of the radius to the mid position
   4×4 IndexFunArray{Float64, 2, IndexFunArrays.var"#4#5"{Float64, Tuple{Float64, Float64}, Tuple{Int64, Int64}}}:
    4.5  2.5  2.5  4.5
