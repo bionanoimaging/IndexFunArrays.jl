@@ -94,7 +94,7 @@ Another more complicated example is a complex-values free-space (optical) propag
 Yet storing such arrays can be memory intensive and slow and one would ideally perform such calculations "on-the-fly", e.g. only when applying the filter
 to the Fourier-transformation. Julia has a great mechanism for this: syntactic loop fusion and broadcasting (e.g. using ".*").
 
-Using CartesianIndices() it is possible to write such index-expressions yet they do not "feel" like arrays.
+Using `CartesianIndices` it is possible to write such index-expressions yet they do not "feel" like arrays.
 IndexFunArrays allow index-based calculations to look like arrays and to take part in loop fusion. This eases the writing of more complicated expressions without loss in speed
 due to Julia's syntactic loop fusion mechanism.
 You can think of a `IndexFunArray` of being an array that stores an expression calculating with indices inside.
