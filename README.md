@@ -1,6 +1,7 @@
 # IndexFunArrays.jl
-Fun with Indices (and functions on them.)
-This package allows to generate complex array expressions which do not allocate memory but instead are generated once they are accessed.
+This package allows to generate complex array expressions based on the indices.
+The `IndexFunArray` does not allocate memory but instead is entry-wise generated once it is accessed.
+`IndexFunArray <: AbstractArray` and behaves almost like a normal array.
 
 
 | **Documentation**                       | **Build Status**                          | **Code Coverage**               |
@@ -13,7 +14,7 @@ This package allows to generate complex array expressions which do not allocate 
 Not registered yet,
 Type `]`in the REPL to get to the package manager:
 ```julia
-julia> ] add https://github.com/RainerHeintzmann/IndexFunArrays.jl
+julia> ] add https://github.com/bionanoimaging/IndexFunArrays.jl 
 ```
 
 
@@ -47,16 +48,54 @@ julia> IndexFunArray(x -> sum(abs2.(x)), (3, 3))   # directly using the construc
 ```
 
 
+## More complex examples
+If we assume the following situation where we have a large array created. We can assign the `IndexFunArray` (in this case `rr` being the distance to a reference position)
+to this array without allocation of a significant amount of new memory:
+```julia
+julia> @time x = randn((10000, 10000));
+  0.278858 seconds (25 allocations: 762.959 MiB, 1.31% gc time)
+
+julia> @time x = randn((10000, 10000));
+  0.261548 seconds (2 allocations: 762.940 MiB, 0.96% gc time)
+
+julia> using IndexFunArrays
+
+julia> @time x .= rr(size(x));
+  0.361640 seconds (1.18 M allocations: 70.353 MiB, 46.29% compilation time)
+
+julia> @time x .= rr(size(x));
+  0.194074 seconds (11 allocations: 496 bytes)
+```
+
+We can see that there is only a small number of 496 bytes allocated and not the full ~763MiB.
+The following benchmark shows that the performance is almost as good as with `CartesianIndices`:
+```julia
+julia> include("examples/benchmark.jl")
+compare_to_CartesianIndices (generic function with 1 method)
+
+julia> compare_to_CartesianIndices()
+[ Info: rr2 based
+  1.981 ms (18 allocations: 720 bytes)
+  1.979 ms (18 allocations: 720 bytes)
+[ Info: CartesianIndices based
+  1.938 ms (0 allocations: 0 bytes)
+  1.940 ms (0 allocations: 0 bytes)
+[ Info: CartesianIndices based with initialized function
+  1.941 ms (0 allocations: 0 bytes)
+  1.942 ms (0 allocations: 0 bytes)
+```
+
 ## Why this package?
 In image processing and other applications you often encounter position-dependent functions some of which can be a bit of work to code.
 It helps the thinking to picture such functions as arrays, which contain the index-dependent values. A good examples are windowing functions.
-Another more complicated example is a complex-values free-space propagator.
+Another more complicated example is a complex-values free-space (optical) propagator.
 Yet storing such arrays can be memory intensive and slow and one would ideally perform such calculations "on-the-fly", e.g. only when applying the filter
 to the Fourier-transformation. Julia has a great mechanism for this: syntactic loop fusion and broadcasting (e.g. using ".*").
+
 Using CartesianIndices() it is possible to write such index-expressions yet they do not "feel" like arrays.
 IndexFunArrays allow index-based calculations to look like arrays and to take part in loop fusion. This eases the writing of more complicated expressions without loss in speed
 due to Julia's syntactic loop fusion mechanism.
-You can think of a IndexFunArray of being an array that stores an expression calculating with indices inside.
+You can think of a `IndexFunArray` of being an array that stores an expression calculating with indices inside.
 This also means you cannot assing to such arrays which also precludes using range indices. However views are possible and range indices can be applied to such views.
 Of course such arrays can generate any datatype. See `?IndexFunArray` for more detail.
 
