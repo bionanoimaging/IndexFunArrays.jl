@@ -135,4 +135,8 @@ for F in generate_window_functions_expr()
     end
 
     @eval export $(F[1])
-end 
+end
+
+# include docstrings
+include("concrete_generators_docstrings.jl")
+

@@ -36,9 +36,6 @@ The output of `gen` determines the element type of the resulting array.
 `gen` needs to have `T` as return type, otherwise the GeneratorArray
 might be type unstable.
 
-This is the simplest GeneratorArray constructor and only suited for arrays
-containing `<:Numbers`.
-
 # Examples
 ```julia-repl
 julia> GeneratorArray(x -> sum(x), (3, 3))
@@ -52,6 +49,12 @@ julia> GeneratorArray(x -> sum(abs2.(x)), (3, 3))
   2   5  10
   5   8  13
  10  13  18
+
+julia> GeneratorArray(x -> (x[1], x[2], "Julia"), (3,3))
+3×3 GeneratorArray{Tuple{Int64, Int64, String}, 2, var"#18#19"}:
+ (1, 1, "Julia")  (1, 2, "Julia")  (1, 3, "Julia")
+ (2, 1, "Julia")  (2, 2, "Julia")  (2, 3, "Julia")
+ (3, 1, "Julia")  (3, 2, "Julia")  (3, 3, "Julia")
 ```
 """
 function GeneratorArray(gen::F, size::NTuple{N,Int}) where {N,F}
@@ -67,9 +70,10 @@ end
 Base.size(A::GeneratorArray) = A.size
 Base.similar(A::GeneratorArray, ::Type{T}, size::Dims) where {T} = GeneratorArray(A.generator, size)
 
+# calculate the entry according to the index
 Base.getindex(A::GeneratorArray{T,N}, I::Vararg{Int, N}) where {T,N} = return A.generator(I)
 
-# not possible
+# not supported
 Base.setindex!(A::GeneratorArray{T,N}, v, I::Vararg{Int,N}) where {T,N} = begin 
     error("Attempt to assign entries to GeneratorArray which is immutable.")
 end
