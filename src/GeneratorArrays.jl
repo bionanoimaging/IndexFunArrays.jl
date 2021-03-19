@@ -9,7 +9,6 @@ include("concrete_generators.jl")
 struct GeneratorArray{T, N, F} <: AbstractArray{T, N} where {F}
     # stores the generator function to be applied to the indices. 
     generator::F     
-    #a offset which is subtracted (.-) from the indices
     # output size of the array 
     size::NTuple{N, Int}
 
@@ -20,7 +19,6 @@ struct GeneratorArray{T, N, F} <: AbstractArray{T, N} where {F}
         end
         return new{T, N, F}(gen, size) 
     end
-
 end
 
 
@@ -78,7 +76,6 @@ Base.getindex(A::GeneratorArray{T,N}, I::Vararg{Int, N}) where {T,N} = return A.
 Base.setindex!(A::GeneratorArray{T,N}, v, I::Vararg{Int,N}) where {T,N} = begin 
     error("Attempt to assign entries to GeneratorArray which is immutable.")
 end
-
 
 
 """
