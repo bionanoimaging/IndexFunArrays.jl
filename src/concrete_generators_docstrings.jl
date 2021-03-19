@@ -95,6 +95,22 @@ julia> rr2(Int, (3, 3), offset=(1, 1), scale=(10, 10))
  100  200  500
  400  500  800
 ```
+## Application to selected dimensions
+Note that the code below yields a 3D array but with a one-sized trailing dimension. This can then be used for broadcasting.
+```jldoctest
+julia> x = ones(5,6,5);
+
+julia> y=rr2(size(x,(1,2)))
+5×6×1 GeneratorArray{Float64, 3, GeneratorArrays.var"#4#5"{Float64, Tuple{Float64, Float64, Float64}, Tuple{Int64, Int64, Int64}}}:
+[:, :, 1] =
+ 13.0  8.0  5.0  4.0  5.0  8.0
+ 10.0  5.0  2.0  1.0  2.0  5.0
+  9.0  4.0  1.0  0.0  1.0  4.0
+ 10.0  5.0  2.0  1.0  2.0  5.0
+ 13.0  8.0  5.0  4.0  5.0  8.0
+```
+Similarly you can also use dimensions 2 and 3 yielding an array of `size(y) == (1,6,5)`. 
+Note that the necessary modification to the `Base.size` function is currently provided by this package.
 """
 rr2
 
@@ -124,7 +140,7 @@ rr
 
 
 """
-    xx([T=Float64], size::size::NTuple{N, Int};
+    xx([T=Float64], size::NTuple{N, Int};
        offset=CtrFT,
        scale=ScaUnit)
 
@@ -142,7 +158,7 @@ xx
 
 
 """
-    yy([T=Float64], size::size::NTuple{N, Int};
+    yy([T=Float64], size::NTuple{N, Int};
        offset=CtrFT,
        scale=ScaUnit)
 
@@ -161,7 +177,7 @@ yy
 
 
 """
-    zz([T=Float64], size::size::NTuple{N, Int};
+    zz([T=Float64], size::NTuple{N, Int};
        offset=CtrFT,
        scale=ScaUnit)
 
@@ -183,3 +199,118 @@ julia> zz((1, 1, 4))
 ```
 """
 zz
+
+"""
+    window_linear([T=Float64], size::NTuple; 
+                offset=CtrFT, scale=ScaFTEdge, border_in=0.8, border_out=1.0)  
+
+A multidimensional (separable) window with a linear transition from zero at the borders (`border_out`) to one (`border_in`).
+```jldoctest
+julia> window_linear((8,9),border_in=0.0)
+8×9 GeneratorArray{Float64, 2, GeneratorArrays.var"#34#35"{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Float64, Float64}}:
+ 0.0  0.0     0.0    0.0     0.0   0.0     0.0    0.0     0.0
+ 0.0  0.0625  0.125  0.1875  0.25  0.1875  0.125  0.0625  0.0
+ 0.0  0.125   0.25   0.375   0.5   0.375   0.25   0.125   0.0
+ 0.0  0.1875  0.375  0.5625  0.75  0.5625  0.375  0.1875  0.0
+ 0.0  0.25    0.5    0.75    1.0   0.75    0.5    0.25    0.0
+ 0.0  0.1875  0.375  0.5625  0.75  0.5625  0.375  0.1875  0.0
+ 0.0  0.125   0.25   0.375   0.5   0.375   0.25   0.125   0.0
+ 0.0  0.0625  0.125  0.1875  0.25  0.1875  0.125  0.0625  0.0
+```
+"""
+window_linear
+
+"""
+    window_radial_linear([T=Float64], size::NTuple; 
+                offset=CtrFT, scale=ScaFTEdge, border_in=0.8, border_out=1.0)  
+
+A multidimensional radial window with a linear transition from zero at the borders (`border_out`) to one (`border_in`).
+With the default offset and scale the borders are specified relative to the edge.
+```jldoctest
+julia> window_radial_linear((8,9),border_in=0.0)
+8×9 GeneratorArray{Float64, 2, GeneratorArrays.var"#59#60"{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Float64, Float64}}:
+ 0.0  0.0        0.0        0.0       0.0   0.0       0.0        0.0        0.0
+ 0.0  0.0        0.0986122  0.209431  0.25  0.209431  0.0986122  0.0        0.0
+ 0.0  0.0986122  0.292893   0.440983  0.5   0.440983  0.292893   0.0986122  0.0
+ 0.0  0.209431   0.440983   0.646447  0.75  0.646447  0.440983   0.209431   0.0
+ 0.0  0.25       0.5        0.75      1.0   0.75      0.5        0.25       0.0
+ 0.0  0.209431   0.440983   0.646447  0.75  0.646447  0.440983   0.209431   0.0
+ 0.0  0.0986122  0.292893   0.440983  0.5   0.440983  0.292893   0.0986122  0.0
+ 0.0  0.0        0.0986122  0.209431  0.25  0.209431  0.0986122  0.0        0.0
+```
+"""
+window_radial_linear
+
+
+"""
+    window_edge([T=Float64], size::NTuple; 
+                offset=CtrFT, scale=ScaFTEdge, border_in=0.8, border_out=1.0)  
+
+A multidimensional (separable) window with a sudden transition half way between the borders (`border_out`) to one (`border_in`).
+See `?window_linear` for more details on the arguments.
+"""
+window_edge
+
+"""
+    window_radial_edge([T=Float64], size::NTuple; 
+                offset=CtrFT, scale=ScaFTEdge, border_in=0.8, border_out=1.0)  
+
+A multidimensional radial window (disk) with a sudden transition half way between the borders (`border_out`) to one (`border_in`).
+See `?window_radial_linear` for more details on the arguments.
+"""
+window_radial_edge
+
+"""
+    window_hanning([T=Float64], size::NTuple; 
+                offset=CtrFT, scale=ScaFTEdge, border_in=0.8, border_out=1.0)  
+
+A multidimensional (separable) window with a von Hann transition between the borders (`border_out`) to one (`border_in`).
+See `?window_linear` for more details on the arguments.
+"""
+window_hanning
+
+"""
+    window_radial_hanning([T=Float64], size::NTuple; 
+                offset=CtrFT, scale=ScaFTEdge, border_in=0.8, border_out=1.0)  
+
+A multidimensional radial window with a von Hann transition between the borders (`border_out`) to one (`border_in`).
+See `?window_radial_linear` for more details on the arguments.
+"""
+window_radial_hanning
+
+"""
+    window_hamming([T=Float64], size::NTuple; 
+                offset=CtrFT, scale=ScaFTEdge, border_in=0.8, border_out=1.0)  
+
+A multidimensional (separable) window with a Hamming transition between the borders (`border_out`) to one (`border_in`).
+See `?window_linear` for more details on the arguments.
+"""
+window_hamming
+
+"""
+    window_radial_hamming([T=Float64], size::NTuple; 
+                offset=CtrFT, scale=ScaFTEdge, border_in=0.8, border_out=1.0)  
+
+A multidimensional radial window with a Hamming transition between the borders (`border_out`) to one (`border_in`).
+See `?window_radial_linear` for more details on the arguments.
+"""
+window_radial_hamming
+
+"""
+    window_blackman_harris([T=Float64], size::NTuple; 
+                offset=CtrFT, scale=ScaFTEdge, border_in=0.8, border_out=1.0)  
+
+A multidimensional (separable) window with a  transition according to Blackman/Harris between the borders (`border_out`) to one (`border_in`).
+See `?window_linear` for more details on the arguments.
+"""
+window_blackman_harris
+
+"""
+    window_radial_blackman_harris([T=Float64], size::NTuple; 
+                offset=CtrFT, scale=ScaFTEdge, border_in=0.8, border_out=1.0)  
+
+A multidimensional radial window with a Hamming transition according to Blackman/Harris between the borders (`border_out`) to one (`border_in`).
+See `?window_radial_linear` for more details on the arguments.
+"""
+window_radial_blackman_harris
+

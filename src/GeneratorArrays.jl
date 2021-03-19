@@ -1,6 +1,8 @@
 module GeneratorArrays
 
 export GeneratorArray
+import Base.size
+export size
 
 include("concrete_generators.jl")
 
@@ -77,5 +79,16 @@ Base.getindex(A::GeneratorArray{T,N}, I::Vararg{Int, N}) where {T,N} = return A.
 Base.setindex!(A::GeneratorArray{T,N}, v, I::Vararg{Int,N}) where {T,N} = begin 
     error("Attempt to assign entries to GeneratorArray which is immutable.")
 end
+
+function size(x::AbstractArray{T},dim::NTuple{N,Int}; keep_dims=true) where{T,N}
+    if ~keep_dims
+        return map(n->size(x,n),dim)
+    end
+    sz=ones(Int, ndims(x))
+    for n in dim
+        sz[n]=size(x,n) 
+    end
+    return Tuple(sz)
+end 
 
 end # module
