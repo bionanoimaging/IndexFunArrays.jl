@@ -2,9 +2,9 @@
 This package allows to generate complex array expressions which do not allocate memory but instead are generated once they are accessed.
 
 
-| **Build Status**                          | **Code Coverage**               |
-|:-----------------------------------------:|:-------------------------------:|
-| [![][CI-img]][CI-url]                     | [![][codecov-img]][codecov-url] |
+| **Documentation**                       | **Build Status**                          | **Code Coverage**               |
+|:---------------------------------------:|:-----------------------------------------:|:-------------------------------:|
+| [![][docs-stable-img]][docs-stable-url] [![][docs-dev-img]][docs-dev-url] | [![][CI-img]][CI-url] | [![][codecov-img]][codecov-url] |
 
 
 
@@ -20,8 +20,14 @@ julia> ] add https://github.com/RainerHeintzmann/GeneratorArrays.jl
 
 
 
-[CI-img]: https://github.com/RainerHeintzmann/GeneratorArrays.jl/actions/workflows/ci.yml/badge.svg
-[CI-url]: https://github.com/RainerHeintzmann/GeneratorArrays.jl/actions/workflows/ci.yml
+[docs-dev-img]: https://img.shields.io/badge/docs-dev-pink.svg 
+[docs-dev-url]: https://bionanoimaging.github.io/GeneratorArrays.jl/dev/
+
+[docs-stable-img]: https://img.shields.io/badge/docs-stable-darkgreen.svg 
+[docs-stable-url]: https://bionanoimaging.github.io/GeneratorArrays.jl/stable/
+
+[CI-img]: https://github.com/bionanoimaging/GeneratorArrays.jl/actions/workflows/ci.yml/badge.svg
+[CI-url]: https://github.com/bionanoimaging/GeneratorArrays.jl/actions/workflows/ci.yml
 
 [codecov-img]: https://codecov.io/gh/bionanoimaging/GeneratorArrays.jl/branch/master/graph/badge.svg?token=P0YYCPKXI1
 [codecov-url]: https://codecov.io/gh/bionanoimaging/GeneratorArrays.jl
