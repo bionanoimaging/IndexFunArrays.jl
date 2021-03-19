@@ -100,7 +100,7 @@ Note that the code below yields a 3D array but with a one-sized trailing dimensi
 ```jldoctest
 julia> x = ones(5,6,5);
 
-julia> y=rr2(size(x,(1,2)))
+julia> y=rr2(selectsizes(x,(1,2)))
 5×6×1 IndexFunArray{Float64, 3, IndexFunArrays.var"#4#5"{Float64, Tuple{Float64, Float64, Float64}, Tuple{Int64, Int64, Int64}}}:
 [:, :, 1] =
  13.0  8.0  5.0  4.0  5.0  8.0
@@ -227,16 +227,12 @@ window_linear
 A multidimensional radial window with a linear transition from zero at the borders (`border_out`) to one (`border_in`).
 With the default offset and scale the borders are specified relative to the edge.
 ```jldoctest
-julia> window_radial_linear((8,9),border_in=0.0)
-8×9 IndexFunArray{Float64, 2, IndexFunArrays.var"#59#60"{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Float64, Float64}}:
- 0.0  0.0        0.0        0.0       0.0   0.0       0.0        0.0        0.0
- 0.0  0.0        0.0986122  0.209431  0.25  0.209431  0.0986122  0.0        0.0
- 0.0  0.0986122  0.292893   0.440983  0.5   0.440983  0.292893   0.0986122  0.0
- 0.0  0.209431   0.440983   0.646447  0.75  0.646447  0.440983   0.209431   0.0
- 0.0  0.25       0.5        0.75      1.0   0.75      0.5        0.25       0.0
- 0.0  0.209431   0.440983   0.646447  0.75  0.646447  0.440983   0.209431   0.0
- 0.0  0.0986122  0.292893   0.440983  0.5   0.440983  0.292893   0.0986122  0.0
- 0.0  0.0        0.0986122  0.209431  0.25  0.209431  0.0986122  0.0        0.0
+julia> window_radial_linear((4,5),border_in=0.0)
+4×5 IndexFunArray{Float64, 2, IndexFunArrays.var"#59#60"{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Float64, Float64}}:
+ 0.0  0.0       0.0  0.0       0.0
+ 0.0  0.292893  0.5  0.292893  0.0
+ 0.0  0.5       1.0  0.5       0.0
+ 0.0  0.292893  0.5  0.292893  0.0
 ```
 """
 window_radial_linear
