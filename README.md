@@ -1,4 +1,4 @@
-# IndexFun.jl
+# IndexFunArrays.jl
 Fun with Indices (and functions on them.)
 This package allows to generate complex array expressions which do not allocate memory but instead are generated once they are accessed.
 
