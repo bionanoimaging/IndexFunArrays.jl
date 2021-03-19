@@ -1,14 +1,14 @@
-# GeneratorArrays.jl
+# IndexFunArrays.jl
 
 Here you can find the docstrings of all functions.
 We also provide several concrete generators.
 
 
-## GeneratorArray Interface
+## IndexFunArray Interface
 
-The abstract `GeneratorArray` definition
+The abstract `IndexFunArray` definition
 ```@docs
-GeneratorArray
+IndexFunArray
 ```
 
 

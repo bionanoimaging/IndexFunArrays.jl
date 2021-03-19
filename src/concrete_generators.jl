@@ -102,7 +102,7 @@ end
 # we automatically generate the functions for rr2, rr, ...
 # We set the types for the arguments correctly in the default cases
 for F in generate_functions_expr() 
-    # fallback type of GeneratorArray
+    # fallback type of IndexFunArray
     default_T = Float64
 
     # default functions with certain offset and scaling behavior
@@ -111,7 +111,7 @@ for F in generate_functions_expr()
                            scale=ScaUnit) where{N, T} 
         offset = get_offset(size, offset)
         scale = get_scale(size, scale)
-        GeneratorArray(T, $(F[2]), size) 
+        IndexFunArray(T, $(F[2]), size) 
     end
     
     # change order of offset and scale
@@ -132,7 +132,7 @@ end
 
 # we automatically generate the functions for different windows like hanning 
 for F in generate_window_functions_expr() 
-    # fallback type of GeneratorArray
+    # fallback type of IndexFunArray
     default_T = Float64
 
     # default functions with certain offset and scaling behavior
@@ -141,7 +141,7 @@ for F in generate_window_functions_expr()
                            scale=ScaFTEdge, border_in=0.8, border_out=1.0) where{N, T} 
         offset = get_offset(size, offset)
         scale = get_scale(size, scale)
-        GeneratorArray(T, $(F[2]), size) 
+        IndexFunArray(T, $(F[2]), size) 
     end
     
     # change order of offset and scale

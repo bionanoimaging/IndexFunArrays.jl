@@ -1,4 +1,4 @@
-# Concrete GeneratorArrays
+# Concrete IndexFunArrays
 
 Types to change scaling and reference
 ```@docs

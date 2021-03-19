@@ -1,4 +1,4 @@
-using GeneratorArrays
+using IndexFunArrays
 using BenchmarkTools
 
 function foo()

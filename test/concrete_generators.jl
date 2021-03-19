@@ -74,16 +74,16 @@ end
         
         x = window_hanning(Int, (10, ), border_in=0.4, border_out=0.499) 
         @test x ≈ [0, 0, 0, 1, 1, 1, 1, 1, 0, 0]
-        @test typeof(x) <: GeneratorArray{Int, 1, T} where T
+        @test typeof(x) <: IndexFunArray{Int, 1, T} where T
         
         x = window_hanning(ComplexF32, (10, ), border_in=0.4, border_out=0.499) 
         @test x ≈ [0, 0, 0, 1, 1, 1, 1, 1, 0, 0]
-        @test typeof(x) <: GeneratorArray{ComplexF32, 1, T} where T
+        @test typeof(x) <: IndexFunArray{ComplexF32, 1, T} where T
         
 
         x = window_hanning(Float32.(randn((10, ))), border_in=0.4, border_out=0.499) 
         @test x ≈ [0, 0, 0, 1, 1, 1, 1, 1, 0, 0]
-        @test typeof(x) <: GeneratorArray{Float32, 1, T} where T
+        @test typeof(x) <: IndexFunArray{Float32, 1, T} where T
         
     end
 

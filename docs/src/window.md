@@ -1,14 +1,14 @@
 # Window Functions
 Several kinds of window functions
 ```@docs
-GeneratorArrays.window_radial_linear
-GeneratorArrays.window_hanning
-GeneratorArrays.window_radial_hamming
-GeneratorArrays.window_hamming
-GeneratorArrays.window_radial_hanning
-GeneratorArrays.window_edge
-GeneratorArrays.window_radial_blackman_harris
-GeneratorArrays.window_blackman_harris
-GeneratorArrays.window_radial_edge
-GeneratorArrays.window_linear
+IndexFunArrays.window_radial_linear
+IndexFunArrays.window_hanning
+IndexFunArrays.window_radial_hamming
+IndexFunArrays.window_hamming
+IndexFunArrays.window_radial_hanning
+IndexFunArrays.window_edge
+IndexFunArrays.window_radial_blackman_harris
+IndexFunArrays.window_blackman_harris
+IndexFunArrays.window_radial_edge
+IndexFunArrays.window_linear
 ```

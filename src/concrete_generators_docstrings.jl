@@ -10,13 +10,13 @@ In this case `CtrFT` is the center defined by the FFT convention.
 or simply tuples with the same shape as `size`.
 Look at `?Ctr` and `?Sca` for all options.
 
-Note that this function is based on a `GeneratorArray` and therefore does
+Note that this function is based on a `IndexFunArray` and therefore does
 not allocate the full memory needed to represent the array.
 
 # Examples
 ```jldoctest
 julia> rr2((4, 4))
-4×4 GeneratorArray{Float64, 2, GeneratorArrays.var"#4#5"{Float64, Tuple{Float64, Float64}, Tuple{Int64, Int64}}}:
+4×4 IndexFunArray{Float64, 2, IndexFunArrays.var"#4#5"{Float64, Tuple{Float64, Float64}, Tuple{Int64, Int64}}}:
  8.0  5.0  4.0  5.0
  5.0  2.0  1.0  2.0
  4.0  1.0  0.0  1.0
@@ -26,34 +26,34 @@ julia> rr2((4, 4))
 ## Change Reference Position
 ```jldoctest
 julia> rr2((3,3), offset=CtrCorner)
-3×3 GeneratorArray{Float64, 2, GeneratorArrays.var"#4#5"{Float64, Tuple{Float64, Float64}, Tuple{Int64, Int64}}}:
+3×3 IndexFunArray{Float64, 2, IndexFunArrays.var"#4#5"{Float64, Tuple{Float64, Float64}, Tuple{Int64, Int64}}}:
  0.0  1.0  4.0
  1.0  2.0  5.0
  4.0  5.0  8.0
 
 julia> rr2((4,4), offset=CtrFT)
-4×4 GeneratorArray{Float64, 2, GeneratorArrays.var"#4#5"{Float64, Tuple{Float64, Float64}, Tuple{Int64, Int64}}}:
+4×4 IndexFunArray{Float64, 2, IndexFunArrays.var"#4#5"{Float64, Tuple{Float64, Float64}, Tuple{Int64, Int64}}}:
  8.0  5.0  4.0  5.0
  5.0  2.0  1.0  2.0
  4.0  1.0  0.0  1.0
  5.0  2.0  1.0  2.0
 
 julia> rr2((4,4), offset=CtrMid)
-4×4 GeneratorArray{Float64, 2, GeneratorArrays.var"#4#5"{Float64, Tuple{Float64, Float64}, Tuple{Int64, Int64}}}:
+4×4 IndexFunArray{Float64, 2, IndexFunArrays.var"#4#5"{Float64, Tuple{Float64, Float64}, Tuple{Int64, Int64}}}:
  4.5  2.5  2.5  4.5
  2.5  0.5  0.5  2.5
  2.5  0.5  0.5  2.5
  4.5  2.5  2.5  4.5
 
 julia> rr2((4,4), offset=CtrEnd)
-4×4 GeneratorArray{Float64, 2, GeneratorArrays.var"#4#5"{Float64, Tuple{Float64, Float64}, Tuple{Int64, Int64}}}:
+4×4 IndexFunArray{Float64, 2, IndexFunArrays.var"#4#5"{Float64, Tuple{Float64, Float64}, Tuple{Int64, Int64}}}:
  18.0  13.0  10.0  9.0
  13.0   8.0   5.0  4.0
  10.0   5.0   2.0  1.0
   9.0   4.0   1.0  0.0
 
 julia> rr2((3, 3), offset=(1, 1))
-3×3 GeneratorArray{Float64, 2, GeneratorArrays.var"#4#5"{Float64, Tuple{Int64, Int64}, Tuple{Int64, Int64}}}:
+3×3 IndexFunArray{Float64, 2, IndexFunArrays.var"#4#5"{Float64, Tuple{Int64, Int64}, Tuple{Int64, Int64}}}:
  0.0  1.0  4.0
  1.0  2.0  5.0
  4.0  5.0  8.0
@@ -62,35 +62,35 @@ julia> rr2((3, 3), offset=(1, 1))
 ## Change Scaling
 ```jldoctest
 julia> rr((4,4), scale=ScaUnit)
-4×4 GeneratorArray{Float64, 2, GeneratorArrays.var"#9#10"{Float64, Tuple{Float64, Float64}, Tuple{Int64, Int64}}}:
+4×4 IndexFunArray{Float64, 2, IndexFunArrays.var"#9#10"{Float64, Tuple{Float64, Float64}, Tuple{Int64, Int64}}}:
  2.82843  2.23607  2.0  2.23607
  2.23607  1.41421  1.0  1.41421
  2.0      1.0      0.0  1.0
  2.23607  1.41421  1.0  1.41421
 
 julia> rr((4,4), scale=ScaNorm)
-4×4 GeneratorArray{Float64, 2, GeneratorArrays.var"#9#10"{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}}}:
+4×4 IndexFunArray{Float64, 2, IndexFunArrays.var"#9#10"{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}}}:
  0.942809  0.745356  0.666667  0.745356
  0.745356  0.471405  0.333333  0.471405
  0.666667  0.333333  0.0       0.333333
  0.745356  0.471405  0.333333  0.471405
 
 julia> rr((4,4), scale=ScaFT)
-4×4 GeneratorArray{Float64, 2, GeneratorArrays.var"#9#10"{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}}}:
+4×4 IndexFunArray{Float64, 2, IndexFunArrays.var"#9#10"{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}}}:
  0.707107  0.559017  0.5   0.559017
  0.559017  0.353553  0.25  0.353553
  0.5       0.25      0.0   0.25
  0.559017  0.353553  0.25  0.353553
 
 julia> rr((4,4), scale=ScaFTEdge)
-4×4 GeneratorArray{Float64, 2, GeneratorArrays.var"#9#10"{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}}}:
+4×4 IndexFunArray{Float64, 2, IndexFunArrays.var"#9#10"{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}}}:
  1.41421  1.11803   1.0  1.11803
  1.11803  0.707107  0.5  0.707107
  1.0      0.5       0.0  0.5
  1.11803  0.707107  0.5  0.707107
 
 julia> rr2(Int, (3, 3), offset=(1, 1), scale=(10, 10))
-3×3 GeneratorArray{Int64, 2, GeneratorArrays.var"#4#5"{Int64, Tuple{Int64, Int64}, Tuple{Int64, Int64}}}:
+3×3 IndexFunArray{Int64, 2, IndexFunArrays.var"#4#5"{Int64, Tuple{Int64, Int64}, Tuple{Int64, Int64}}}:
    0  100  400
  100  200  500
  400  500  800
@@ -101,7 +101,7 @@ Note that the code below yields a 3D array but with a one-sized trailing dimensi
 julia> x = ones(5,6,5);
 
 julia> y=rr2(size(x,(1,2)))
-5×6×1 GeneratorArray{Float64, 3, GeneratorArrays.var"#4#5"{Float64, Tuple{Float64, Float64, Float64}, Tuple{Int64, Int64, Int64}}}:
+5×6×1 IndexFunArray{Float64, 3, IndexFunArrays.var"#4#5"{Float64, Tuple{Float64, Float64, Float64}, Tuple{Int64, Int64, Int64}}}:
 [:, :, 1] =
  13.0  8.0  5.0  4.0  5.0  8.0
  10.0  5.0  2.0  1.0  2.0  5.0
@@ -124,13 +124,13 @@ See `rr2` for all options.
 # Examples
 ```jldoctest
 julia> rr((3, 3))
-3×3 GeneratorArray{Float64, 2, GeneratorArrays.var"#9#10"{Float64, Tuple{Float64, Float64}, Tuple{Int64, Int64}}}:
+3×3 IndexFunArray{Float64, 2, IndexFunArrays.var"#9#10"{Float64, Tuple{Float64, Float64}, Tuple{Int64, Int64}}}:
  1.41421  1.0  1.41421
  1.0      0.0  1.0
  1.41421  1.0  1.41421
 
 julia> rr((3, 3), offset=CtrCorner)
-3×3 GeneratorArray{Float64, 2, GeneratorArrays.var"#9#10"{Float64, Tuple{Float64, Float64}, Tuple{Int64, Int64}}}:
+3×3 IndexFunArray{Float64, 2, IndexFunArrays.var"#9#10"{Float64, Tuple{Float64, Float64}, Tuple{Int64, Int64}}}:
  0.0  1.0      2.0
  1.0  1.41421  2.23607
  2.0  2.23607  2.82843
@@ -147,7 +147,7 @@ rr
 A distance ramp along first dimension.
 ```jldoctest
 julia> xx((4,4))
-4×4 GeneratorArray{Float64, 2, GeneratorArrays.var"#14#15"{Float64, Tuple{Float64, Float64}, Tuple{Int64, Int64}}}:
+4×4 IndexFunArray{Float64, 2, IndexFunArrays.var"#14#15"{Float64, Tuple{Float64, Float64}, Tuple{Int64, Int64}}}:
  -2.0  -2.0  -2.0  -2.0
  -1.0  -1.0  -1.0  -1.0
   0.0   0.0   0.0   0.0
@@ -165,7 +165,7 @@ xx
 A distance ramp along second dimension.
 ```jldoctest
 julia> yy((4,4))
-4×4 GeneratorArray{Float64, 2, GeneratorArrays.var"#19#20"{Float64, Tuple{Float64, Float64}, Tuple{Int64, Int64}}}:
+4×4 IndexFunArray{Float64, 2, IndexFunArrays.var"#19#20"{Float64, Tuple{Float64, Float64}, Tuple{Int64, Int64}}}:
  -2.0  -1.0  0.0  1.0
  -2.0  -1.0  0.0  1.0
  -2.0  -1.0  0.0  1.0
@@ -184,7 +184,7 @@ yy
 A distance ramp along third dimension.
 ```jldoctest
 julia> zz((1, 1, 4))
-1×1×4 GeneratorArray{Float64, 3, GeneratorArrays.var"#24#25"{Float64, Tuple{Float64, Float64, Float64}, Tuple{Int64, Int64, Int64}}}:
+1×1×4 IndexFunArray{Float64, 3, IndexFunArrays.var"#24#25"{Float64, Tuple{Float64, Float64, Float64}, Tuple{Int64, Int64, Int64}}}:
 [:, :, 1] =
  -2.0
 
@@ -207,7 +207,7 @@ zz
 A multidimensional (separable) window with a linear transition from zero at the borders (`border_out`) to one (`border_in`).
 ```jldoctest
 julia> window_linear((8,9),border_in=0.0)
-8×9 GeneratorArray{Float64, 2, GeneratorArrays.var"#34#35"{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Float64, Float64}}:
+8×9 IndexFunArray{Float64, 2, IndexFunArrays.var"#34#35"{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Float64, Float64}}:
  0.0  0.0     0.0    0.0     0.0   0.0     0.0    0.0     0.0
  0.0  0.0625  0.125  0.1875  0.25  0.1875  0.125  0.0625  0.0
  0.0  0.125   0.25   0.375   0.5   0.375   0.25   0.125   0.0
@@ -228,7 +228,7 @@ A multidimensional radial window with a linear transition from zero at the borde
 With the default offset and scale the borders are specified relative to the edge.
 ```jldoctest
 julia> window_radial_linear((8,9),border_in=0.0)
-8×9 GeneratorArray{Float64, 2, GeneratorArrays.var"#59#60"{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Float64, Float64}}:
+8×9 IndexFunArray{Float64, 2, IndexFunArrays.var"#59#60"{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Float64, Float64}}:
  0.0  0.0        0.0        0.0       0.0   0.0       0.0        0.0        0.0
  0.0  0.0        0.0986122  0.209431  0.25  0.209431  0.0986122  0.0        0.0
  0.0  0.0986122  0.292893   0.440983  0.5   0.440983  0.292893   0.0986122  0.0

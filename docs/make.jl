@@ -1,14 +1,14 @@
-using GeneratorArrays, Documenter 
+using IndexFunArrays, Documenter 
 
  # set seed fixed for documentation
-DocMeta.setdocmeta!(GeneratorArrays, :DocTestSetup, :(using GeneratorArrays); recursive=true)
-makedocs(modules = [GeneratorArrays], 
-         sitename = "GeneratorArrays.jl", 
+DocMeta.setdocmeta!(IndexFunArrays, :DocTestSetup, :(using IndexFunArrays); recursive=true)
+makedocs(modules = [IndexFunArrays], 
+         sitename = "IndexFunArrays.jl", 
          pages = Any[
-            "GeneratorArrays.jl" => "index.md",
+            "IndexFunArrays.jl" => "index.md",
             "Distance Functions" => "distance.md",
             "Window Functions" => "window.md",
          ]
         )
 
-deploydocs(repo = "github.com/bionanoimaging/GeneratorArrays.jl.git", devbranch="master")
+deploydocs(repo = "github.com/bionanoimaging/IndexFunArrays.jl.git", devbranch="master")
