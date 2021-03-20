@@ -111,8 +111,15 @@ julia> y=rr2(selectsizes(x,(1,2)))
 ```
 Similarly you can also use dimensions 2 and 3 yielding an array of `size(y) == (1,6,5)`. 
 Note that the necessary modification to the `Base.size` function is currently provided by this package.
+
+---
+    rr2(arr::AbstractArray; offset=CtrFt, scaling=ScaUnit)
+
+This is a wrapper for 
+`rr2(eltype(arr), size(arr), scaling=scaling, offset=offset)`.
 """
 rr2
+
 
 """
     rr([T=Float64], size::size::NTuple{N, Int};
@@ -135,6 +142,11 @@ julia> rr((3, 3), offset=CtrCorner)
  1.0  1.41421  2.23607
  2.0  2.23607  2.82843
 ```
+---
+    rr(arr::AbstractArray; offset=CtrFt, scaling=ScaUnit)
+
+This is a wrapper for 
+`rr(eltype(arr), size(arr), scaling=scaling, offset=offset)`.
 """
 rr
 
@@ -153,6 +165,11 @@ julia> xx((4,4))
   0.0   0.0   0.0   0.0
   1.0   1.0   1.0   1.0
 ```
+---
+    xx(arr::AbstractArray; offset=CtrFt, scaling=ScaUnit)
+
+This is a wrapper for 
+`xx(eltype(arr), size(arr), scaling=scaling, offset=offset)`.
 """
 xx
 
@@ -171,6 +188,11 @@ julia> yy((4,4))
  -2.0  -1.0  0.0  1.0
  -2.0  -1.0  0.0  1.0
 ```
+---
+    yy(arr::AbstractArray; offset=CtrFt, scaling=ScaUnit)
+
+This is a wrapper for 
+`yy(eltype(arr), size(arr), scaling=scaling, offset=offset)`.
 """
 yy
 
@@ -197,6 +219,12 @@ julia> zz((1, 1, 4))
 [:, :, 4] =
  1.0
 ```
+
+---
+    zz(arr::AbstractArray; offset=CtrFt, scaling=ScaUnit)
+
+This is a wrapper for 
+`zz(eltype(arr), size(arr), scaling=scaling, offset=offset)`.
 """
 zz
 
@@ -217,6 +245,13 @@ julia> window_linear((8,9),border_in=0.0)
  0.0  0.125   0.25   0.375   0.5   0.375   0.25   0.125   0.0
  0.0  0.0625  0.125  0.1875  0.25  0.1875  0.125  0.0625  0.0
 ```
+
+---
+    window_linear(arr::AbstractArray; offset=CtrFt, scaling=ScaUnit,
+                                      border_in=0.8, border_out=1.0)
+
+This is a wrapper for 
+`window_linear(eltype(arr), size(arr), scaling=scaling, offset=offset, border_in=border_in, border_out=border_out)`.
 """
 window_linear
 
@@ -234,6 +269,13 @@ julia> window_radial_linear((4,5),border_in=0.0)
  0.0  0.5       1.0  0.5       0.0
  0.0  0.292893  0.5  0.292893  0.0
 ```
+
+---
+    window_radial_linear(arr::AbstractArray; offset=CtrFt, scaling=ScaUnit,
+                                      border_in=0.8, border_out=1.0)
+
+This is a wrapper for 
+`window_radial_linear(eltype(arr), size(arr), scaling=scaling, offset=offset, border_in=border_in, border_out=border_out)`.
 """
 window_radial_linear
 
@@ -244,6 +286,13 @@ window_radial_linear
 
 A multidimensional (separable) window with a sudden transition half way between the borders (`border_out`) to one (`border_in`).
 See `?window_linear` for more details on the arguments.
+
+---
+    window_edge(arr::AbstractArray; offset=CtrFt, scaling=ScaUnit,
+                                      border_in=0.8, border_out=1.0)
+
+This is a wrapper for 
+`window_edge(eltype(arr), size(arr), scaling=scaling, offset=offset, border_in=border_in, border_out=border_out)`.
 """
 window_edge
 
@@ -253,6 +302,13 @@ window_edge
 
 A multidimensional radial window (disk) with a sudden transition half way between the borders (`border_out`) to one (`border_in`).
 See `?window_radial_linear` for more details on the arguments.
+
+---
+    window_radial_edge(arr::AbstractArray; offset=CtrFt, scaling=ScaUnit,
+                                      border_in=0.8, border_out=1.0)
+
+This is a wrapper for 
+`window_radial_edge(eltype(arr), size(arr), scaling=scaling, offset=offset, border_in=border_in, border_out=border_out)`.
 """
 window_radial_edge
 
@@ -262,6 +318,13 @@ window_radial_edge
 
 A multidimensional (separable) window with a von Hann transition between the borders (`border_out`) to one (`border_in`).
 See `?window_linear` for more details on the arguments.
+
+---
+    window_hanning(arr::AbstractArray; offset=CtrFt, scaling=ScaUnit,
+                                      border_in=0.8, border_out=1.0)
+
+This is a wrapper for 
+`window_hanning(eltype(arr), size(arr), scaling=scaling, offset=offset, border_in=border_in, border_out=border_out)`.
 """
 window_hanning
 
@@ -271,6 +334,13 @@ window_hanning
 
 A multidimensional radial window with a von Hann transition between the borders (`border_out`) to one (`border_in`).
 See `?window_radial_linear` for more details on the arguments.
+
+---
+    window_radial_hanning(arr::AbstractArray; offset=CtrFt, scaling=ScaUnit,
+                                      border_in=0.8, border_out=1.0)
+
+This is a wrapper for 
+`window_radial_hanning(eltype(arr), size(arr), scaling=scaling, offset=offset, border_in=border_in, border_out=border_out)`.
 """
 window_radial_hanning
 
@@ -280,6 +350,13 @@ window_radial_hanning
 
 A multidimensional (separable) window with a Hamming transition between the borders (`border_out`) to one (`border_in`).
 See `?window_linear` for more details on the arguments.
+
+---
+    window_hamming(arr::AbstractArray; offset=CtrFt, scaling=ScaUnit,
+                                      border_in=0.8, border_out=1.0)
+
+This is a wrapper for 
+`window_hamming(eltype(arr), size(arr), scaling=scaling, offset=offset, border_in=border_in, border_out=border_out)`.
 """
 window_hamming
 
@@ -289,6 +366,13 @@ window_hamming
 
 A multidimensional radial window with a Hamming transition between the borders (`border_out`) to one (`border_in`).
 See `?window_radial_linear` for more details on the arguments.
+
+---
+    window_radial_hamming(arr::AbstractArray; offset=CtrFt, scaling=ScaUnit,
+                                      border_in=0.8, border_out=1.0)
+
+This is a wrapper for 
+`window_radial_hamming(eltype(arr), size(arr), scaling=scaling, offset=offset, border_in=border_in, border_out=border_out)`.
 """
 window_radial_hamming
 
@@ -298,6 +382,13 @@ window_radial_hamming
 
 A multidimensional (separable) window with a  transition according to Blackman/Harris between the borders (`border_out`) to one (`border_in`).
 See `?window_linear` for more details on the arguments.
+
+---
+    window_blackman_harris(arr::AbstractArray; offset=CtrFt, scaling=ScaUnit,
+                                      border_in=0.8, border_out=1.0)
+
+This is a wrapper for 
+`window_blackman_harris(eltype(arr), size(arr), scaling=scaling, offset=offset, border_in=border_in, border_out=border_out)`.
 """
 window_blackman_harris
 
@@ -307,6 +398,13 @@ window_blackman_harris
 
 A multidimensional radial window with a Hamming transition according to Blackman/Harris between the borders (`border_out`) to one (`border_in`).
 See `?window_radial_linear` for more details on the arguments.
+
+---
+    window_radial_blackman_harris(arr::AbstractArray; offset=CtrFt, scaling=ScaUnit,
+                                      border_in=0.8, border_out=1.0)
+
+This is a wrapper for 
+`window_radial_blackman_harris(eltype(arr), size(arr), scaling=scaling, offset=offset, border_in=border_in, border_out=border_out)`.
 """
 window_radial_blackman_harris
 
