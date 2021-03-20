@@ -63,7 +63,7 @@ julia> @time x = randn((10000, 10000));
 
 julia> using IndexFunArrays
 
-julia> @time x .= rr(size(x));
+julia> @time x .= rr(size(x)); # first run contains some compilation
   0.361640 seconds (1.18 M allocations: 70.353 MiB, 46.29% compilation time)
 
 julia> @time x .= rr(size(x));
