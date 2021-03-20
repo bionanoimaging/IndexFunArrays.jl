@@ -19,6 +19,7 @@ julia> ] add https://github.com/bionanoimaging/IndexFunArrays.jl
 
 
 ## Quick Examples
+We ship a lot of convenient wrappers but you can also use an `IndexFunArray` directly. See below:
 ```julia
 julia> using IndexFunArrays
 
