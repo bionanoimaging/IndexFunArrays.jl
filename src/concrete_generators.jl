@@ -84,7 +84,7 @@ function generate_window_functions_expr()
     x_exprW = :(clamp.(1 .-(abs.(scale .* (x .- offset)).-border_in)./(border_out-border_in),0,1)) 
     x_exprRW = :(clamp.(1 .-(sqrt.(sum((scale .* (x .- offset)).^2)).-border_in)./(border_out-border_in),0,1)) 
 
-    functions = [  # see https://de.wikipedia.org/wiki/Fensterfunktion
+    functions = [  # see https://en.wikipedia.org/wiki/Window_function 
         (:(window_linear),  :(x -> T(prod(($x_exprW))))),
         (:(window_edge),  :(x -> T(prod(($x_exprW).>0.5)))),
         (:(window_hanning),  :(x -> T(prod(sinpi.(0.5 .* ($x_exprW)).^2)))),
