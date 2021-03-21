@@ -7,18 +7,18 @@ export phiphi
 # These are the type promotion rules, taken from float.jl but written in terms of types
 # see also 
 promote_type()
-defaultType(::Type{Bool}, def_T)    = def_T
-defaultType(::Type{Int8}, def_T)    = def_T
-defaultType(::Type{Int16}, def_T)   = def_T
-defaultType(::Type{Int32}, def_T)   = def_T
-defaultType(::Type{Int64}, def_T)   = def_T # LOSSY
-defaultType(::Type{Int128}, def_T)  = def_T # LOSSY
-defaultType(::Type{UInt8}, def_T)   = def_T
-defaultType(::Type{UInt16}, def_T)  = def_T
-defaultType(::Type{UInt32}, def_T)  = def_T
-defaultType(::Type{UInt64}, def_T)  = def_T # LOSSY
-defaultType(::Type{UInt128}, def_T) = def_T # LOSSY
-defaultType(::Type{T}, def_T) where{T} = T # all other types remain to be the same
+default_type(::Type{Bool}, def_T)    = def_T
+default_type(::Type{Int8}, def_T)    = def_T
+default_type(::Type{Int16}, def_T)   = def_T
+default_type(::Type{Int32}, def_T)   = def_T
+default_type(::Type{Int64}, def_T)   = def_T # LOSSY
+default_type(::Type{Int128}, def_T)  = def_T # LOSSY
+default_type(::Type{UInt8}, def_T)   = def_T
+default_type(::Type{UInt16}, def_T)  = def_T
+default_type(::Type{UInt32}, def_T)  = def_T
+default_type(::Type{UInt64}, def_T)  = def_T # LOSSY
+default_type(::Type{UInt128}, def_T) = def_T # LOSSY
+default_type(::Type{T}, def_T) where{T} = T # all other types remain to be the same
 
 
 # define types to specify where the center point is
@@ -141,7 +141,7 @@ for F in generate_functions_expr()
     # convenient wrapper to provide an array as input
     @eval function $(F[1])(arr::AbstractArray{T, N}; 
                            offset=CtrFT, scale=ScaUnit) where {T, N}         
-        $(F[1])(defaultType(T, $default_T), size(arr), scale=scale, offset=offset)
+        $(F[1])(default_type(T, $default_T), size(arr), scale=scale, offset=offset)
     end
 
     @eval export $(F[1])
@@ -173,7 +173,7 @@ for F in generate_window_functions_expr()
     @eval function $(F[1])(arr::AbstractArray{T, N}; 
                            offset=CtrFT, 
                            scale=ScaFTEdge, border_in=0.8, border_out=1.0) where{N, T} 
-        $(F[1])(defaultType(T, $default_T), size(arr), scale=scale, offset=offset, border_in=border_in, border_out=border_out)
+        $(F[1])(default_type(T, $default_T), size(arr), scale=scale, offset=offset, border_in=border_in, border_out=border_out)
     end
 
     @eval export $(F[1])
