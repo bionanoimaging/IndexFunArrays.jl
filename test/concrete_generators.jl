@@ -1,5 +1,25 @@
 @testset "Test generated concrete generator functions" begin
 
+    @testset "Type conversion for default type" begin
+        def_T = Float64
+
+        Types_changed = [Bool, Int8, Int16, Int32, Int64, Int128, UInt8, UInt16, UInt32, UInt64, UInt128]
+        Typtes_unchanged = [ComplexF32, ComplexF64, Complex{Int}, Float32, Float64]
+
+        for T in Types_changed
+            IndexFunArrays.default_type(T, Float64) = Float64
+            for T2 in Types_changed
+                IndexFunArrays.default_type(T, def_T2) = def_T
+            end
+        end
+        
+        for T in Types_changed
+            for T2 in Types_changed
+                IndexFunArrays.default_type(T, T2) = T
+            end
+        end
+    end
+
     @testset "Test rr method" begin
     
     
@@ -96,6 +116,7 @@ end
     end
 
     
+
 
 
 end
