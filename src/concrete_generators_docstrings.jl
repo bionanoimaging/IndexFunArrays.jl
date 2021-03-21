@@ -255,7 +255,7 @@ julia> phiphi((10, 10))
 This is a wrapper for 
 `phiphi(eltype(arr), size(arr), scaling=scaling, offset=offset)`.
 """
-phiphi
+phiphi 
 
 """
     window_linear([T=Float64], size::NTuple; 
