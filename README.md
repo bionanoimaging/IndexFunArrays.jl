@@ -43,15 +43,30 @@ julia> rr((4,4), scale=ScaUnit)  # distance (not square) to the Fourier-center w
    2.0      1.0      0.0  1.0
    2.23607  1.41421  1.0  1.41421
 
-julia> IndexFunArray(x -> sum(abs2.(x)), (3, 3))   # directly using the constructor and supplying a function to store in the array
+julia> z = IndexFunArray(x -> sum(abs2.(x)), (3, 3))   # directly using the constructor and supplying a function to store in the array
   3×3 IndexFunArray{Int64, 2, var"#184#185"}:
     2   5  10
     5   8  13
    10  13  18
+
+julia> z[3,3] # use it like a normal array
+18
+
+julia> @view z[1:1, 1:3] # for slices you need @view because we cannot assign to a IndexFunArray
+1×3 view(::IndexFunArray{Int64, 2, var"#1#2"}, 1:1, 1:3) with eltype Int64:
+ 2  5  10
+
+julia> z .^ 2 # once you apply operations on it, it returns a allocated array
+3×3 Matrix{Int64}:
+   4   25  100
+  25   64  169
+ 100  169  324
 ```
 
 
 ## More complex examples
+
+### Assign to allocated memory 
 If we assume the following situation where we have a large array created. We can assign the `IndexFunArray` (in this case `rr` being the distance to a reference position)
 to this array without allocation of a significant amount of new memory:
 ```julia
@@ -70,6 +85,30 @@ julia> @time x .= rr(size(x));
   0.194074 seconds (11 allocations: 496 bytes)
 ```
 
+### Apply further operations without allocations
+For that use, one can use [LazyArrays.jl](https://github.com/JuliaArrays/LazyArrays.jl) which implements that efficiently.
+
+Below an example (where we removed the lines with compilation calls). Thanks to `LazyArrays` `y` is not evaluated but at the end `z` is:
+```julia
+julia> using IndexFunArrays, LazyArrays
+
+julia> @time x = rr((1000, 1000));
+  0.000014 seconds (6 allocations: 240 bytes)
+
+julia> @time y = @~ exp.(x)
+  0.000022 seconds (5 allocations: 336 bytes)
+Base.Broadcast.Broadcasted{Base.Broadcast.DefaultArrayStyle{2}}(exp, ([707.1067811865476 706.4000283125703 … 705.6939846704093 706.4000283125703; 706.4000283125703 705.6925676241744 … 704.985815460141 705.6925676241744; … ; 705.6939846704093 704.985815460141 … 704.2783540618013 704.985815460141; 706.4000283125703 705.6925676241744 … 704.985815460141 705.6925676241744],))
+
+julia> @time z = materialize(y);
+  0.018635 seconds (2 allocations: 7.629 MiB)
+
+julia> typeof(z)
+Matrix{Float64} (alias for Array{Float64, 2})
+```
+
+
+
+### Benchmark
 We can see that there is only a small number of 496 bytes allocated and not the full ~763MiB.
 The following benchmark shows that the performance is almost as good as with `CartesianIndices`:
 ```julia
