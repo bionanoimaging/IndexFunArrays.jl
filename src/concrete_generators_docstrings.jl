@@ -229,6 +229,35 @@ This is a wrapper for
 zz
 
 """
+    phiphi([T=Float64], size::NTuple{N, Int};
+       offset=CtrFT,
+       scale=ScaUnit)
+
+An azimutal spiral phase ramp using atan(). The azimuthal phase spans dimensions 1 and 2.
+```jldoctest
+julia> phiphi((10, 10))
+10×10 IndexFunArray{Float64, 2, IndexFunArrays.var"#29#30"{Float64, Tuple{Float64, Float64}, Tuple{Int64, Int64}}}:
+ -2.35619   -2.46685   -2.60117   -2.76109   -2.9442    3.14159  2.9442    2.76109   2.60117   2.46685
+ -2.24554   -2.35619   -2.49809   -2.67795   -2.89661   3.14159  2.89661   2.67795   2.49809   2.35619
+ -2.11122   -2.2143    -2.35619   -2.55359   -2.81984   3.14159  2.81984   2.55359   2.35619   2.2143
+ -1.9513    -2.03444   -2.1588    -2.35619   -2.67795   3.14159  2.67795   2.35619   2.1588    2.03444
+ -1.76819   -1.81577   -1.89255   -2.03444   -2.35619   3.14159  2.35619   2.03444   1.89255   1.81577
+ -1.5708    -1.5708    -1.5708    -1.5708    -1.5708    0.0      1.5708    1.5708    1.5708    1.5708
+ -1.3734    -1.32582   -1.24905   -1.10715   -0.785398  0.0      0.785398  1.10715   1.24905   1.32582
+ -1.19029   -1.10715   -0.982794  -0.785398  -0.463648  0.0      0.463648  0.785398  0.982794  1.10715
+ -1.03038   -0.927295  -0.785398  -0.588003  -0.321751  0.0      0.321751  0.588003  0.785398  0.927295
+ -0.896055  -0.785398  -0.643501  -0.463648  -0.244979  0.0      0.244979  0.463648  0.643501  0.785398
+```
+
+---
+    phiphi(arr::AbstractArray; offset=CtrFt, scaling=ScaUnit)
+
+This is a wrapper for 
+`phiphi(eltype(arr), size(arr), scaling=scaling, offset=offset)`.
+"""
+phiphi 
+
+"""
     window_linear([T=Float64], size::NTuple; 
                 offset=CtrFT, scale=ScaFTEdge, border_in=0.8, border_out=1.0)  
 
