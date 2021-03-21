@@ -109,7 +109,7 @@ Matrix{Float64} (alias for Array{Float64, 2})
 
 
 ### Benchmark
-We can see that there is only a small number of 496 bytes allocated and not the full ~763MiB.
+We can see that there is only a small number of 496 bytes allocated and not the full memory.
 The following benchmark shows that the performance is almost as good as with `CartesianIndices`:
 ```julia
 julia> include("examples/benchmark.jl")
