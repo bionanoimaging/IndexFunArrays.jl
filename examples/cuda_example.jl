@@ -54,27 +54,36 @@ function MandelbrotIterations(c, Niter=500)
     return (res % 127)
 end
 
-function MandelbrotIterations(idx,start,scale, Niter=500)
+function MandelbrotIterations(idx,start,scale, Niter=100)
     c = Complex(start[1].+idx[1].*scale[1],start[2].+idx[2].*scale[2])
-    return MandelbrotIterations(c,Niter)
+    return MandelbrotIterations(c..., Niter)
 end
 
-function testMandelbrot(s=(1024,1024), Niter=100)
+function testMandelbrotArray(s=(1024,1024), Niter=100)
+    arr = zeros(Int64, s)
+    scale = (3.0,3.0)./s;
+    start=(-2.3,-1.5);
+    @info "Test MandelBrot Array CPU"
+    @time arr .= MandelbrotIterations.(CartesianIndices(arr), [scale], [start])
+    @time arr .= MandelbrotIterations.(CartesianIndices(arr), [scale], [start])
+end
+
+function testMandelbrotIFA(s=(1024,1024), Niter=100)
     arr = zeros(Int64, s)
     scale = (3.0,3.0)./s;
     start=(-2.3,-1.5);
     Mandelbrot = IndexFunArray(x -> MandelbrotIterations(x,start, scale,Niter), size(arr));
+    @info "Test MandelBrot IndexFunArray CPU"
     @time arr .= Mandelbrot;
     @time arr .= Mandelbrot;
-    #@time arr .= MandelbrotIterations.(arr)  # why is this nonsense?
-    #@time arr .= MandelbrotIterations.(arr)
-    arr_c = CuArray(arr)
-    CUDA.@time arr_c .= Mandelbrot
-    CUDA.@time arr_c .= Mandelbrot
+    
+    #arr_c = CuArray(arr)
+    #CUDA.@time arr_c .= Mandelbrot
+    #CUDA.@time arr_c .= Mandelbrot
     #CUDA.@time arr_c .= MandelbrotIterations.(arr_c,start,scale,Niter)
     return arr
 end
 
 #using Napari
-#napari.view_image(testMandelbrot())
+#napari.view_image(testMandelbrotIFA())
 
