@@ -88,7 +88,7 @@ julia> @time x .= rr(size(x));
 ### Apply further operations without allocations
 For that use, one can use [LazyArrays.jl](https://github.com/JuliaArrays/LazyArrays.jl) which implements that efficiently.
 
-Below an example (where we removed the lines with compilation calls). Thanks to `LazyArrays` `y` is not evaluated but at the end `z` is:
+Below an example (where we removed the lines with compilation calls). Thanks to LazyArrays.jl, `y` is not evaluated but at the end `z` is:
 ```julia
 julia> using IndexFunArrays, LazyArrays
 
@@ -130,7 +130,7 @@ julia> compare_to_CartesianIndices()
 ## Why this package?
 In image processing and other applications you often encounter position-dependent functions some of which can be a bit of work to code.
 It helps the thinking to picture such functions as arrays, which contain the index-dependent values. A good examples are windowing functions.
-Another more complicated example is a complex-values free-space (optical) propagator.
+Another more complicated example is a complex-valued free-space (optical) propagator.
 Yet storing such arrays can be memory intensive and slow and one would ideally perform such calculations "on-the-fly", e.g. only when applying the filter
 to the Fourier-transformation. Julia has a great mechanism for this: syntactic loop fusion and broadcasting (e.g. using ".*").
 
@@ -153,4 +153,3 @@ Of course such arrays can generate any datatype. See `?IndexFunArray` for more d
 
 [codecov-img]: https://codecov.io/gh/bionanoimaging/IndexFunArrays.jl/branch/master/graph/badge.svg?token=P0YYCPKXI1
 [codecov-url]: https://codecov.io/gh/bionanoimaging/IndexFunArrays.jl
-
