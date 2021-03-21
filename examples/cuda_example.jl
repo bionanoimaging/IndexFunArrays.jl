@@ -34,5 +34,42 @@ function test(s)
     CUDA.@time f3(arr_c);
 
     return 
+end 
 
+function MandelbrotIterations(c, Niter=500)
+    x = c
+    res = 0
+    for n in 1:Niter
+        x = x.^2 .+ c
+        #if abs(x) > 4.0 && (res == 0)
+        #    res = n
+        #end
+        res += (res == 0)*(abs(x)> 4.0)*n  # ensure that only the first breakage counts but avoid if
+    end
+    return (res % 127)
 end
+
+function MandelbrotIterations(idx,start,scale, Niter=500)
+    c = Complex(start[1].+idx[1].*scale[1],start[2].+idx[2].*scale[2])
+    return MandelbrotIterations(c,Niter)
+end
+
+function testMandelbrot(s=(1024,1024), Niter=100)
+    arr = zeros(Int64, s)
+    scale = (3.0,3.0)./s;
+    start=(-2.3,-1.5);
+    Mandelbrot = IndexFunArray(x -> MandelbrotIterations(x,start, scale,Niter), size(arr));
+    @time arr .= Mandelbrot;
+    @time arr .= Mandelbrot;
+    #@time arr .= MandelbrotIterations.(arr)  # why is this nonsense?
+    #@time arr .= MandelbrotIterations.(arr)
+    arr_c = CuArray(arr)
+    CUDA.@time arr_c .= Mandelbrot
+    CUDA.@time arr_c .= Mandelbrot
+    #CUDA.@time arr_c .= MandelbrotIterations.(arr_c,start,scale,Niter)
+    return arr
+end
+
+using Napari
+napari.view_image(testMandelbrot())
+
