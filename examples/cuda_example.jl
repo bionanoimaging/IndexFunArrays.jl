@@ -75,6 +75,6 @@ function testMandelbrot(s=(1024,1024), Niter=100)
     return arr
 end
 
-using Napari
-napari.view_image(testMandelbrot())
+#using Napari
+#napari.view_image(testMandelbrot())
 
