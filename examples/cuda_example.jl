@@ -11,10 +11,15 @@ function f2(arr)
     return arr
 end
 
+function f3(arr)
+    arr = arr.^2 .+ arr.^3 .+ sqrt.(arr .^2) 
+    return arr
+end
+
 function test(s)
     arr = randn(Float32, s)
     arr_c = CuArray(arr)
-    x = rr(Float32, s)
+    x = rr2(Float32, s)
     x_c = CuArray(rr(Float32, s))
 
     @time f(arr, x);
@@ -25,7 +30,8 @@ function test(s)
     CUDA.@time f(arr_c, x);
     CUDA.@time f2(arr_c);
     CUDA.@time f2(arr_c);
-
+    CUDA.@time f3(arr_c);
+    CUDA.@time f3(arr_c);
 
     return 
 
