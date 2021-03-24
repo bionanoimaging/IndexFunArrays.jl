@@ -14,7 +14,7 @@ The `IndexFunArray` does not allocate memory but instead is entry-wise generated
 Not registered yet,
 Type `]`in the REPL to get to the package manager:
 ```julia
-julia> ] add https://github.com/bionanoimaging/IndexFunArrays.jl 
+julia> ] add IndexFunArrays
 ```
 
 
