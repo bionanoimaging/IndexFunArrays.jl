@@ -11,8 +11,7 @@ The `IndexFunArray` does not allocate memory but instead is entry-wise generated
 
 
 ## Installation
-Not registered yet,
-Type `]`in the REPL to get to the package manager:
+Type `]`in the REPL to get to the package manager and install it:
 ```julia
 julia> ] add IndexFunArrays
 ```
