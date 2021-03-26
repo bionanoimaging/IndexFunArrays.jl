@@ -55,6 +55,10 @@
         @test xx(Int, (3, 5), offset = CtrCorner, scale = ScaUnit) == [0 0 0 0 0; 1 1 1 1 1; 2 2 2 2 2] 
     end
 
+    @testset "Test delta method" begin
+        a = delta(Float64, (3, 5), offset = CtrCorner, scale = ScaUnit)
+        @test  a == [1.0 0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0 0.0]
+    end
 
     @testset "Test different scalings" begin
         @test rr((10,), scale = ScaNorm) == [0.5555555555555556, 0.4444444444444444, 0.3333333333333333, 0.2222222222222222, 0.1111111111111111, 0.0, 0.1111111111111111, 0.2222222222222222, 0.3333333333333333, 0.4444444444444444]
@@ -115,9 +119,9 @@ end
         @test window_radial_linear((4, 4), border_in = 0, border_out = 1, offset = CtrCorner, scale = ScaNorm) == [1.0 0.6666666666666667 0.33333333333333337 0.0; 0.6666666666666667 0.5285954792089683 0.2546440075000701 0.0; 0.33333333333333337 0.2546440075000701 0.057190958417936644 0.0; 0.0 0.0 0.0 0.0]
     end
 
-    
-
-
+    @testset "window_half_cos" begin
+        @test sum(abs.(window_half_cos((1, 14), border_in = 0, border_out = 1) .- [0.0  0.222521  0.433884  0.62349  0.781831  0.900969  0.974928  1.0  0.974928  0.900969  0.781831  0.62349  0.433884  0.222521])) < 1e-5
+    end
 
 end
 

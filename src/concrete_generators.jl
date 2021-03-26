@@ -72,9 +72,9 @@ Abstract type to indicate a scaling from which several other types subtype.
 Sca
 
 get_scale(size, ::Type{ScaUnit}) = ntuple(_ -> one(Int), length(size))
-get_scale(size, ::Type{ScaNorm}) = 1 ./ (size .- 1)
-get_scale(size, ::Type{ScaFT}) = 0.5 ./ (size .÷ 2)
-get_scale(size, ::Type{ScaFTEdge}) = 1 ./ (size .÷ 2)  
+get_scale(size, ::Type{ScaNorm}) = 1 ./ (size)  #  was .- 1 but does not feel right. Size 1 yields infinite! 
+get_scale(size, ::Type{ScaFT}) = 0.5 ./ (max.(size .÷ 2,1 ))
+get_scale(size, ::Type{ScaFTEdge}) = 1 ./ (max.(size .÷ 2, 1))  
 get_scale(size, t::NTuple) = t 
 
 # List of functions and names we want to predefine
@@ -84,6 +84,7 @@ function generate_functions_expr()
     x_expr1 = :(scale[1] .* (x[1] .- offset[1]))
     x_expr2 = :(scale[2] .* (x[2] .- offset[2]))
     x_expr3 = :(scale[3] .* (x[3] .- offset[3]))
+    x_expr4 = :(prod(x .== offset))
 
     functions = [
         (:(rr2), :(x -> T(sum(abs2.($x_expr))))),
@@ -91,6 +92,7 @@ function generate_functions_expr()
         (:(xx),  :(x -> T($x_expr1))),
         (:(yy),  :(x -> T($x_expr2))),
         (:(zz),  :(x -> T($x_expr3))),
+        (:(delta),  :(x -> T($x_expr4))),
         (:(phiphi), :(x -> T(atan.($x_expr2, $x_expr1)))),  # this is the arcus tangens of y/x yielding a spiral phase ramp
     ]
     return functions
@@ -105,6 +107,7 @@ function generate_window_functions_expr()
         (:(window_linear),  :(x -> T(prod(($x_exprW))))),
         (:(window_edge),  :(x -> T(prod(($x_exprW).>0.5)))),
         (:(window_hanning),  :(x -> T(prod(sinpi.(0.5 .* ($x_exprW)).^2)))),
+        (:(window_half_cos),  :(x -> T(prod(sinpi.(0.5 .* ($x_exprW)))))),
         (:(window_hamming),  :(x -> T(prod(0.54 .-0.46.*cospi.(($x_exprW)))))),
         (:(window_blackman_harris),  :(x -> T(prod(0.35875 .- 0.48829.*cospi.($x_exprW).+0.14128.*cospi.(2 .*$x_exprW).-0.01168.*cospi.(3 .*$x_exprW))))),
         (:(window_radial_linear),  :(x -> T($x_exprRW))),
@@ -157,7 +160,7 @@ for F in generate_window_functions_expr()
                            offset=CtrFT,
                            scale=ScaFTEdge, border_in=0.8, border_out=1.0) where{N, T} 
         offset = get_offset(size, offset)
-        scale = get_scale(size, scale)
+        @show scale = get_scale(size, scale)
         IndexFunArray(T, $(F[2]), size) 
     end
     
