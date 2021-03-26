@@ -98,20 +98,20 @@ end
 
 function generate_window_functions_expr()
     # x_exprW = :(clamp.(- border_in .+ abs.(scale .* (x .- offset))./(border_out-border_in),0,1))
-    x_exprW = :(clamp.(1 .-(abs.(scale .* (x .- offset)).-border_in)./(border_out-border_in),0,1)) 
-    x_exprRW = :(clamp.(1 .-(sqrt.(sum((scale .* (x .- offset)).^2)).-border_in)./(border_out-border_in),0,1)) 
+    x_exprW = :(clamp.(1 .-(abs.(scale .* (x .- offset)).-border_in)./(border_out .- border_in),0,1)) 
+    x_exprRW = :(clamp.(1 .-(sqrt.(sum((scale .* (x .- offset)).^2)).-border_in)./(border_out .- border_in),0,1)) 
 
     functions = [  # see https://en.wikipedia.org/wiki/Window_function 
         (:(window_linear),  :(x -> T(prod(($x_exprW))))),
         (:(window_edge),  :(x -> T(prod(($x_exprW).>0.5)))),
         (:(window_hanning),  :(x -> T(prod(sinpi.(0.5 .* ($x_exprW)).^2)))),
-        (:(window_hamming),  :(x -> T(prod(0.54.-0.46.*cospi.(($x_exprW)))))),
-        (:(window_blackman_harris),  :(x -> T(prod(0.35875-0.48829.*cospi.($x_exprW).+0.14128.*cospi.(2 .*$x_exprW).-0.01168.*cospi.(3 .*$x_exprW))))),
+        (:(window_hamming),  :(x -> T(prod(0.54 .-0.46.*cospi.(($x_exprW)))))),
+        (:(window_blackman_harris),  :(x -> T(prod(0.35875 .- 0.48829.*cospi.($x_exprW).+0.14128.*cospi.(2 .*$x_exprW).-0.01168.*cospi.(3 .*$x_exprW))))),
         (:(window_radial_linear),  :(x -> T($x_exprRW))),
         (:(window_radial_edge),  :(x -> T(($x_exprRW).>0.5))),
         (:(window_radial_hanning),  :(x -> T(sinpi.(0.5 .* ($x_exprRW)).^2))),
-        (:(window_radial_hamming),  :(x -> T((0.54.-0.46.*cospi.(($x_exprRW)))))),
-        (:(window_radial_blackman_harris),  :(x -> T((0.35875-0.48829.*cospi.($x_exprRW).+0.14128.*cospi.(2 .*$x_exprRW).-0.01168.*cospi.(3 .*$x_exprRW))))),
+        (:(window_radial_hamming),  :(x -> T((0.54 .-0.46.*cospi.(($x_exprRW)))))),
+        (:(window_radial_blackman_harris),  :(x -> T((0.35875 .-0.48829.*cospi.($x_exprRW).+0.14128.*cospi.(2 .*$x_exprRW).-0.01168.*cospi.(3 .*$x_exprRW))))),
     ]
     return functions
 end
