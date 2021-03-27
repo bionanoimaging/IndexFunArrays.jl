@@ -161,7 +161,6 @@ for F in generate_window_functions_expr()
                            offset=CtrFT,
                            scale=ScaFTEdge, border_in=0.8, border_out=1.0) where{N, T} 
         offset = get_offset(size, offset)
-        @show scale = get_scale(size, scale)
         IndexFunArray(T, $(F[2]), size) 
     end
     
