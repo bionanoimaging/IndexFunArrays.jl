@@ -3,6 +3,9 @@ using Random
 
 using IndexFunArrays
 
+include("test_center_scaling.jl")
+include("constructors.jl")
+include("concrete_generators.jl")
 
 
 @testset "Test defined array operation" begin
@@ -59,10 +62,5 @@ end
 
 end
 
-
-
-include("constructors.jl")
-
-include("concrete_generators.jl")
 
 return

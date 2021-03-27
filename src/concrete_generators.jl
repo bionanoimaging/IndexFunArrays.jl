@@ -160,6 +160,7 @@ for F in generate_window_functions_expr()
     @eval function $(F[1])(::Type{T}, size::NTuple{N, Int};
                            offset=CtrFT,
                            scale=ScaFTEdge, border_in=0.8, border_out=1.0) where{N, T} 
+        scale = get_scale(size, scale)
         offset = get_offset(size, offset)
         IndexFunArray(T, $(F[2]), size) 
     end
