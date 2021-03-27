@@ -72,7 +72,7 @@ Abstract type to indicate a scaling from which several other types subtype.
 Sca
 
 get_scale(size, ::Type{ScaUnit}) = ntuple(_ -> one(Int), length(size))
-get_scale(size, ::Type{ScaNorm}) = 1 ./ (max.(size.-1,1)) 
+get_scale(size, ::Type{ScaNorm}) = 1 ./ (max.(size .- 1,1)) 
 get_scale(size, ::Type{ScaFT}) = 0.5 ./ (max.(size .÷ 2,1 ))
 get_scale(size, ::Type{ScaFTEdge}) = 1 ./ (max.(size .÷ 2, 1))  
 get_scale(size, t::NTuple) = t 
