@@ -1,11 +1,13 @@
 """
     rr2([T=Float64], size::NTuple{N, Int};
         offset=CtrFT,
+        dims=ntuple(+, N),
         scale=ScaUnit)
 
 Essentially returns the `CartesianIndices` but with optional
 `scale`, `offset` and data type.
 Note that `T` is enforced element-wise for the return tuple elements.
+
 
 ```jldoctest
 julia> idx(Int, (3,3), offset=CtrCorner)
@@ -33,6 +35,7 @@ idx
 """
     rr2([T=Float64], size::NTuple{N, Int};
         offset=CtrFT,
+        dims=ntuple(+, N),
         scale=ScaUnit)
 
 Calculates the squared radius to a reference pixel.
@@ -41,6 +44,8 @@ In this case `CtrFT` is the center defined by the FFT convention.
 `offset` and `scale` can be either of `<:Ctr`, `<:Sca` respectively
 or simply tuples with the same shape as `size`.
 Look at `?Ctr` and `?Sca` for all options.
+`dims` is a keyword argument to specifiy over which dimensions the
+operation will effectively happen.
 
 Note that this function is based on a `IndexFunArray` and therefore does
 not allocate the full memory needed to represent the array.
@@ -155,8 +160,9 @@ rr2
 
 """
     rr([T=Float64], size::NTuple{N, Int};
-       offset=CtrFT,
-       scale=ScaUnit)
+        offset=CtrFT,
+        dims=ntuple(+, N),
+        scale=ScaUnit)
 
 See `rr2` for all options.
 
@@ -185,8 +191,9 @@ rr
 
 """
     xx([T=Float64], size::NTuple{N, Int};
-       offset=CtrFT,
-       scale=ScaUnit)
+        offset=CtrFT,
+        dims=ntuple(+, N),
+        scale=ScaUnit)
 
 A distance ramp along first dimension.
 ```jldoctest
@@ -208,8 +215,9 @@ xx
 
 """
     yy([T=Float64], size::NTuple{N, Int};
-       offset=CtrFT,
-       scale=ScaUnit)
+        offset=CtrFT,
+        dims=ntuple(+, N),
+        scale=ScaUnit)
 
 A distance ramp along second dimension.
 ```jldoctest
@@ -232,8 +240,9 @@ yy
 
 """
     zz([T=Float64], size::NTuple{N, Int};
-       offset=CtrFT,
-       scale=ScaUnit)
+        offset=CtrFT,
+        dims=ntuple(+, N),
+        scale=ScaUnit)
 
 A distance ramp along third dimension.
 ```jldoctest
@@ -262,8 +271,9 @@ zz
 
 """
     phiphi([T=Float64], size::NTuple{N, Int};
-       offset=CtrFT,
-       scale=ScaUnit)
+        offset=CtrFT,
+        dims=ntuple(+, N),
+        scale=ScaUnit)
 
 An azimutal spiral phase ramp using atan(). The azimuthal phase spans dimensions 1 and 2.
 ```jldoctest
@@ -286,7 +296,7 @@ phiphi
 
 """
     window_linear([T=Float64], size::NTuple; 
-                offset=CtrFT, scale=ScaFTEdge, border_in=0.8, border_out=1.0)  
+                offset=CtrFT, scale=ScaFTEdge, border_in=0.8, border_out=1.0, dims=ntuple(+, N))  
 
 A multidimensional (separable) window with a linear transition from zero at the borders (`border_out`) to one (`border_in`).
 ```jldoctest
@@ -313,7 +323,7 @@ window_linear
 
 """
     window_radial_linear([T=Float64], size::NTuple; 
-                offset=CtrFT, scale=ScaFTEdge, border_in=0.8, border_out=1.0)  
+                offset=CtrFT, scale=ScaFTEdge, border_in=0.8, border_out=1.0, dims=ntuple(+, N))  
 
 A multidimensional radial window with a linear transition from zero at the borders (`border_out`) to one (`border_in`).
 With the default offset and scale the borders are specified relative to the edge.
@@ -328,7 +338,7 @@ julia> window_radial_linear((4,5),border_in=0.0)
 
 ---
     window_radial_linear(arr::AbstractArray; offset=CtrFt, scaling=ScaUnit,
-                                      border_in=0.8, border_out=1.0)
+                         border_in=0.8, border_out=1.0, dims=ntuple(+, N))
 
 This is a wrapper for 
 `window_radial_linear(eltype(arr), size(arr), scaling=scaling, offset=offset, border_in=border_in, border_out=border_out)`.
@@ -338,7 +348,7 @@ window_radial_linear
 
 """
     window_edge([T=Float64], size::NTuple; 
-                offset=CtrFT, scale=ScaFTEdge, border_in=0.8, border_out=1.0)  
+                offset=CtrFT, scale=ScaFTEdge, border_in=0.8, border_out=1.0, dims=ntuple(+, N))  
 
 A multidimensional (separable) window with a sudden transition half way between the borders (`border_out`) to one (`border_in`).
 See `?window_linear` for more details on the arguments.
@@ -354,14 +364,14 @@ window_edge
 
 """
     window_radial_edge([T=Float64], size::NTuple; 
-                offset=CtrFT, scale=ScaFTEdge, border_in=0.8, border_out=1.0)  
+                offset=CtrFT, scale=ScaFTEdge, border_in=0.8, border_out=1.0, dims=ntuple(+, N))  
 
 A multidimensional radial window (disk) with a sudden transition half way between the borders (`border_out`) to one (`border_in`).
 See `?window_radial_linear` for more details on the arguments.
 
 ---
-    window_radial_edge(arr::AbstractArray; offset=CtrFt, scaling=ScaUnit,
-                                      border_in=0.8, border_out=1.0)
+    window_radial_edge(arr::AbstractArray; 
+                       offset=CtrFT, scale=ScaFTEdge, border_in=0.8, border_out=1.0, dims=ntuple(+, N))  
 
 This is a wrapper for 
 `window_radial_edge(eltype(arr), size(arr), scaling=scaling, offset=offset, border_in=border_in, border_out=border_out)`.
@@ -370,14 +380,14 @@ window_radial_edge
 
 """
     window_hanning([T=Float64], size::NTuple; 
-                offset=CtrFT, scale=ScaFTEdge, border_in=0.8, border_out=1.0)  
+                       offset=CtrFT, scale=ScaFTEdge, border_in=0.8, border_out=1.0, dims=ntuple(+, N))  
 
 A multidimensional (separable) window with a von Hann transition between the borders (`border_out`) to one (`border_in`).
 See `?window_linear` for more details on the arguments.
 
 ---
-    window_hanning(arr::AbstractArray; offset=CtrFt, scaling=ScaUnit,
-                                      border_in=0.8, border_out=1.0)
+    window_hanning(arr::AbstractArray;
+                       offset=CtrFT, scale=ScaFTEdge, border_in=0.8, border_out=1.0, dims=ntuple(+, N))  
 
 This is a wrapper for 
 `window_hanning(eltype(arr), size(arr), scaling=scaling, offset=offset, border_in=border_in, border_out=border_out)`.
@@ -386,14 +396,15 @@ window_hanning
 
 """
     window_radial_hanning([T=Float64], size::NTuple; 
-                offset=CtrFT, scale=ScaFTEdge, border_in=0.8, border_out=1.0)  
+                       offset=CtrFT, scale=ScaFTEdge, border_in=0.8, border_out=1.0, dims=ntuple(+, N))  
 
 A multidimensional radial window with a von Hann transition between the borders (`border_out`) to one (`border_in`).
 See `?window_radial_linear` for more details on the arguments.
 
 ---
-    window_radial_hanning(arr::AbstractArray; offset=CtrFt, scaling=ScaUnit,
-                                      border_in=0.8, border_out=1.0)
+    window_radial_hanning(arr::AbstractArray;
+                          offset=CtrFT, scale=ScaFTEdge, border_in=0.8, border_out=1.0, dims=ntuple(+, N))  
+                                      
 
 This is a wrapper for 
 `window_radial_hanning(eltype(arr), size(arr), scaling=scaling, offset=offset, border_in=border_in, border_out=border_out)`.
@@ -402,14 +413,14 @@ window_radial_hanning
 
 """
     window_hamming([T=Float64], size::NTuple; 
-                offset=CtrFT, scale=ScaFTEdge, border_in=0.8, border_out=1.0)  
+                   offset=CtrFT, scale=ScaFTEdge, border_in=0.8, border_out=1.0, dims=ntuple(+, N))  
 
 A multidimensional (separable) window with a Hamming transition between the borders (`border_out`) to one (`border_in`).
 See `?window_linear` for more details on the arguments.
 
 ---
-    window_hamming(arr::AbstractArray; offset=CtrFt, scaling=ScaUnit,
-                                      border_in=0.8, border_out=1.0)
+    window_hamming(arr::AbstractArray;
+                   offset=CtrFT, scale=ScaFTEdge, border_in=0.8, border_out=1.0, dims=ntuple(+, N))  
 
 This is a wrapper for 
 `window_hamming(eltype(arr), size(arr), scaling=scaling, offset=offset, border_in=border_in, border_out=border_out)`.
@@ -418,14 +429,14 @@ window_hamming
 
 """
     window_radial_hamming([T=Float64], size::NTuple; 
-                offset=CtrFT, scale=ScaFTEdge, border_in=0.8, border_out=1.0)  
+                          offset=CtrFT, scale=ScaFTEdge, border_in=0.8, border_out=1.0, dims=ntuple(+, N))  
 
 A multidimensional radial window with a Hamming transition between the borders (`border_out`) to one (`border_in`).
 See `?window_radial_linear` for more details on the arguments.
 
 ---
-    window_radial_hamming(arr::AbstractArray; offset=CtrFt, scaling=ScaUnit,
-                                      border_in=0.8, border_out=1.0)
+    window_radial_hamming(arr::AbstractArray;
+                          offset=CtrFT, scale=ScaFTEdge, border_in=0.8, border_out=1.0, dims=ntuple(+, N))  
 
 This is a wrapper for 
 `window_radial_hamming(eltype(arr), size(arr), scaling=scaling, offset=offset, border_in=border_in, border_out=border_out)`.
@@ -434,14 +445,14 @@ window_radial_hamming
 
 """
     window_blackman_harris([T=Float64], size::NTuple; 
-                offset=CtrFT, scale=ScaFTEdge, border_in=0.8, border_out=1.0)  
+                          offset=CtrFT, scale=ScaFTEdge, border_in=0.8, border_out=1.0, dims=ntuple(+, N))  
 
 A multidimensional (separable) window with a  transition according to Blackman/Harris between the borders (`border_out`) to one (`border_in`).
 See `?window_linear` for more details on the arguments.
 
 ---
-    window_blackman_harris(arr::AbstractArray; offset=CtrFt, scaling=ScaUnit,
-                                      border_in=0.8, border_out=1.0)
+    window_blackman_harris(arr::AbstractArray;
+                          offset=CtrFT, scale=ScaFTEdge, border_in=0.8, border_out=1.0, dims=ntuple(+, N))  
 
 This is a wrapper for 
 `window_blackman_harris(eltype(arr), size(arr), scaling=scaling, offset=offset, border_in=border_in, border_out=border_out)`.
@@ -450,17 +461,15 @@ window_blackman_harris
 
 """
     window_radial_blackman_harris([T=Float64], size::NTuple; 
-                offset=CtrFT, scale=ScaFTEdge, border_in=0.8, border_out=1.0)  
+                          offset=CtrFT, scale=ScaFTEdge, border_in=0.8, border_out=1.0, dims=ntuple(+, N))  
 
 A multidimensional radial window with a Hamming transition according to Blackman/Harris between the borders (`border_out`) to one (`border_in`).
 See `?window_radial_linear` for more details on the arguments.
 
 ---
-    window_radial_blackman_harris(arr::AbstractArray; offset=CtrFt, scaling=ScaUnit,
-                                      border_in=0.8, border_out=1.0)
-
+    window_radial_blackman_harris(arr::AbstractArray;
+                                  offset=CtrFT, scale=ScaFTEdge, border_in=0.8, border_out=1.0, dims=ntuple(+, N))
 This is a wrapper for 
 `window_radial_blackman_harris(eltype(arr), size(arr), scaling=scaling, offset=offset, border_in=border_in, border_out=border_out)`.
 """
 window_radial_blackman_harris
-
