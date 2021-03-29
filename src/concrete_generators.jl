@@ -3,6 +3,7 @@ export Ctr,CtrCorner,CtrFFT,CtrFT,CtrMid,CtrEnd
 export rr, rr2
 export xx, yy, zz
 export phiphi
+export idx
 
 # These are the type promotion rules, taken from float.jl but written in terms of types
 # see also 
@@ -25,7 +26,9 @@ default_type(::Type{T}, def_T) where{T} = T # all other types remain to be the s
 abstract type Ctr end  # Center of the array
 struct CtrCorner <: Ctr end  # corner voxel is zero
 struct CtrFFT <: Ctr end # corresponding to FFTs
+struct CtrRFFT <: Ctr end # corresponding to RFFTs
 struct CtrFT <: Ctr end # corresponding to FTs  (meaning shifted FFTs)
+struct CtrRFT <: Ctr end # corresponding to RFTs
 struct CtrMid <: Ctr end # middle of the array
 struct CtrEnd <: Ctr end # other corner voxel is zero
 
@@ -45,7 +48,9 @@ Ctr
 
 get_offset(size, ::Type{CtrCorner}) = size.*0 .+ 1.0
 get_offset(size, ::Type{CtrFT}) = size.÷2 .+ 1.0
+get_offset(size, ::Type{CtrRFT}) = Base.setindex(size.÷2,size[1],1) .+ 1.0
 get_offset(size, ::Type{CtrFFT}) = size.*0 .+ 1.0
+get_offset(size, ::Type{CtrRFFT}) = size.*0 .+ 1.0
 get_offset(size, ::Type{CtrMid}) = (size.+1)./2.0
 get_offset(size, ::Type{CtrEnd}) = size.+0.0
 get_offset(size, t::NTuple) =  t
@@ -56,7 +61,9 @@ abstract type Sca end # scaling of the array
 struct ScaUnit <: Sca end # pixel distance is one
 struct ScaNorm <: Sca end # total size along each dimension normalized to 1.0
 struct ScaFT <: Sca end # reciprocal Fourier coordinates
+struct ScaRFT <: Sca end # reciprocal Fourier coordinates for rFTs. 
 struct ScaFTEdge <: Sca end # such that the edge of the Fourier space is 1.0
+struct ScaRFTEdge <: Sca end # such that the edge of the Fourier space is 1.0
 
 """
     Sca 
@@ -74,7 +81,9 @@ Sca
 get_scale(size, ::Type{ScaUnit}) = ntuple(_ -> one(Int), length(size))
 get_scale(size, ::Type{ScaNorm}) = 1 ./ (max.(size .- 1, 1)) 
 get_scale(size, ::Type{ScaFT}) = 0.5 ./ (max.(size .÷ 2, 1))
+get_scale(size, ::Type{ScaRFT}) = 0.5 ./ (max.(Base.setindex(size.÷ 2,size[1],1), 1))
 get_scale(size, ::Type{ScaFTEdge}) = 1 ./ (max.(size .÷ 2, 1))  
+get_scale(size, ::Type{ScaRFTEdge}) = 1 ./ (max.(Base.setindex(size.÷ 2,size[1],1), 1))
 get_scale(size, t::NTuple) = t 
 
 # List of functions and names we want to predefine
@@ -94,6 +103,9 @@ function generate_functions_expr()
         (:(zz),  :(x -> T($x_expr3))),
         (:(delta),  :(x -> T($x_expr4))),
         (:(phiphi), :(x -> T(atan.($x_expr2, $x_expr1)))),  # this is the arcus tangens of y/x yielding a spiral phase ramp
+        (:(idx),  :(x -> T($x_expr)), NTuple{N,Float32} where {N}), # returns a tuple
+        (:(idx_64),  :(x -> T($x_expr)), NTuple{N,Float64} where {N}), # returns a tuple
+        (:(idx_int),  :(x -> T($x_expr)), NTuple{N,Int} where {N}), # returns a tuple
     ]
     return functions
 end
@@ -125,7 +137,7 @@ for F in generate_functions_expr()
     # fallback type of IndexFunArray
     default_T = Float64
 
-    # default functions with certain offset and scaling behavior
+    # default functions with offset and scaling behavior
     @eval function $(F[1])(::Type{T}, size::NTuple{N, Int};
                            offset=CtrFT,
                            scale=ScaUnit) where{N, T} 
@@ -137,14 +149,16 @@ for F in generate_functions_expr()
     # change order of offset and scale
     @eval function $(F[1])(size::NTuple{N, Int}; 
                            offset=CtrFT, scale=ScaUnit) where {N}
-        T = $default_T 
+        T = $(length(F)>2 ? F[3] : default_T)
         $(F[1])(T, size, scale=scale, offset=offset) 
     end
 
     # convenient wrapper to provide an array as input
     @eval function $(F[1])(arr::AbstractArray{T, N}; 
-                           offset=CtrFT, scale=ScaUnit) where {T, N}         
-        $(F[1])(default_type(T, $default_T), size(arr), scale=scale, offset=offset)
+                           offset=CtrFT, scale=ScaUnit) where {T, N}
+        T2 = default_type(T, $default_T)                   
+        T3 = $(length(F)>2 ? F[3] : "T2")
+        $(F[1])(T3, size(arr), scale=scale, offset=offset)
     end
 
     @eval export $(F[1])

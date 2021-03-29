@@ -14,8 +14,9 @@ struct IndexFunArray{T, N, F} <: AbstractArray{T, N} where {F}
 
     # Constructor function
     function IndexFunArray(::Type{T}, gen::F, size::NTuple{N,Int}) where {T,N,F,G,H}
-        if typeof(gen(size)) != T
-            error("The generator function does not have Type T as indicated")
+        res_type = typeof(gen(size))
+        if isa(T, res_type) 
+            error("The generator function does not have type $T as indicated, but type $res_type")
         end
         return new{T, N, F}(gen, size) 
     end
