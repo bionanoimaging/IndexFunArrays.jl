@@ -37,7 +37,7 @@ end
         return true
     end
 
-    @test f()
+    @show f()
     @test g()
 end
 

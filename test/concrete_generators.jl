@@ -87,6 +87,12 @@
 end
 
 
+@testset "Test idx method" begin
+    @test idx(Float32, (5,)) == Tuple{Float32}[(-2.0,), (-1.0,), (0.0,), (1.0,), (2.0,)]
+    @test idx(Int8, (5, 2)) == Tuple{Int8, Int8}[(-2, -1) (-2, 0); (-1, -1) (-1, 0); (0, -1) (0, 0); (1, -1) (1, 0); (2, -1) (2, 0)] 
+end
+
+
 @testset "Test window functions" begin
 
 
