@@ -1,5 +1,5 @@
-export Sca,ScaUnit,ScaNorm,ScaFT,ScaFTEdge
-export Ctr,CtrCorner,CtrFFT,CtrFT,CtrMid,CtrEnd
+export Sca,ScaUnit,ScaNorm,ScaFT,ScaFTEdge,ScaRFT,ScaRFTEdge
+export Ctr,CtrCorner,CtrFFT,CtrFT,CtrMid,CtrEnd,CtrRFFT,CtrRFT
 export rr, rr2
 export xx, yy, zz
 export phiphi
@@ -48,7 +48,7 @@ Ctr
 
 get_offset(size, ::Type{CtrCorner}) = size.*0 .+ 1.0
 get_offset(size, ::Type{CtrFT}) = size.÷2 .+ 1.0
-get_offset(size, ::Type{CtrRFT}) = Base.setindex(size.÷2,size[1],1) .+ 1.0
+get_offset(size, ::Type{CtrRFT}) = Base.setindex(size.÷2,0,1) .+ 1.0
 get_offset(size, ::Type{CtrFFT}) = size.*0 .+ 1.0
 get_offset(size, ::Type{CtrRFFT}) = size.*0 .+ 1.0
 get_offset(size, ::Type{CtrMid}) = (size.+1)./2.0
@@ -82,9 +82,9 @@ Sca
 get_scale(size, ::Type{ScaUnit}) = ntuple(_ -> one(Int), length(size))
 get_scale(size, ::Type{ScaNorm}) = 1 ./ (max.(size .- 1, 1)) 
 get_scale(size, ::Type{ScaFT}) = 0.5 ./ (max.(size .÷ 2, 1))
-get_scale(size, ::Type{ScaRFT}) = 0.5 ./ (max.(Base.setindex(size.÷ 2,size[1],1), 1))
+get_scale(size, ::Type{ScaRFT}) = 0.5 ./ (max.(Base.setindex(size.÷ 2,size[1]-1,1), 1))
 get_scale(size, ::Type{ScaFTEdge}) = 1 ./ (max.(size .÷ 2, 1))  
-get_scale(size, ::Type{ScaRFTEdge}) = 1 ./ (max.(Base.setindex(size.÷ 2,size[1],1), 1))
+get_scale(size, ::Type{ScaRFTEdge}) = 1 ./ (max.(Base.setindex(size.÷ 2,size[1]-1,1), 1))
 get_scale(size, t::Number) = ntuple(i -> t, length(size)) 
 get_scale(size, t::NTuple) = t 
 
