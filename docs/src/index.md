@@ -11,6 +11,10 @@ The abstract `IndexFunArray` definition
 IndexFunArray
 ```
 
+## Indices with certain type
+```@docs
+idx
+```
 
 ## Helpful Array Function
 In addition to normal `size` one can imagine a `selectsizes` which returns the sizes
