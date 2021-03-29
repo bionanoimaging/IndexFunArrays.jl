@@ -103,12 +103,10 @@ function generate_functions_expr()
         (:(zz),  :(x -> T($x_expr3))),
         (:(delta),  :(x -> T($x_expr4))),
         (:(phiphi), :(x -> T(atan.($x_expr2, $x_expr1)))),  # this is the arcus tangens of y/x yielding a spiral phase ramp
-        (:(idx),  :(x -> T($x_expr)), NTuple{N,Float32} where {N}), # returns a tuple
-        (:(idx_64),  :(x -> T($x_expr)), NTuple{N,Float64} where {N}), # returns a tuple
-        (:(idx_int),  :(x -> T($x_expr)), NTuple{N,Int} where {N}), # returns a tuple
     ]
     return functions
 end
+
 
 function generate_window_functions_expr()
     # x_exprW = :(clamp.(- border_in .+ abs.(scale .* (x .- offset))./(border_out-border_in),0,1))
@@ -131,6 +129,17 @@ function generate_window_functions_expr()
     return functions
 end
 
+
+function generate_tuple_functions_expr()
+    x_expr = :(scale .* (x .- offset))
+
+    functions = [
+        (:(idx),  :(x -> T.($x_expr))), # returns a tuple
+    ]
+    return functions
+end
+
+
 # we automatically generate the functions for rr2, rr, ...
 # We set the types for the arguments correctly in the default cases
 for F in generate_functions_expr() 
@@ -149,7 +158,7 @@ for F in generate_functions_expr()
     # change order of offset and scale
     @eval function $(F[1])(size::NTuple{N, Int}; 
                            offset=CtrFT, scale=ScaUnit) where {N}
-        T = $(length(F)>2 ? F[3] : default_T)
+        T = $default_T
         $(F[1])(T, size, scale=scale, offset=offset) 
     end
 
@@ -157,8 +166,7 @@ for F in generate_functions_expr()
     @eval function $(F[1])(arr::AbstractArray{T, N}; 
                            offset=CtrFT, scale=ScaUnit) where {T, N}
         T2 = default_type(T, $default_T)                   
-        T3 = $(length(F)>2 ? F[3] : "T2")
-        $(F[1])(T3, size(arr), scale=scale, offset=offset)
+        $(F[1])(T2, size(arr), scale=scale, offset=offset)
     end
 
     @eval export $(F[1])
@@ -196,6 +204,41 @@ for F in generate_window_functions_expr()
 
     @eval export $(F[1])
 end
+
+
+# we automatically generate tuple functions
+# We set the types for the arguments correctly in the default cases
+for F in generate_tuple_functions_expr() 
+    # fallback type of IndexFunArray
+    default_T = Float64
+    # default functions with offset and scaling behavior
+    @eval function $(F[1])(::Type{T}, size::NTuple{N, Int};
+                           offset=CtrFT,
+                           scale=ScaUnit) where{N, T} 
+        T2 = typeof(T.(size))
+        offset = get_offset(size, offset)
+        scale = get_scale(size, scale)
+        IndexFunArray(T2, $(F[2]), size) 
+    end
+    
+    # change order of offset and scale
+    @eval function $(F[1])(size::NTuple{N, Int}; 
+                           offset=CtrFT, scale=ScaUnit) where {N}
+        T2 = $default_T
+        $(F[1])(T2, size, scale=scale, offset=offset) 
+    end
+
+    # convenient wrapper to provide an array as input
+    @eval function $(F[1])(arr::AbstractArray{T, N}; 
+                           offset=CtrFT, scale=ScaUnit) where {T, N}
+        T2 = default_type(T, $default_T)                   
+        $(F[1])(T2, size(arr), scale=scale, offset=offset)
+    end
+
+    @eval export $(F[1])
+end 
+
+
 
 # include docstrings
 include("concrete_generators_docstrings.jl")
