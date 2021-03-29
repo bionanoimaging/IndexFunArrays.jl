@@ -53,7 +53,8 @@ get_offset(size, ::Type{CtrFFT}) = size.*0 .+ 1.0
 get_offset(size, ::Type{CtrRFFT}) = size.*0 .+ 1.0
 get_offset(size, ::Type{CtrMid}) = (size.+1)./2.0
 get_offset(size, ::Type{CtrEnd}) = size.+0.0
-get_offset(size, t::NTuple) =  t
+get_offset(size, t::Number) = ntuple(i -> t, length(size))
+get_offset(size, t::NTuple) = t
 
 
 
@@ -84,6 +85,7 @@ get_scale(size, ::Type{ScaFT}) = 0.5 ./ (max.(size .÷ 2, 1))
 get_scale(size, ::Type{ScaRFT}) = 0.5 ./ (max.(Base.setindex(size.÷ 2,size[1],1), 1))
 get_scale(size, ::Type{ScaFTEdge}) = 1 ./ (max.(size .÷ 2, 1))  
 get_scale(size, ::Type{ScaRFTEdge}) = 1 ./ (max.(Base.setindex(size.÷ 2,size[1],1), 1))
+get_scale(size, t::Number) = ntuple(i -> t, length(size)) 
 get_scale(size, t::NTuple) = t 
 
 # List of functions and names we want to predefine
@@ -149,22 +151,25 @@ for F in generate_functions_expr()
     # default functions with offset and scaling behavior
     @eval function $(F[1])(::Type{T}, size::NTuple{N, Int};
                            offset=CtrFT,
-                           scale=ScaUnit) where{N, T} 
+                           scale=ScaUnit,
+                           dims=ntuple(+, N)) where{N, T} 
         offset = get_offset(size, offset)
-        scale = get_scale(size, scale)
+        scale_init = get_scale(size, scale)
+        scale = map(i -> zero(i), scale_init)
+        scale = ntuple(i -> i ∈ dims ? scale_init[i] : 0, N)
         IndexFunArray(T, $(F[2]), size) 
     end
     
     # change order of offset and scale
     @eval function $(F[1])(size::NTuple{N, Int}; 
-                           offset=CtrFT, scale=ScaUnit) where {N}
+                           offset=CtrFT, scale=ScaUnit, dims=ntuple(+, N)) where {N}
         T = $default_T
-        $(F[1])(T, size, scale=scale, offset=offset) 
+        $(F[1])(T, size, scale=scale, offset=offset, dims=dims) 
     end
 
     # convenient wrapper to provide an array as input
     @eval function $(F[1])(arr::AbstractArray{T, N}; 
-                           offset=CtrFT, scale=ScaUnit) where {T, N}
+                           offset=CtrFT, scale=ScaUnit, dims=ntuple(+, N)) where {T, N}
         T2 = default_type(T, $default_T)                   
         $(F[1])(T2, size(arr), scale=scale, offset=offset)
     end
@@ -181,8 +186,10 @@ for F in generate_window_functions_expr()
     # default functions with certain offset and scaling behavior
     @eval function $(F[1])(::Type{T}, size::NTuple{N, Int};
                            offset=CtrFT,
-                           scale=ScaFTEdge, border_in=0.8, border_out=1.0) where{N, T} 
-        scale = get_scale(size, scale)
+                           scale=ScaFTEdge, border_in=0.8, border_out=1.0, dims=ntuple(+, N)) where{N, T} 
+        scale_init = get_scale(size, scale)
+        scale = map(i -> zero(i), scale_init)
+        scale = ntuple(i -> i ∈ dims ? scale_init[i] : 0, N)
         offset = get_offset(size, offset)
         IndexFunArray(T, $(F[2]), size) 
     end
@@ -190,16 +197,16 @@ for F in generate_window_functions_expr()
     # change order of offset and scale
     @eval function $(F[1])(size::NTuple{N, Int}; 
                            offset=CtrFT, 
-                           scale=ScaFTEdge, border_in=0.8, border_out=1.0) where{N} 
+                           scale=ScaFTEdge, border_in=0.8, border_out=1.0, dims=ntuple(+, N)) where{N} 
         T = $default_T 
-        $(F[1])(T, size, scale=scale, offset=offset, border_in=border_in, border_out=border_out) 
+        $(F[1])(T, size, scale=scale, offset=offset, border_in=border_in, border_out=border_out, dims=dims) 
     end
 
     # convenient wrapper to provide an array as input
     @eval function $(F[1])(arr::AbstractArray{T, N}; 
                            offset=CtrFT, 
-                           scale=ScaFTEdge, border_in=0.8, border_out=1.0) where{N, T} 
-        $(F[1])(default_type(T, $default_T), size(arr), scale=scale, offset=offset, border_in=border_in, border_out=border_out)
+                           scale=ScaFTEdge, border_in=0.8, border_out=1.0, dims=ntuple(+, N)) where{N, T} 
+        $(F[1])(default_type(T, $default_T), size(arr), scale=scale, offset=offset, border_in=border_in, border_out=border_out, dims=dims)
     end
 
     @eval export $(F[1])
@@ -214,25 +221,27 @@ for F in generate_tuple_functions_expr()
     # default functions with offset and scaling behavior
     @eval function $(F[1])(::Type{T}, size::NTuple{N, Int};
                            offset=CtrFT,
-                           scale=ScaUnit) where{N, T} 
+                           scale=ScaUnit, dims=ntuple(+, N)) where{N, T} 
         T2 = typeof(T.(size))
         offset = get_offset(size, offset)
-        scale = get_scale(size, scale)
+        scale_init = get_scale(size, scale)
+        scale = map(i -> zero(i), scale_init)
+        scale = ntuple(i -> i ∈ dims ? scale_init[i] : 0, N)
         IndexFunArray(T2, $(F[2]), size) 
     end
     
     # change order of offset and scale
     @eval function $(F[1])(size::NTuple{N, Int}; 
-                           offset=CtrFT, scale=ScaUnit) where {N}
+                           offset=CtrFT, scale=ScaUnit, dims=ntuple(+, N)) where {N}
         T2 = $default_T
-        $(F[1])(T2, size, scale=scale, offset=offset) 
+        $(F[1])(T2, size, scale=scale, offset=offset, dims=dims) 
     end
 
     # convenient wrapper to provide an array as input
     @eval function $(F[1])(arr::AbstractArray{T, N}; 
-                           offset=CtrFT, scale=ScaUnit) where {T, N}
+                           offset=CtrFT, scale=ScaUnit, dims=ntuple(+, N)) where {T, N}
         T2 = default_type(T, $default_T)                   
-        $(F[1])(T2, size(arr), scale=scale, offset=offset)
+        $(F[1])(T2, size(arr), scale=scale, offset=offset, dims=dims)
     end
 
     @eval export $(F[1])
