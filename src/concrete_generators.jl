@@ -1,7 +1,7 @@
 export Sca,ScaUnit,ScaNorm,ScaFT,ScaFTEdge,ScaRFT,ScaRFTEdge
 export Ctr,CtrCorner,CtrFFT,CtrFT,CtrMid,CtrEnd,CtrRFFT,CtrRFT
 export rr, rr2
-export xx, yy, zz
+export xx, yy, zz, ee, tt, ramp
 export phiphi
 export idx
 
@@ -95,7 +95,9 @@ function generate_functions_expr()
     x_expr1 = :(scale[1] .* (x[1] .- offset[1]))
     x_expr2 = :(scale[2] .* (x[2] .- offset[2]))
     x_expr3 = :(scale[3] .* (x[3] .- offset[3]))
-    x_expr4 = :(prod(x .== offset))
+    x_expr4 = :(scale[4] .* (x[4] .- offset[4]))
+    x_expr5 = :(scale[5] .* (x[5] .- offset[5]))
+    x_expr6 = :(prod(x .== offset))
 
     functions = [
         (:(rr2), :(x -> T(sum(abs2.($x_expr))))),
@@ -103,7 +105,9 @@ function generate_functions_expr()
         (:(xx),  :(x -> T($x_expr1))),
         (:(yy),  :(x -> T($x_expr2))),
         (:(zz),  :(x -> T($x_expr3))),
-        (:(delta),  :(x -> T($x_expr4))),
+        (:(ee),  :(x -> T($x_expr4))),
+        (:(tt),  :(x -> T($x_expr5))),
+        (:(delta),  :(x -> T($x_expr6))),
         (:(phiphi), :(x -> T(atan.($x_expr2, $x_expr1)))),  # this is the arcus tangens of y/x yielding a spiral phase ramp
     ]
     return functions
@@ -141,6 +145,32 @@ function generate_tuple_functions_expr()
     return functions
 end
 
+"""
+    single_dim_size(dim::Int,dim_size::Int)
+
+returns a tuple (length dim) of singleton sizes except at the final position dim, which contains dim_size
+
+"""
+function single_dim_size(dim::Int,dim_size::Int)
+    Base.setindex(Tuple(ones(Int, dim)),dim_size,dim)
+end
+
+function ramp(::Type{T}, dim::Int, dim_size::Int;
+    offset=CtrFT, scale=ScaUnit) where {T}
+    size = single_dim_size(dim,dim_size)
+    offset = get_offset(size, offset)
+    scale = get_scale(size, scale)
+    # @show scale = map(i -> zero(i), scale_init)
+    # scale = ntuple(i -> i ∈ dims ? scale_init[i] : 0, dim)
+    f = ((x) -> scale[dim] .* (x[dim] .- offset[dim]))
+    IndexFunArray(T, f, size) 
+end
+
+function ramp(dim::Int, dim_size::Int;
+    offset=CtrFT, scale=ScaUnit)
+    default_T = Float64
+    ramp(default_T, dim, dim_size; offset, scale)
+end
 
 # we automatically generate the functions for rr2, rr, ...
 # We set the types for the arguments correctly in the default cases

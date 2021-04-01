@@ -46,13 +46,29 @@
 
     end
 
-    @testset "Test xx and yy method" begin
+    @testset "Test xx, yy, zz, ee and tt methods" begin
         a = xx(Float64, (3, 5), offset = CtrCorner, scale = ScaUnit)
-        b = yy(Float64, (5, 3), offset = CtrCorner, scale = ScaUnit)'
-        @test  a == [0.0 0.0 0.0 0.0 0.0; 1.0 1.0 1.0 1.0 1.0; 2.0 2.0 2.0 2.0 2.0]
-        @test a == b
+        b = yy(Float64, (5, 3), offset = CtrCorner, scale = ScaUnit)
+        c = zz(Float64, (1, 5, 3), offset = CtrCorner, scale = ScaUnit)
+        d = ee(Float64, (1, 1, 5, 3), offset = CtrCorner, scale = ScaUnit)
+        e = tt(Float64, (1, 1, 1, 5, 3), offset = CtrCorner, scale = ScaUnit)
+        @test a == [0.0 0.0 0.0 0.0 0.0; 1.0 1.0 1.0 1.0 1.0; 2.0 2.0 2.0 2.0 2.0]
+        @test a == b'
+        @test (b.+0)[:] == (c.+0)[:]
+        @test (b.+0)[:] == (d.+0)[:]
+        @test (b.+0)[:] == (e.+0)[:]
+        @test size(c) == (1,5,3)
+        @test size(d) == (1,1,5,3)
+        @test size(e) == (1,1,1,5,3)
 
         @test xx(Int, (3, 5), offset = CtrCorner, scale = ScaUnit) == [0 0 0 0 0; 1 1 1 1 1; 2 2 2 2 2] 
+    end
+
+    @testset "Test the ramp method" begin
+        a = yy(Float64, (1, 5), offset = CtrCorner, scale = ScaUnit)
+        b = ramp(Float64, 2, 5, offset = CtrCorner, scale = ScaUnit)
+        @test a == [0,1,2,3,4]'
+        @test size(ramp(7,7)) == (1,1,1,1,1,1,7)
     end
 
     @testset "Test delta method" begin

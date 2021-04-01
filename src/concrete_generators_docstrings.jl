@@ -270,6 +270,68 @@ This is a wrapper for
 zz
 
 """
+    ee([T=Float64], size::NTuple{N, Int};
+        offset=CtrFT,
+        dims=ntuple(+, N),
+        scale=ScaUnit)
+
+A distance ramp along forth (element) dimension. This dimension is often used as a color or wavelength channel.
+```jldoctest
+julia> ee((1, 1, 1, 4))
+1×1×1×4 IndexFunArray{Float64, 4, IndexFunArrays.var"#60#63"{Float64, NTuple{4, Float64}}}:
+[:, :, 1, 1] =
+ -2.0
+
+[:, :, 1, 2] =
+ -1.0
+
+[:, :, 1, 3] =
+ 0.0
+
+[:, :, 1, 4] =
+ 1.0
+```
+
+---
+    ee(arr::AbstractArray; offset=CtrFt, scaling=ScaUnit)
+
+This is a wrapper for 
+`ee(eltype(arr), size(arr), scaling=scaling, offset=offset)`.
+"""
+ee
+
+"""
+    tt([T=Float64], size::NTuple{N, Int};
+        offset=CtrFT,
+        dims=ntuple(+, N),
+        scale=ScaUnit)
+
+A distance ramp along fifth (time) dimension.
+```jldoctest
+julia> tt((1, 1, 1, 1, 4))
+1×1×1×1×4 IndexFunArray{Float64, 5, IndexFunArrays.var"#69#72"{Float64, NTuple{5, Float64}}}:
+[:, :, 1, 1, 1] =
+ -2.0
+
+[:, :, 1, 1, 2] =
+ -1.0
+
+[:, :, 1, 1, 3] =
+ 0.0
+
+[:, :, 1, 1, 4] =
+ 1.0
+```
+
+---
+    tt(arr::AbstractArray; offset=CtrFt, scaling=ScaUnit)
+
+This is a wrapper for 
+`tt(eltype(arr), size(arr), scaling=scaling, offset=offset)`.
+"""
+tt
+
+"""
     phiphi([T=Float64], size::NTuple{N, Int};
         offset=CtrFT,
         dims=ntuple(+, N),
@@ -293,6 +355,36 @@ This is a wrapper for
 `phiphi(eltype(arr), size(arr), scaling=scaling, offset=offset)`.
 """
 phiphi 
+
+
+
+"""
+    ramp(::Type{T}, dim::Int, dim_size::Int;
+    offset=CtrFT, scale=ScaUnit) where {T}
+
+generates a dim-dimensional ramp of size dim_size to be used for broadcasting through multidimensional expressions.
+dim: highest dimension of the oriented array to be generated. This is also the ramp direction.
+dim_size: size along this dimension.
+
+For details about offset and scale see rr2.
+```jldoctest
+julia> ramp(Float32, 1, 7; offset=(2,))
+7-element IndexFunArray{Float32, 1, IndexFunArrays.var"#434#435"{Tuple{Int64}, Tuple{Int64}, Int64}}:
+ -1
+  0
+  1
+  2
+  3
+  4
+  5
+```
+ramp(dim::Int, dim_size::Int; offset=CtrFt, scaling=ScaUnit)
+
+This is a wrapper for 
+`ramp(Float64, dim::Int, dim_size::Int; offset=CtrFt, scaling=ScaUnit)`.
+
+"""
+ramp
 
 """
     window_linear([T=Float64], size::NTuple; 
