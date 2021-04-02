@@ -3,6 +3,7 @@ module IndexFunArrays
 export IndexFunArray
 export selectsizes 
 
+include("utils.jl")
 include("concrete_generators.jl")
 
  # T refers to the result type
@@ -15,9 +16,9 @@ struct IndexFunArray{T, N, F} <: AbstractArray{T, N} where {F}
     # Constructor function
     function IndexFunArray(::Type{T}, gen::F, size::NTuple{N,Int}) where {T,N,F,G,H}
         res_type = gen(size)
-#        if !(gen(size) isa T) 
-#            error("The generator function does not have type $T as indicated, but type $res_type")
-#        end
+        if !(gen(size) isa T) 
+            throw(ArgumentError("The generator function does not have type $T as indicated, but type $res_type"))
+        end
         return new{T, N, F}(gen, size) 
     end
 end
@@ -81,38 +82,5 @@ Base.setindex!(A::IndexFunArray{T,N}, v, I::Vararg{Int,N}) where {T,N} = begin
     error("Attempt to assign entries to IndexFunArray which is immutable.")
 end
 
-
-"""
-    selectsizes(x::AbstractArray,dim::NTuple; keep_dims=true)
-
-Additional size method to access the size at several dimensions
-in one call.
-
-# Examples
-```jldoctest
-julia> x = ones((2,4,6,8, 10));
-
-julia> selectsizes(x, (2,3))
-(1, 4, 6, 1, 1)
-
-julia> selectsizes(x, (2,3,4), keep_dims=false)
-(4, 6, 8)
-
-julia> selectsizes(x, (4,3,2), keep_dims=false)
-(8, 6, 4)
-```
-
-"""
-function selectsizes(x::AbstractArray{T},dim::NTuple{N,Int};
-                    keep_dims=true) where{T,N}
-    if ~keep_dims
-        return map(n->size(x,n),dim)
-    end
-    sz = ones(Int, ndims(x))
-    for n in dim
-        sz[n] = size(x,n) 
-    end
-    return Tuple(sz)
-end 
 
 end # module
