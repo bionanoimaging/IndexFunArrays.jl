@@ -166,10 +166,9 @@ function ramp(::Type{T}, dim::Int, dim_size::Int;
     IndexFunArray(T, f, size) 
 end
 
-function ramp(dim::Int, dim_size::Int;
-    offset=CtrFT, scale=ScaUnit)
+function ramp(dim::Int, dim_size::Int; offset=CtrFT, scale=ScaUnit)
     default_T = Float64
-    ramp(default_T, dim, dim_size; offset, scale)
+    ramp(default_T, dim, dim_size; offset=offset, scale=scale)
 end
 
 # we automatically generate the functions for rr2, rr, ...
