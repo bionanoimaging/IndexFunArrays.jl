@@ -362,9 +362,9 @@ phiphi
     ramp(::Type{T}, dim::Int, dim_size::Int;
     offset=CtrFT, scale=ScaUnit) where {T}
 
-generates a dim-dimensional ramp of size dim_size to be used for broadcasting through multidimensional expressions.
-dim: highest dimension of the oriented array to be generated. This is also the ramp direction.
-dim_size: size along this dimension.
+Generates a dim-dimensional ramp of size `dim_size` to be used for broadcasting through multidimensional expressions.
+`dim` highest dimension of the oriented array to be generated. This is also the ramp direction.
+`dim_size` size along this dimension.
 
 For details about offset and scale see rr2.
 ```jldoctest
