@@ -3,7 +3,7 @@ export Ctr,CtrCorner,CtrFFT,CtrFT,CtrMid,CtrEnd,CtrRFFT,CtrRFT
 export rr, rr2
 export xx, yy, zz, ee, tt, ramp
 export phiphi
-export idx
+export idx, cpx
 
 # These are the type promotion rules, taken from float.jl but written in terms of types
 # see also 
@@ -164,6 +164,20 @@ end
 function ramp(dim::Int, dim_size::Int; offset=CtrFT, scale=ScaUnit)
     default_T = Float64
     ramp(default_T, dim, dim_size; offset=offset, scale=scale)
+end
+
+# helper function for single index conversion
+function to_cpx(index::NTuple{N,T}) where {N,T}
+    complex(index...)
+end
+
+# values in the complex plane
+function cpx(::Type{T}, size::NTuple{N, Int}; offset=CtrFT, scale=ScaUnit, dims=ntuple(+, N)) where {N,T}
+    to_cpx.(idx(T, size, offset=offset, scale=scale, dims=dims))
+end
+# values in the complex plane
+function cpx(size::NTuple{N, Int}; offset=CtrFT, scale=ScaUnit, dims=ntuple(+, N)) where {N,T}
+    to_cpx.(idx(size, offset=offset, scale=scale, dims=dims))
 end
 
 # we automatically generate the functions for rr2, rr, ...
