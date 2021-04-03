@@ -110,6 +110,13 @@ end
     @test idx(randn((5,2))) == Tuple{Int8, Int8}[(-2, -1) (-2, 0); (-1, -1) (-1, 0); (0, -1) (0, 0); (1, -1) (1, 0); (2, -1) (2, 0)] 
 end
 
+@testset "Test cpx method" begin
+    @test cpx(Float32, (5,)) == [-2.0f0 + 0.0f0im, -1.0f0 + 0.0f0im, 0.0f0 + 0.0f0im,1.0f0 + 0.0f0im,2.0f0 + 0.0f0im]
+    @test cpx(Int8, (5, 2)) == Complex{Int8}[(-2-1im) (-2+0im);(-1-1im) (-1+0im);(0-1im) (0+0im);(1-1im) (1+0im);(2-1im) (2+0im)]
+
+    @test cpx(randn((5,2))) == Complex{Int8}[(-2-1im) (-2+0im);(-1-1im) (-1+0im);(0-1im) (0+0im);(1-1im) (1+0im);(2-1im) (2+0im)]
+end
+
 
 @testset "Check dims argument" begin
     @test abs.(rr((5,5), dims=1)) == abs.(xx((5,5)))

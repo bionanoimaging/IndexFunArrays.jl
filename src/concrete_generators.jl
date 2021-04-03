@@ -179,6 +179,9 @@ end
 function cpx(size::NTuple{N, Int}; offset=CtrFT, scale=ScaUnit, dims=ntuple(+, N)) where {N,T}
     to_cpx.(idx(size, offset=offset, scale=scale, dims=dims))
 end
+function cpx(arr::AbstractArray{T, N}; offset=CtrFT, scale=ScaUnit, dims=ntuple(+, N)) where {N,T}
+    to_cpx.(idx(arr, offset=offset, scale=scale, dims=dims))
+end
 
 # we automatically generate the functions for rr2, rr, ...
 # We set the types for the arguments correctly in the default cases
