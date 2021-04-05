@@ -21,10 +21,11 @@ end
 
 
 """
-    selectsizes(x::AbstractArray,dim::NTuple; keep_dims=true)
+    selectsizes(x::AbstractArray, dim; keep_dims=true)
 
 Additional size method to access the size at several dimensions
 in one call.
+`keep_dims` allows to return the other dimensions as singletons.
 
 # Examples
 ```jldoctest
@@ -32,6 +33,12 @@ julia> x = ones((2,4,6,8, 10));
 
 julia> selectsizes(x, (2,3))
 (1, 4, 6, 1, 1)
+
+julia> selectsizes(x, 5)
+(1, 1, 1, 1, 10)
+
+julia> selectsizes(x, (5,))
+(1, 1, 1, 1, 10)
 
 julia> selectsizes(x, (2,3,4), keep_dims=false)
 (4, 6, 8)
@@ -53,3 +60,6 @@ function selectsizes(x::AbstractArray{T},dim::NTuple{N,Int};
     return Tuple(sz)
 end 
 
+function selectsizes(x::AbstractArray, dim::Integer; keep_dims=true)
+    selectsizes(x, Tuple(dim), keep_dims=keep_dims)
+end

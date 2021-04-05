@@ -17,6 +17,8 @@
         x = ones((10));
         @test selectsizes(x, (1,), keep_dims=false) == (10,)
         @test selectsizes(x, (1,), keep_dims=true) == (10,)
+        @test selectsizes(x, 1, keep_dims=false) == (10,)
+        @test selectsizes(x, 1, keep_dims=true) == (10,)
         
     
         x = ones((10, 10));
