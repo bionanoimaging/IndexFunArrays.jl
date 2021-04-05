@@ -25,7 +25,7 @@
 
 
     @testset "Check scaling" begin
-        @test IndexFunArrays.get_scale((5, 4), ScaFT) === (0.25, 0.25)
+        @test IndexFunArrays.get_scale((5, 4), ScaFT) === (0.2, 0.25)
         @test IndexFunArrays.get_scale((5, 4), ScaUnit) == (1, 1)
         @test IndexFunArrays.get_scale((6, 5), ScaNorm) == (0.2, 0.25)
         @test IndexFunArrays.get_scale((6, 5), ScaNorm) == (0.2, 0.25)
