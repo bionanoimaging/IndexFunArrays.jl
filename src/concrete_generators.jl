@@ -3,7 +3,7 @@ export Ctr,CtrCorner,CtrFFT,CtrFT,CtrMid,CtrEnd,CtrRFFT,CtrRFT
 export rr, rr2
 export xx, yy, zz, ee, tt, ramp
 export phiphi
-export idx, cpx, cpx_shift
+export idx, cpx, exp_ikx
 
 using LinearAlgebra
 # These are the type promotion rules, taken from float.jl but written in terms of types
@@ -185,14 +185,14 @@ function cpx(arr::AbstractArray{T, N}; offset=CtrFT, scale=ScaUnit, dims=ntuple(
 end
 
 # complex exponential for shifting
-function cpx_shift(::Type{T}, size::NTuple{N, Int}; shift_by= .-size.÷2, offset=CtrFT, dims=ntuple(+, N)) where {N,T}
+function exp_ikx(::Type{T}, size::NTuple{N, Int}; shift_by= .-size.÷2, offset=CtrFT, dims=ntuple(+, N)) where {N,T}
     exp.(dot.([(2pi*im).*shift_by], idx(T, size, offset=offset, scale=ScaFT, dims=dims)))
 end
-# values in the complex plane
-function cpx_shift(size::NTuple{N, Int}; shift_by=  .-size.÷2, offset=CtrFT, dims=ntuple(+, N)) where {N,T}
+
+function exp_ikx(size::NTuple{N, Int}; shift_by=  .-size.÷2, offset=CtrFT, dims=ntuple(+, N)) where {N,T}
     exp.(dot.([(2pi*im).*shift_by], idx(size, offset=offset, scale=ScaFT, dims=dims)))
 end
-function cpx_shift(arr::AbstractArray{T, N}; shift_by=  .-size.÷2, offset=CtrFT, dims=ntuple(+, N)) where {N,T}
+function exp_ikx(arr::AbstractArray{T, N}; shift_by=  .-size(arr).÷2, offset=CtrFT, dims=ntuple(+, N)) where {N,T}
     exp.(dot.([(2pi*im).*shift_by], idx(arr, offset=offset, scale=ScaFT, dims=dims)))
 end
 
