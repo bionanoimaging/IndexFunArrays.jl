@@ -3,8 +3,9 @@ export Ctr,CtrCorner,CtrFFT,CtrFT,CtrMid,CtrEnd,CtrRFFT,CtrRFT
 export rr, rr2
 export xx, yy, zz, ee, tt, ramp
 export phiphi
-export idx, cpx
+export idx, cpx, cpx_shift
 
+using LinearAlgebra
 # These are the type promotion rules, taken from float.jl but written in terms of types
 # see also 
 promote_type()
@@ -85,10 +86,10 @@ Sca
 
 get_scale(size, ::Type{ScaUnit}) = ntuple(_ -> one(Int), length(size))
 get_scale(size, ::Type{ScaNorm}) = 1 ./ (max.(size .- 1, 1)) 
-get_scale(size, ::Type{ScaFT}) = 0.5 ./ (max.(size .÷ 2, 1))
-get_scale(size, ::Type{ScaRFT}) = 0.5 ./ (max.(Base.setindex(size.÷ 2,size[1]-1,1), 1))
-get_scale(size, ::Type{ScaFTEdge}) = 1 ./ (max.(size .÷ 2, 1))  
-get_scale(size, ::Type{ScaRFTEdge}) = 1 ./ (max.(Base.setindex(size.÷ 2,size[1]-1,1), 1))
+get_scale(size, ::Type{ScaFT}) = 0.5 ./ (max.(size ./ 2, 1))
+get_scale(size, ::Type{ScaRFT}) = 0.5 ./ (max.(Base.setindex(size./ 2,size[1]-1,1), 1))
+get_scale(size, ::Type{ScaFTEdge}) = 1 ./ (max.(size ./ 2, 1))  
+get_scale(size, ::Type{ScaRFTEdge}) = 1 ./ (max.(Base.setindex(size./ 2,size[1]-1,1), 1))
 get_scale(size, t::Number) = ntuple(i -> t, length(size)) 
 get_scale(size, t::NTuple) = t 
 
@@ -181,6 +182,18 @@ function cpx(size::NTuple{N, Int}; offset=CtrFT, scale=ScaUnit, dims=ntuple(+, N
 end
 function cpx(arr::AbstractArray{T, N}; offset=CtrFT, scale=ScaUnit, dims=ntuple(+, N)) where {N,T}
     to_cpx.(idx(arr, offset=offset, scale=scale, dims=dims))
+end
+
+# complex exponential for shifting
+function cpx_shift(::Type{T}, size::NTuple{N, Int}; shift_by= .-size.÷2, offset=CtrFT, dims=ntuple(+, N)) where {N,T}
+    exp.(dot.([(2pi*im).*shift_by], idx(T, size, offset=offset, scale=ScaFT, dims=dims)))
+end
+# values in the complex plane
+function cpx_shift(size::NTuple{N, Int}; shift_by=  .-size.÷2, offset=CtrFT, dims=ntuple(+, N)) where {N,T}
+    exp.(dot.([(2pi*im).*shift_by], idx(size, offset=offset, scale=ScaFT, dims=dims)))
+end
+function cpx_shift(arr::AbstractArray{T, N}; shift_by=  .-size.÷2, offset=CtrFT, dims=ntuple(+, N)) where {N,T}
+    exp.(dot.([(2pi*im).*shift_by], idx(arr, offset=offset, scale=ScaFT, dims=dims)))
 end
 
 # we automatically generate the functions for rr2, rr, ...
