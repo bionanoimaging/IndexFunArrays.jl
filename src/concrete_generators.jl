@@ -6,6 +6,10 @@ export phiphi
 export idx, cpx, exp_ikx
 
 using LinearAlgebra
+
+
+const DEFAULT_T = Float64
+
 # These are the type promotion rules, taken from float.jl but written in terms of types
 # see also 
 promote_type()
@@ -163,8 +167,8 @@ function ramp(::Type{T}, dim::Int, dim_size::Int;
 end
 
 function ramp(dim::Int, dim_size::Int; offset=CtrFT, scale=ScaUnit)
-    default_T = Float64
-    ramp(default_T, dim, dim_size; offset=offset, scale=scale)
+    DEFAULT_T = Float64
+    ramp(DEFAULT_T, dim, dim_size; offset=offset, scale=scale)
 end
 
 # helper function for single index conversion
@@ -174,34 +178,35 @@ end
 
 # values in the complex plane
 function cpx(::Type{T}, size::NTuple{N, Int}; offset=CtrFT, scale=ScaUnit, dims=ntuple(+, N)) where {N,T}
-    to_cpx.(idx(T, size, offset=offset, scale=scale, dims=dims))
+    ig = idx(T, size, offset=offset, scale=scale, dims=dims).generator
+    f(x) = complex(ig(x)...)
+    return IndexFunArray(Complex{T}, f, size)
 end
 # values in the complex plane
 function cpx(size::NTuple{N, Int}; offset=CtrFT, scale=ScaUnit, dims=ntuple(+, N)) where {N,T}
-    to_cpx.(idx(size, offset=offset, scale=scale, dims=dims))
+    cpx(DEFAULT_T, size, offset=offset, scale=scale, dims=dims)
 end
 function cpx(arr::AbstractArray{T, N}; offset=CtrFT, scale=ScaUnit, dims=ntuple(+, N)) where {N,T}
-    to_cpx.(idx(arr, offset=offset, scale=scale, dims=dims))
+    cpx(T, size(arr), offset=offset, scale=scale, dims=dims)
 end
 
 # complex exponential for shifting
 function exp_ikx(::Type{T}, size::NTuple{N, Int}; shift_by= .-size.÷2, offset=CtrFT, dims=ntuple(+, N)) where {N,T}
-    exp.(dot.([(2pi*im).*shift_by], idx(T, size, offset=offset, scale=ScaFT, dims=dims)))
+    ig = idx(T, size, offset=offset, scale=ScaFT, dims=dims).generator
+    f(x) = exp(dot((2π*im .* shift_by), ig(x)))
+    return IndexFunArray(typeof(f(size)), f, size)
 end
 
 function exp_ikx(size::NTuple{N, Int}; shift_by=  .-size.÷2, offset=CtrFT, dims=ntuple(+, N)) where {N,T}
-    exp.(dot.([(2pi*im).*shift_by], idx(size, offset=offset, scale=ScaFT, dims=dims)))
+    exp_ikx(DEFAULT_T, size, shift_by=shift_by, offset=offset, dims=dims)
 end
 function exp_ikx(arr::AbstractArray{T, N}; shift_by=  .-size(arr).÷2, offset=CtrFT, dims=ntuple(+, N)) where {N,T}
-    exp.(dot.([(2pi*im).*shift_by], idx(arr, offset=offset, scale=ScaFT, dims=dims)))
+    exp_ikx(T, size(arr), shift_by=shift_by, offset=offset, dims=dims)
 end
 
 # we automatically generate the functions for rr2, rr, ...
 # We set the types for the arguments correctly in the default cases
 for F in generate_functions_expr() 
-    # fallback type of IndexFunArray
-    default_T = Float64
-
     # default functions with offset and scaling behavior
     @eval function $(F[1])(::Type{T}, size::NTuple{N, Int};
                            offset=CtrFT,
@@ -217,14 +222,14 @@ for F in generate_functions_expr()
     # change order of offset and scale
     @eval function $(F[1])(size::NTuple{N, Int}; 
                            offset=CtrFT, scale=ScaUnit, dims=ntuple(+, N)) where {N}
-        T = $default_T
+        T = $DEFAULT_T
         $(F[1])(T, size, scale=scale, offset=offset, dims=dims) 
     end
 
     # convenient wrapper to provide an array as input
     @eval function $(F[1])(arr::AbstractArray{T, N}; 
                            offset=CtrFT, scale=ScaUnit, dims=ntuple(+, N)) where {T, N}
-        T2 = default_type(T, $default_T)                   
+        T2 = default_type(T, $DEFAULT_T)                   
         $(F[1])(T2, size(arr), scale=scale, offset=offset)
     end
 
@@ -234,9 +239,6 @@ end
 
 # we automatically generate the functions for different windows like hanning 
 for F in generate_window_functions_expr() 
-    # fallback type of IndexFunArray
-    default_T = Float64
-
     # default functions with certain offset and scaling behavior
     @eval function $(F[1])(::Type{T}, size::NTuple{N, Int};
                            offset=CtrFT,
@@ -252,7 +254,7 @@ for F in generate_window_functions_expr()
     @eval function $(F[1])(size::NTuple{N, Int}; 
                            offset=CtrFT, 
                            scale=ScaFTEdge, border_in=0.8, border_out=1.0, dims=ntuple(+, N)) where{N} 
-        T = $default_T 
+        T = $DEFAULT_T 
         $(F[1])(T, size, scale=scale, offset=offset, border_in=border_in, border_out=border_out, dims=dims) 
     end
 
@@ -260,7 +262,7 @@ for F in generate_window_functions_expr()
     @eval function $(F[1])(arr::AbstractArray{T, N}; 
                            offset=CtrFT, 
                            scale=ScaFTEdge, border_in=0.8, border_out=1.0, dims=ntuple(+, N)) where{N, T} 
-        $(F[1])(default_type(T, $default_T), size(arr), scale=scale, offset=offset, border_in=border_in, border_out=border_out, dims=dims)
+        $(F[1])(default_type(T, $DEFAULT_T), size(arr), scale=scale, offset=offset, border_in=border_in, border_out=border_out, dims=dims)
     end
 
     @eval export $(F[1])
@@ -270,8 +272,6 @@ end
 # we automatically generate tuple functions
 # We set the types for the arguments correctly in the default cases
 for F in generate_tuple_functions_expr() 
-    # fallback type of IndexFunArray
-    default_T = Float64
     # default functions with offset and scaling behavior
     @eval function $(F[1])(::Type{T}, size::NTuple{N, Int};
                            offset=CtrFT,
@@ -287,14 +287,14 @@ for F in generate_tuple_functions_expr()
     # change order of offset and scale
     @eval function $(F[1])(size::NTuple{N, Int}; 
                            offset=CtrFT, scale=ScaUnit, dims=ntuple(+, N)) where {N}
-        T2 = $default_T
+        T2 = $DEFAULT_T
         $(F[1])(T2, size, scale=scale, offset=offset, dims=dims) 
     end
 
     # convenient wrapper to provide an array as input
     @eval function $(F[1])(arr::AbstractArray{T, N}; 
                            offset=CtrFT, scale=ScaUnit, dims=ntuple(+, N)) where {T, N}
-        T2 = default_type(T, $default_T)                   
+        T2 = default_type(T, $DEFAULT_T)                   
         $(F[1])(T2, size(arr), scale=scale, offset=offset, dims=dims)
     end
 
