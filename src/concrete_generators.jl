@@ -1,5 +1,6 @@
-export Sca,ScaUnit,ScaNorm,ScaFT,ScaFTEdge,ScaRFT,ScaRFTEdge
-export Ctr,CtrCorner,CtrFFT,CtrFT,CtrMid,CtrEnd,CtrRFFT,CtrRFT
+export Sca,ScaUnit,ScaNorm,ScaFT,ScaFTEdge
+# export ScaRFT,ScaRFTEdge
+export Ctr,CtrCorner,CtrFFT,CtrFT,CtrMid,CtrEnd, CtrRFFT,CtrRFT  # These do not work, as they need the size information about the real-space array
 export rr, rr2
 export xx, yy, zz, ee, tt, ramp
 export phiphi
@@ -91,9 +92,9 @@ Sca
 get_scale(size, ::Type{ScaUnit}) = ntuple(_ -> one(Int), length(size))
 get_scale(size, ::Type{ScaNorm}) = 1 ./ (max.(size .- 1, 1)) 
 get_scale(size, ::Type{ScaFT}) = 0.5 ./ (max.(size ./ 2, 1))
-get_scale(size, ::Type{ScaRFT}) = 0.5 ./ (max.(Base.setindex(size./ 2,size[1]-1,1), 1))
+# get_scale(size, ::Type{ScaRFT}) = 0.5 ./ (max.(Base.setindex(size./ 2,size[1]-1,1), 1))  # These scales are wrong! They need the information on the real-space size!
 get_scale(size, ::Type{ScaFTEdge}) = 1 ./ (max.(size ./ 2, 1))  
-get_scale(size, ::Type{ScaRFTEdge}) = 1 ./ (max.(Base.setindex(size./ 2,size[1]-1,1), 1))
+# get_scale(size, ::Type{ScaRFTEdge}) = 1 ./ (max.(Base.setindex(size./ 2,size[1]-1,1), 1))
 get_scale(size, t::Number) = ntuple(i -> t, length(size)) 
 get_scale(size, t::NTuple) = t 
 
@@ -191,17 +192,17 @@ function cpx(arr::AbstractArray{T, N}; offset=CtrFT, scale=ScaUnit, dims=ntuple(
 end
 
 # complex exponential for shifting
-function exp_ikx(::Type{T}, size::NTuple{N, Int}; shift_by= .-size.÷2, offset=CtrFT, dims=ntuple(+, N)) where {N,T}
-    ig = idx(T, size, offset=offset, scale=ScaFT, dims=dims).generator
+function exp_ikx(::Type{T}, size::NTuple{N, Int}; shift_by= .-size.÷2, offset=CtrFT, scale=ScaFT, dims=ntuple(+, N)) where {N,T}
+    ig = idx(T, size, offset=offset, scale=scale, dims=dims).generator
     f(x) = exp(dot((2π*im .* shift_by), ig(x)))
     return IndexFunArray(typeof(f(size)), f, size)
 end
 
-function exp_ikx(size::NTuple{N, Int}; shift_by=  .-size.÷2, offset=CtrFT, dims=ntuple(+, N)) where {N,T}
-    exp_ikx(DEFAULT_T, size, shift_by=shift_by, offset=offset, dims=dims)
+function exp_ikx(size::NTuple{N, Int}; shift_by=  .-size.÷2, offset=CtrFT, scale=ScaFT, dims=ntuple(+, N)) where {N,T}
+    exp_ikx(DEFAULT_T, size, shift_by=shift_by, offset=offset, scale=scale, dims=dims)
 end
-function exp_ikx(arr::AbstractArray{T, N}; shift_by=  .-size(arr).÷2, offset=CtrFT, dims=ntuple(+, N)) where {N,T}
-    exp_ikx(T, size(arr), shift_by=shift_by, offset=offset, dims=dims)
+function exp_ikx(arr::AbstractArray{T, N}; shift_by=  .-size(arr).÷2, offset=CtrFT, scale=ScaFT, dims=ntuple(+, N)) where {N,T}
+    exp_ikx(T, size(arr), shift_by=shift_by, offset=offset, scale=scale, dims=dims)
 end
 
 # we automatically generate the functions for rr2, rr, ...
