@@ -115,11 +115,13 @@ end
     @test cpx(Int8, (5, 2)) == Complex{Int8}[(-2-1im) (-2+0im);(-1-1im) (-1+0im);(0-1im) (0+0im);(1-1im) (1+0im);(2-1im) (2+0im)]
 
     @test cpx(randn((5,2))) == Complex{Int8}[(-2-1im) (-2+0im);(-1-1im) (-1+0im);(0-1im) (0+0im);(1-1im) (1+0im);(2-1im) (2+0im)]
+    @test cpx((5,2)) == Complex{Int8}[(-2-1im) (-2+0im);(-1-1im) (-1+0im);(0-1im) (0+0im);(1-1im) (1+0im);(2-1im) (2+0im)]
 end
 
 @testset "Test exp_ikx method" begin
     @test exp_ikx(Float32, (5,)) ≈ [0.3090170656104166 + 0.9510564931493436im,  -0.8090170163879177 - 0.5877852219942177im , 1.0+0.0im, -0.8090170163879177 + 0.5877852219942177im,  0.3090170656104166 - 0.9510564931493436im]
     @test exp_ikx(randn((2,2))) ≈ [1.0 (-1.0);-1.0 1.0]
+    @test exp_ikx(((2,2))) ≈ [1.0 (-1.0);-1.0 1.0]
 end
 
 @testset "Check dims argument" begin

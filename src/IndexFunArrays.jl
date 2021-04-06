@@ -75,10 +75,10 @@ Base.size(A::IndexFunArray) = A.size
 Base.similar(A::IndexFunArray, ::Type{T}, size::Dims) where {T} = IndexFunArray(A.generator, size)
 
 # calculate the entry according to the index
-Base.getindex(A::IndexFunArray{T,N}, I::Vararg{Int, N}) where {T,N} = return A.generator(I)
+Base.getindex(A::IndexFunArray{T,N}, I::Vararg{B, N}) where {T,N, B} = return A.generator(I)
 
 # not supported
-Base.setindex!(A::IndexFunArray{T,N}, v, I::Vararg{Int,N}) where {T,N} = begin 
+Base.setindex!(A::IndexFunArray{T,N}, v, I::Vararg{B,N}) where {T,N, B} = begin 
     error("Attempt to assign entries to IndexFunArray which is immutable.")
 end
 
