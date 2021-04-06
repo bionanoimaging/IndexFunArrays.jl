@@ -187,18 +187,18 @@ function cpx(arr::AbstractArray{T, N}; offset=CtrFT, scale=ScaUnit, dims=ntuple(
 end
 
 # complex exponential for shifting
-function exp_ikx(::Type{T}, size::NTuple{N, Int}; shift_by= .-size.÷2, offset=CtrFT, scale=ScaFT, dims=ntuple(+, N)) where {N,T}
-    scale = get_scale(size, scale)
-    offset = get_offset(size, offset)
+function exp_ikx(::Type{T}, size::NTuple{N, Int}; shift_by=size.÷2, offset=CtrFT, scale=ScaFT, dims=ntuple(+, N)) where {N,T}
+    scale = T.(get_scale(size, scale))
+    offset = T.(get_offset(size, offset))
     finds(x) = (scale .* (x .- offset))
-    f(x) = cispi(dot((2 .* shift_by), finds(x)))
+    f(x) = cispi(dot((2 .* T.(shift_by)), finds(x)))
     return IndexFunArray(typeof(f(size)), f, size)
 end
 
-function exp_ikx(size::NTuple{N, Int}; shift_by=  .-size.÷2, offset=CtrFT, scale=ScaFT, dims=ntuple(+, N)) where {N,T}
+function exp_ikx(size::NTuple{N, Int}; shift_by=size.÷2, offset=CtrFT, scale=ScaFT, dims=ntuple(+, N)) where {N,T}
     exp_ikx(DEFAULT_T, size, shift_by=shift_by, offset=offset, scale=scale, dims=dims)
 end
-function exp_ikx(arr::AbstractArray{T, N}; shift_by=  .-size(arr).÷2, offset=CtrFT, scale=ScaFT, dims=ntuple(+, N)) where {N,T}
+function exp_ikx(arr::AbstractArray{T, N}; shift_by=size(arr).÷2, offset=CtrFT, scale=ScaFT, dims=ntuple(+, N)) where {N,T}
     exp_ikx(T, size(arr), shift_by=shift_by, offset=offset, scale=scale, dims=dims)
 end
 
