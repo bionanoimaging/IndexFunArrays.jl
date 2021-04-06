@@ -168,7 +168,6 @@ function ramp(::Type{T}, dim::Int, dim_size::Int;
 end
 
 function ramp(dim::Int, dim_size::Int; offset=CtrFT, scale=ScaUnit)
-    DEFAULT_T = Float64
     ramp(DEFAULT_T, dim, dim_size; offset=offset, scale=scale)
 end
 
@@ -189,8 +188,10 @@ end
 
 # complex exponential for shifting
 function exp_ikx(::Type{T}, size::NTuple{N, Int}; shift_by= .-size.÷2, offset=CtrFT, scale=ScaFT, dims=ntuple(+, N)) where {N,T}
-    ig = idx(T, size, offset=offset, scale=scale, dims=dims).generator
-    f(x) = exp(dot((2π*im .* shift_by), ig(x)))
+    scale = get_scale(size, scale)
+    offset = get_offset(size, offset)
+    finds(x) = (scale .* (x .- offset))
+    f(x) = cispi(dot((2 .* shift_by), finds(x)))
     return IndexFunArray(typeof(f(size)), f, size)
 end
 
