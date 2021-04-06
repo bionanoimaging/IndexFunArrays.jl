@@ -172,10 +172,6 @@ function ramp(dim::Int, dim_size::Int; offset=CtrFT, scale=ScaUnit)
     ramp(DEFAULT_T, dim, dim_size; offset=offset, scale=scale)
 end
 
-# helper function for single index conversion
-function to_cpx(index::NTuple{N,T}) where {N,T}
-    complex(index...)
-end
 
 # values in the complex plane
 function cpx(::Type{T}, size::NTuple{N, Int}; offset=CtrFT, scale=ScaUnit, dims=ntuple(+, N)) where {N,T}
