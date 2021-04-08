@@ -2,6 +2,10 @@ using Test
 using Random
 
 using IndexFunArrays
+using BenchmarkTools
+
+BenchmarkTools.DEFAULT_PARAMETERS.samples = 2
+BenchmarkTools.DEFAULT_PARAMETERS.evals = 2
 
 include("test_center_scaling.jl")
 include("constructors.jl")
@@ -30,5 +34,7 @@ end
     @test_throws ErrorException (a[1] = 1) 
 end
 
+
+include("performance_tests.jl")
 
 return
