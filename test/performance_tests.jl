@@ -48,6 +48,7 @@
         end
 
         f((256, 256), ComplexF64)
+        f((256, 256), ComplexF32)
     end
 
     @testset "cpx performance" begin
