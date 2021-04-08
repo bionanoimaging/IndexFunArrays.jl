@@ -160,8 +160,8 @@ function ramp(::Type{T}, dim::Int, dim_size::Int;
     offset=CtrFT, scale=ScaUnit) where {T}
     size = single_dim_size(dim,dim_size)
     offset = get_offset(size, offset)
-    scale = get_scale(size, scale)
-    f = ((x) -> scale[dim] .* (x[dim] .- offset[dim]))
+    scale_n = get_scale(size, scale)
+    f = ((x) -> scale_n[dim] .* (x[dim] .- offset[dim]))
     IndexFunArray(T, f, size) 
 end
 
@@ -186,9 +186,9 @@ end
 
 # complex exponential for shifting
 function exp_ikx(::Type{T}, size::NTuple{N, Int}; shift_by=size.÷2, offset=CtrFT, scale=ScaFT, dims=ntuple(+, N)) where {N,T}
-    scale = T.(get_scale(size, scale))
+    scale_n = T.(get_scale(size, scale))
     offset = T.(get_offset(size, offset))
-    finds(x) = (scale .* (x .- offset))
+    finds(x) = (scale_n .* (x .- offset))
     f(x) = cis(dot((2π .* T.(.-shift_by)), finds(x)))
     return IndexFunArray(typeof(f(size)), f, size)
 end
