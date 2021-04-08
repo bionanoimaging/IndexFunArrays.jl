@@ -189,7 +189,7 @@ function exp_ikx(::Type{T}, size::NTuple{N, Int}; shift_by=size.÷2, offset=CtrF
     scale_n = T.(get_scale(size, scale))
     offset = T.(get_offset(size, offset))
     finds(x) = (scale_n .* (x .- offset))
-    f(x) = cis(dot((2π .* T.(.-shift_by)), finds(x)))
+    f(x) = cis(dot(T.(2π .* (.-shift_by)), finds(x)))
     return IndexFunArray(typeof(f(size)), f, size)
 end
 
