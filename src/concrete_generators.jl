@@ -161,8 +161,6 @@ function ramp(::Type{T}, dim::Int, dim_size::Int;
     size = single_dim_size(dim,dim_size)
     offset = get_offset(size, offset)
     scale = get_scale(size, scale)
-    # @show scale = map(i -> zero(i), scale_init)
-    # scale = ntuple(i -> i ∈ dims ? scale_init[i] : 0, dim)
     f = ((x) -> scale[dim] .* (x[dim] .- offset[dim]))
     IndexFunArray(T, f, size) 
 end
@@ -212,8 +210,7 @@ for F in generate_functions_expr()
                            dims=ntuple(+, N)) where{N, T} 
         offset = get_offset(size, offset)
         scale_init = get_scale(size, scale)
-        scale = map(i -> zero(i), scale_init)
-        scale = ntuple(i -> i ∈ dims ? scale_init[i] : 0, N)
+        scale = ntuple(i -> i ∈ dims ? scale_init[i] : zero(scale_init[1]), N)
         IndexFunArray(T, $(F[2]), size) 
     end
     
@@ -242,8 +239,7 @@ for F in generate_window_functions_expr()
                            offset=CtrFT,
                            scale=ScaFTEdge, border_in=0.8, border_out=1.0, dims=ntuple(+, N)) where{N, T} 
         scale_init = get_scale(size, scale)
-        scale = map(i -> zero(i), scale_init)
-        scale = ntuple(i -> i ∈ dims ? scale_init[i] : 0, N)
+        scale = ntuple(i -> i ∈ dims ? scale_init[i] : zero(scale_init[1]), N)
         offset = get_offset(size, offset)
         IndexFunArray(T, $(F[2]), size) 
     end
@@ -277,8 +273,7 @@ for F in generate_tuple_functions_expr()
         T2 = typeof(T.(size))
         offset = get_offset(size, offset)
         scale_init = get_scale(size, scale)
-        scale = map(i -> zero(i), scale_init)
-        scale = ntuple(i -> i ∈ dims ? scale_init[i] : 0, N)
+        scale = ntuple(i -> i ∈ dims ? scale_init[i] : zero(scale_init[1]), N)
         IndexFunArray(T2, $(F[2]), size) 
     end
     
