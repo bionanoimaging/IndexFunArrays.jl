@@ -216,7 +216,7 @@ function gaussian(size::NTuple{N, Int}; sigma=1.0, offset=CtrFT, scale=ScaUnit, 
 end
 
 function gaussian(arr::AbstractArray{T, N}; sigma=1.0, offset=CtrFT, scale=ScaUnit, dims=ntuple(+, N)) where {N,T}
-    return exp_sqr(arr, scale = T.(get_scale(size, scale) ./ (2 .* sigma)),  offset=offset, dims = dims)
+    return exp_sqr(arr, scale = T.(get_scale(size(arr), scale) ./ (2 .* sigma)),  offset=offset, dims = dims)
 end
 
 function normal(::Type{T}, size::NTuple{N, Int}; sigma=1.0, offset=CtrFT, scale=ScaUnit, dims=ntuple(+, N)) where {N,T}
@@ -228,7 +228,7 @@ function normal(size::NTuple{N, Int}; sigma=1.0, offset=CtrFT, scale=ScaUnit, di
 end
 
 function normal(arr::AbstractArray{T, N}; sigma=1.0, offset=CtrFT, scale=ScaUnit, dims=ntuple(+, N)) where {N,T}
-    return exp_sqr_norm(arr, scale = T.(get_scale(size, scale) ./ (2 .* sigma .* sigma)),  offset=offset, dims = dims)
+    return exp_sqr_norm(arr, scale = T.(get_scale(size(arr), scale) ./ (2 .* sigma .* sigma)),  offset=offset, dims = dims)
 end
 
 # complex exponential for shifting
