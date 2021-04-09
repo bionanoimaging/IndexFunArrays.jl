@@ -194,11 +194,13 @@ function cpx(arr::AbstractArray{T, N}; offset=CtrFT, scale=ScaUnit, dims=ntuple(
 end
 
 function exp_ikx(::Type{T}, size::NTuple{N, Int}; shift_by=size.÷2, offset=CtrFT, scale=ScaFT, dims=ntuple(+, N)) where {N,T}
-    return exp_is(T, size, scale = T.(-2pi .* get_scale(size, scale) .* shift_by), offset=offset, dims = dims)
+    myscale = T.(-2pi .* get_scale(size, scale) .* shift_by)
+    return exp_is(T, size, scale = myscale, offset=offset, dims = dims)
 end
 
 function exp_ikx(size::NTuple{N, Int}; shift_by=size.÷2, offset=CtrFT, scale=ScaFT, dims=ntuple(+, N)) where {N,T}
-    return exp_is(complex(DEFAULT_T), size, scale = DEFAULT_T.(-2pi .* get_scale(size, scale) .* shift_by), offset=offset, dims = dims)
+    myscale = DEFAULT_T.(-2pi .* get_scale(size, scale) .* shift_by)
+    return exp_is(complex(DEFAULT_T), size, scale = myscale, offset=offset, dims = dims)
 end
 
 function exp_ikx(arr::AbstractArray{T, N}; shift_by=size(arr).÷2, offset=CtrFT, scale=ScaFT, dims=ntuple(+, N)) where {N,T}
