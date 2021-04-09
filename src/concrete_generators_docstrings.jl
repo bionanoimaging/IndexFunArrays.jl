@@ -4,7 +4,7 @@
         dims=ntuple(+, N),
         scale=ScaUnit)
 
-See `rr2` for all options.
+See `rr2` for a description of all options.
 
 Returns basically the `CartesianIndices` but as a tuple and accounting for optional
 `scale`, `offset` and data type.
@@ -39,7 +39,7 @@ idx
         dims=ntuple(+, N),
         scale=ScaUnit)
 
-See `rr2` for all options.
+See `rr2` for a description of all options.
 
 Returns an IndexFunArray where each positon corresponds to a complex value
 according to its position. The parameters `offset` and `scale` can be used
@@ -202,7 +202,7 @@ rr2
         dims=ntuple(+, N),
         scale=ScaUnit)
 
-See `rr2` for all options.
+See `rr2` for a description of all options.
 
 # Examples
 ```jldoctest
@@ -234,7 +234,8 @@ rr
         scale=ScaUnit)
 
 A distance ramp along first dimension.
-```jldoctest
+See `rr2` for a description of all options.
+    ```jldoctest
 julia> xx((4,4))
 4×4 IndexFunArray{Float64, 2, IndexFunArrays.var"#14#15"{Float64, Tuple{Float64, Float64}, Tuple{Int64, Int64}}}:
  -2.0  -2.0  -2.0  -2.0
@@ -258,7 +259,8 @@ xx
         scale=ScaUnit)
 
 A distance ramp along second dimension.
-```jldoctest
+See `rr2` for a description of all options.
+    ```jldoctest
 julia> yy((4,4))
 4×4 IndexFunArray{Float64, 2, IndexFunArrays.var"#19#20"{Float64, Tuple{Float64, Float64}, Tuple{Int64, Int64}}}:
  -2.0  -1.0  0.0  1.0
@@ -283,7 +285,8 @@ yy
         scale=ScaUnit)
 
 A distance ramp along third dimension.
-```jldoctest
+See `rr2` for a description of all options.
+    ```jldoctest
 julia> zz((1, 1, 4))
 1×1×4 IndexFunArray{Float64, 3, IndexFunArrays.var"#24#25"{Float64, Tuple{Float64, Float64, Float64}, Tuple{Int64, Int64, Int64}}}:
 [:, :, 1] =
@@ -314,7 +317,8 @@ zz
         scale=ScaUnit)
 
 A distance ramp along forth (element) dimension. This dimension is often used as a color or wavelength channel.
-```jldoctest
+See `rr2` for a description of all options.
+    ```jldoctest
 julia> ee((1, 1, 1, 4))
 1×1×1×4 IndexFunArray{Float64, 4, IndexFunArrays.var"#60#63"{Float64, NTuple{4, Float64}}}:
 [:, :, 1, 1] =
@@ -345,7 +349,8 @@ ee
         scale=ScaUnit)
 
 A distance ramp along fifth (time) dimension.
-```jldoctest
+See `rr2` for a description of all options.
+    ```jldoctest
 julia> tt((1, 1, 1, 1, 4))
 1×1×1×1×4 IndexFunArray{Float64, 5, IndexFunArrays.var"#69#72"{Float64, NTuple{5, Float64}}}:
 [:, :, 1, 1, 1] =
@@ -376,7 +381,8 @@ tt
         scale=ScaUnit)
 
 An azimutal spiral phase ramp using atan(). The azimuthal phase spans dimensions 1 and 2.
-```jldoctest
+See `rr2` for a description of all options.
+    ```jldoctest
 julia> phiphi((5, 5))
 5×5 IndexFunArray{Float64, 2, IndexFunArrays.var"#29#30"{Float64, Tuple{Float64, Float64}, Tuple{Int64, Int64}}}:
  -2.35619   -2.67795   3.14159  2.67795   2.35619
@@ -404,7 +410,7 @@ Generates a dim-dimensional ramp of size `dim_size` to be used for broadcasting 
 `dim` highest dimension of the oriented array to be generated. This is also the ramp direction.
 `dim_size` size along this dimension.
 
-For details about offset and scale see rr2.
+For details about offset and scale and dims see rr2.
 ```jldoctest
 julia> ramp(Float32, 1, 7; offset=(2,))
 7-element IndexFunArray{Float32, 1, IndexFunArrays.var"#434#435"{Tuple{Int64}, Tuple{Int64}, Int64}}:
@@ -423,6 +429,182 @@ This is a wrapper for
 
 """
 ramp
+
+"""
+    delta([T=Float64], size::NTuple{N, Int};
+        offset=CtrFT,
+        dims=ntuple(+, N),
+        scale=ScaUnit)
+
+A `delta` peak positioned at offset. See `rr2()` for a description of all options. Note that `scale` does not influence the result.
+```jldoctest
+julia> delta((5,5))
+5×5 IndexFunArray{Float64, 2, IndexFunArrays.var"#79#81"{Float64, Tuple{Float64, Float64}}}:
+ 0.0  0.0  0.0  0.0  0.0
+ 0.0  0.0  0.0  0.0  0.0
+ 0.0  0.0  1.0  0.0  0.0
+ 0.0  0.0  0.0  0.0  0.0
+ 0.0  0.0  0.0  0.0  0.0
+
+julia> delta((6,6))
+6×6 IndexFunArray{Float64, 2, IndexFunArrays.var"#79#81"{Float64, Tuple{Float64, Float64}}}:
+ 0.0  0.0  0.0  0.0  0.0  0.0
+ 0.0  0.0  0.0  0.0  0.0  0.0
+ 0.0  0.0  0.0  0.0  0.0  0.0
+ 0.0  0.0  0.0  1.0  0.0  0.0
+ 0.0  0.0  0.0  0.0  0.0  0.0
+ 0.0  0.0  0.0  0.0  0.0  0.0
+
+ julia> delta((5,5),offset=CtrCorner)
+ 5×5 IndexFunArray{Float64, 2, IndexFunArrays.var"#79#81"{Float64, Tuple{Float64, Float64}}}:
+  1.0  0.0  0.0  0.0  0.0
+  0.0  0.0  0.0  0.0  0.0
+  0.0  0.0  0.0  0.0  0.0
+  0.0  0.0  0.0  0.0  0.0
+  0.0  0.0  0.0  0.0  0.0
+  
+```
+
+---
+    delta(arr::AbstractArray; offset=CtrFt, scaling=ScaUnit)
+
+This is a wrapper for 
+`delta(eltype(arr), size(arr), scaling=scaling, offset=offset)`.
+"""
+delta
+
+"""
+    gaussian([T=Float64], size::NTuple{N, Int};
+        offset=CtrFT,
+        sigma=1.0,
+        dims=ntuple(+, N),
+        scale=ScaUnit)
+
+A gaussian peak positioned at offset. Note that the gaussian is NOT normalized by its integral, but by its maximum.
+For a version with a normalized integral, see `normal`.
+
+# Arguments:
+* `sigma`: the (standard deviation) width of the Gaussian
+* `offset`: the center position of the Gaussian. You can use a tuple or the indicators `CtrCorner`, `CtrEnd`, `CtrFT`, `CtrRFT` etc.
+* `scale`: the scale of the pixel. By default `ScaUnit` is assumed
+* `dims`: the dimensions over which to apply this function to.
+```jldoctest
+julia> gaussian((5,5))
+5×5 IndexFunArray{Float64, 2, IndexFunArrays.var"#100#102"{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}}}:
+ 0.0183156  0.082085  0.135335  0.082085  0.0183156
+ 0.082085   0.367879  0.606531  0.367879  0.082085
+ 0.135335   0.606531  1.0       0.606531  0.135335
+ 0.082085   0.367879  0.606531  0.367879  0.082085
+ 0.0183156  0.082085  0.135335  0.082085  0.0183156
+
+julia> gaussian((6,6), sigma=5.0)
+ 6×6 IndexFunArray{Float64, 2, IndexFunArrays.var"#100#102"{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}}}:
+  0.165299  0.272532  0.367879  0.40657   0.367879  0.272532
+  0.272532  0.449329  0.606531  0.67032   0.606531  0.449329
+  0.367879  0.606531  0.818731  0.904837  0.818731  0.606531
+  0.40657   0.67032   0.904837  1.0       0.904837  0.67032
+  0.367879  0.606531  0.818731  0.904837  0.818731  0.606531
+  0.272532  0.449329  0.606531  0.67032   0.606531  0.449329
+
+julia> gaussian(Float32,(5,5),offset=CtrCorner)
+  5×5 IndexFunArray{Float32, 2, IndexFunArrays.var"#100#102"{Float32, Tuple{Float64, Float64}, Tuple{Float32, Float32}}}:
+   1.0          0.606531     0.135335    0.011109    0.000335463
+   0.606531     0.367879     0.082085    0.00673795  0.000203468
+   0.135335     0.082085     0.0183156   0.00150344  4.53999f-5
+   0.011109     0.00673795   0.00150344  0.00012341  3.72665f-6
+   0.000335463  0.000203468  4.53999f-5  3.72665f-6  1.12535f-7
+  
+```
+
+---
+gaussian(arr::AbstractArray; offset=CtrFt, sigma=1.0, scaling=ScaUnit)
+
+This is a wrapper for 
+`gaussian(eltype(arr), size(arr), sigma=sigma, scaling=scaling, offset=offset)`.
+"""
+gaussian
+
+"""
+    normal([T=Float64], size::NTuple{N, Int};
+        offset=CtrFT,
+        sigma=1.0,
+        dims=ntuple(+, N),
+        scale=ScaUnit)
+
+A gaussian peak positioned at offset. Note that this normal distribution (Gaussian) is normalized by its integral.
+For a version with normalized to the maximum, see `gaussian`.
+
+# Arguments:
+* `sigma`: the (standard deviation) width of the Gaussian
+* `offset`: the center position of the Gaussian. You can use a tuple or the indicators `CtrCorner`, `CtrEnd`, `CtrFT`, `CtrRFT` etc.
+* `scale`: the scale of the pixel. By default `ScaUnit` is assumed
+* `dims`: the dimensions over which to apply this function to.
+```jldoctest
+julia> normal((5,5))
+5×5 IndexFunArray{Float64, 2, IndexFunArrays.var"#107#109"{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}}}:
+ 0.00291502  0.0130642  0.0215393  0.0130642  0.00291502
+ 0.0130642   0.0585498  0.0965324  0.0585498  0.0130642
+ 0.0215393   0.0965324  0.159155   0.0965324  0.0215393
+ 0.0130642   0.0585498  0.0965324  0.0585498  0.0130642
+ 0.00291502  0.0130642  0.0215393  0.0130642  0.00291502
+
+julia> sum(normal((5,5)))
+ 0.9818147610543744
+
+julia> sum(normal((25,25)))
+ 1.000000010701151
+
+julia> sum(normal((55,55), sigma=(5.0,2.0)))
+0.9999999639340563
+```
+
+---
+normal(arr::AbstractArray; offset=CtrFt, sigma=1.0, scaling=ScaUnit)
+
+This is a wrapper for 
+`normal(eltype(arr), size(arr), sigma=sigma, scaling=scaling, offset=offset)`.
+"""
+normal
+
+"""
+    exp_ikx([T=Float64], size::NTuple{N, Int};
+        offset=CtrFT,
+        shift_by=size.÷2
+        dims=ntuple(+, N),
+        scale=ScaFT)
+
+A complex-valued phase ramp according to `exp(-2pi i <k,x>)`. If applied as a multiplicative factor in Fourier space,
+it will lead to a shift of `x` pixels in real space. Note that this effect is actually realized by a change to the scaling parameter.
+The default shift is `size.÷2` which corresponds to `CtrFT`, however, the Ctr... arguments cannot be used for `shift_by`.
+
+# Arguments:
+* `shift_by`: the amount to shift by in real space.
+* `offset`: the center position of the Gaussian. You can use a tuple or the indicators `CtrCorner`, `CtrEnd`, `CtrFT`, `CtrRFT` etc.
+* `scale`: the scale of the pixel. By default `ScaUnit` is assumed
+* `dims`: the dimensions over which to apply this function to.
+```jldoctest
+julia> a = rr((4,3),offset=CtrCorner)
+4×3 IndexFunArray{Float64, 2, IndexFunArrays.var"#37#39"{Float64, Tuple{Float64, Float64}, Tuple{Int64, Int64}}}:
+ 0.0  1.0      2.0
+ 1.0  1.41421  2.23607
+ 2.0  2.23607  2.82843
+ 3.0  3.16228  3.60555
+
+julia> using FourierTools; real(iffts(ffts(a).*exp_ikx(a, shift_by=(2.0,1.0))))
+4×3 Matrix{Float64}:
+ 2.82843   2.0          2.23607
+ 3.60555   3.0          3.16228
+ 2.0      -2.22045e-16  1.0
+ 2.23607   1.0          1.41421
+```
+
+---
+exp_ikx(arr::AbstractArray; offset=CtrFt, shift_by==size(arr).÷2, scaling=ScaUnit)
+
+This is a wrapper for 
+`exp_ikx(eltype(arr), size(arr), shift_by=shift_by, scaling=scaling, offset=offset)`.
+"""
+exp_ikx
 
 """
     window_linear([T=Float64], size::NTuple; 
