@@ -108,6 +108,7 @@ function generate_functions_expr()
     x_expr4 = :(scale[4] .* (x[4] .- offset[4]))
     x_expr5 = :(scale[5] .* (x[5] .- offset[5]))
     x_expr6 = :(prod(x .== offset))
+    x_expr7 = :(cis(dot((x .- offset), scale)))
 
     functions = [
         (:(rr2), :(x -> T(sum(abs2.($x_expr))))),
@@ -119,6 +120,7 @@ function generate_functions_expr()
         (:(tt),  :(x -> T($x_expr5))),
         (:(delta),  :(x -> T($x_expr6))),
         (:(phiphi), :(x -> T(atan.($x_expr2, $x_expr1)))),  # this is the arcus tangens of y/x yielding a spiral phase ramp
+        (:(exp_is),  :(x -> T($x_expr7))),  # exp(2pi i s (x-o)) # by modifying s, this becomes exp(i kx)
     ]
     return functions
 end
@@ -184,7 +186,20 @@ function cpx(arr::AbstractArray{T, N}; offset=CtrFT, scale=ScaUnit, dims=ntuple(
     cpx(T, size(arr), offset=offset, scale=scale, dims=dims)
 end
 
+function exp_ikx(::Type{T}, size::NTuple{N, Int}; shift_by=size.÷2, offset=CtrFT, scale=ScaFT, dims=ntuple(+, N)) where {N,T}
+    return exp_is(T, size, scale = T.(-2pi .* get_scale(size, scale) .* shift_by), offset=offset, dims = dims)
+end
+
+function exp_ikx(size::NTuple{N, Int}; shift_by=size.÷2, offset=CtrFT, scale=ScaFT, dims=ntuple(+, N)) where {N,T}
+    return exp_is(complex(DEFAULT_T), size, scale = DEFAULT_T.(-2pi .* get_scale(size, scale) .* shift_by), offset=offset, dims = dims)
+end
+
+function exp_ikx(arr::AbstractArray{T, N}; shift_by=size(arr).÷2, offset=CtrFT, scale=ScaFT, dims=ntuple(+, N)) where {N,T}
+    return exp_is(complex(typeof(arr[1])),size(arr), scale = T.(-2pi .* get_scale(size(arr), scale) .* shift_by),  offset=offset, dims = dims)
+end
+
 # complex exponential for shifting
+#=
 function exp_ikx(::Type{T}, size::NTuple{N, Int}; shift_by=size.÷2, offset=CtrFT, scale=ScaFT, dims=ntuple(+, N)) where {N,T}
     scale_n = T.(get_scale(size, scale))
     offset = T.(get_offset(size, offset))
@@ -199,6 +214,7 @@ end
 function exp_ikx(arr::AbstractArray{T, N}; shift_by=size(arr).÷2, offset=CtrFT, scale=ScaFT, dims=ntuple(+, N)) where {N,T}
     exp_ikx(T, size(arr), shift_by=shift_by, offset=offset, scale=scale, dims=dims)
 end
+=#
 
 # we automatically generate the functions for rr2, rr, ...
 # We set the types for the arguments correctly in the default cases
