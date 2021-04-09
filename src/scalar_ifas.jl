@@ -33,15 +33,44 @@ end
 # we automatically generate the functions for rr2, rr, ...
 # We set the types for the arguments correctly in the default cases
 for F in generate_functions_expr() 
+
+    # default functions with offset and scaling behavior
+    @eval function $(Symbol(F[1], :(base)))(::Type{T}, size::NTuple{N, Int},
+                           offset,
+                           scale,
+                           dims) where{N, T} 
+        offset = get_offset(size, offset)
+        scale_init = get_scale(size, scale)
+        scale = ntuple(i -> i ∈ dims ? scale_init[i] : zero(scale_init[1]), N)
+
+        IndexFunArray(T, $(F[2]), size) 
+    end
+
+    # default functions with offset and scaling behavior
+    @eval function $(Symbol(F[1], :(base)))(::Type{T}, size::NTuple{N, Int},
+                           offset::Vector,
+                           scale::Vector,
+                           dims) where{N, T}
+        offsets_a = get_offset.(Ref(size), offset)
+        scales_a = get_scale.(Ref(size), scale)
+        
+        g(x) = begin
+            res = zero(T)
+            for (offset, scale) in zip(offsets_a, scales_a)
+                res += $(F[2])(x)
+            end
+            return res
+        end
+        IndexFunArray(T, g, size) 
+    end
+
+
     # default functions with offset and scaling behavior
     @eval function $(F[1])(::Type{T}, size::NTuple{N, Int};
                            offset=CtrFT,
                            scale=ScaUnit,
                            dims=ntuple(+, N)) where{N, T} 
-        offset = get_offset(size, offset)
-        scale_init = get_scale(size, scale)
-        scale = ntuple(i -> i ∈ dims ? scale_init[i] : zero(scale_init[1]), N)
-        IndexFunArray(T, $(F[2]), size) 
+        $(Symbol(F[1], :(base)))(T, size, offset, scale, dims) 
     end
     
     # change order of offset and scale
@@ -57,8 +86,6 @@ for F in generate_functions_expr()
         T2 = default_type(T, $DEFAULT_T)                   
         $(F[1])(T2, size(arr), scale=scale, offset=offset)
     end
-
-
 
     @eval export $(F[1])
 end 

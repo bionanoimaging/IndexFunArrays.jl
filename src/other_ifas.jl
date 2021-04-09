@@ -1,6 +1,6 @@
 export idx, cpx, exp_ikx
 export gaussian, normal
-
+export ramp
 
 function ramp(::Type{T}, dim::Int, dim_size::Int;
     offset=CtrFT, scale=ScaUnit) where {T}

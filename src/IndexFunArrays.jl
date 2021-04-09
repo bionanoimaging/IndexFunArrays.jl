@@ -6,6 +6,9 @@ using LinearAlgebra
 export IndexFunArray
 export selectsizes 
 
+const DEFAULT_T = Float64
+
+
 include("utils.jl")
 include("other_ifas.jl")
 # include docstrings
@@ -17,7 +20,6 @@ include("ifa_type.jl")
 include("scaling_offset_types.jl")
 
 
-const DEFAULT_T = Float64
 
 # These are the type promotion rules, taken from float.jl but written in terms of types
 # see also 
