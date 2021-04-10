@@ -260,8 +260,6 @@ end
 
 curry(f, x) = (xs...) -> f(x, xs...)   # just a shorthand to remove x
 
-sfsdf 234l 23 ss
-
 # we automatically generate the functions for rr2, rr, ...
 # We set the types for the arguments correctly in the default cases
 for F in generate_functions_expr() 

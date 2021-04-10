@@ -1,7 +1,7 @@
 module IndexFunArrays
 
 using LinearAlgebra
-
+using Base.Iterators
 
 export IndexFunArray
 export selectsizes 

@@ -29,7 +29,19 @@ function generate_functions_expr()
     return functions
 end
 
+function wrap_fkt(f)
+    return (idx, offset, scale) -> f(idx)
+end
 
+function wrap_zipped(g)
+    return (idx, mytuple) -> g(idx,mytuple...)
+end
+
+curry(f, x) = (xs...) -> f(x, xs...)   # just a shorthand to remove x
+
+mat_to_tvec = (v) -> [Tuple(v[:,n]) for n in 1:size(v,2)] # converts a 2d matrix to a Vector of Tuples
+
+IterType = Union{NTuple{N,Tuple} where N, Vector, Base.Iterators.Repeated}
 # we automatically generate the functions for rr2, rr, ...
 # We set the types for the arguments correctly in the default cases
 for F in generate_functions_expr() 
@@ -46,7 +58,8 @@ for F in generate_functions_expr()
         IndexFunArray(T, $(F[2]), size) 
     end
 
-    # default functions with offset and scaling behavior
+    #=
+    # a version (by Felix) that allows a Vector as input
     @eval function $(Symbol(F[1], :(base)))(::Type{T}, size::NTuple{N, Int},
                            offset::Vector,
                            scale::Vector,
@@ -63,14 +76,44 @@ for F in generate_functions_expr()
         end
         IndexFunArray(T, g, size) 
     end
+    =#
+    @eval function $(F[1])(::Type{T}, size::NTuple{N, Int},
+        offset::IterType,   # a version that supports an iterable collection of tuples for offset and scale 
+        scale::IterType,
+        dims=ntuple(+, N);
+        accumulator = sum) where{N, T} 
+        print("Dispatch TupleTuple\n")
+        w = (x, offset, scale) -> $(F[2])(x) # adds offset and scale as requires parameters to the expression
+        # the line below makes a function only depending on the index position but iterating over both, offsets and scales
+        fkt = (idx) -> accumulator(curry(wrap_zipped(w),idx),zip(offset,scale))
+        IndexFunArray(T, fkt, size) 
+    end
 
+    @eval function $(F[1])(::Type{T}, size::NTuple{N, Int},
+        offset::IterType,   # a version that supports an iterable collection of tuples for offset and scale 
+        scale=ScaUnit,
+        dims=ntuple(+, N);
+        accumulator = sum) where{N, M, T} 
+
+        $(F[1])(T, size, offset, repeated(scale), dims; accumulator = accumulator)
+    end
+
+    @eval function $(F[1])(::Type{T}, size::NTuple{N, Int},
+        offset,   # a version that supports an iterable collection of tuples for offset and scale 
+        scale::IterType,
+        dims=ntuple(+, N);
+        accumulator = sum) where{N, M, T} 
+
+        $(F[1])(T, size, repeated(offset), scale, dims; accumulator = accumulator)
+    end
 
     # default functions with offset and scaling behavior
     @eval function $(F[1])(::Type{T}, size::NTuple{N, Int};
                            offset=CtrFT,
                            scale=ScaUnit,
                            dims=ntuple(+, N)) where{N, T} 
-        $(Symbol(F[1], :(base)))(T, size, offset, scale, dims) 
+        $(F[1])(T, size, offset, scale, dims) 
+        # $(Symbol(F[1], :(base)))(T, size, offset, scale, dims) 
     end
     
     # change order of offset and scale
