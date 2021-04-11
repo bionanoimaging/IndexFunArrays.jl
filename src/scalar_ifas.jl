@@ -46,7 +46,8 @@ end
 curry(f, x) = (xs...) -> f(x, xs...)   # just a shorthand to remove x
 
 function cast_iter(vals::Matrix)
-    axes(vals, 2)
+    Tuple(Tuple(vals[:,n]) for n in 1:size(vals,2))
+    # Tuple(vals[:,axes(vals, 2)])
 end
 
 function cast_iter(vals::Vector{Number})
@@ -69,37 +70,18 @@ for F in generate_functions_expr()
 
     # default functions with offset and scaling behavior
     @eval function $(Symbol(:_, F[1]))(::Type{T}, size::NTuple{N, Int},
-                           offset,
-                           scale,
+                           offset::Union{Type{<:Ctr}, Number, NTuple},
+                           scale::Union{Type{<:Sca}, Number, NTuple},
                            dims, 
                            accumulator,
-                           weight) where{N, T} 
+                           weight::Number) where{N, T} 
         offset = get_offset(size, offset)
         scale_init = get_scale(size, scale)
         scale = ntuple(i -> i ∈ dims ? scale_init[i] : zero(scale_init[1]), N)
 
-        #=
-        if false # isa(offset,IterType) || isa(scale,IterType) || isa(weight,IterType)
-            print("Dispatch T0A\n")
-            offset = cast_iter(offset)
-            scale = cast_iter(scale)
-            weight = cast_iter(weight)
-            w = (x, offset, scale, weight) -> weight .* $(F[2])(x) # adds offset and scale as requires parameters to the expression
-            # the line below makes a function only depending on the index position but iterating over both, offsets and scales
-            fkt = (idx) -> accumulator(curry(wrap_zipped(w),idx),zip(offset,scale,weight))
-    
-            IndexFunArray(T, fkt, size) 
-        else
-            #print("Dispatch T0B\n")
-            #@show weight
-            #@show offset
-            #@show scale
-            g = (x) ->  weight .* ($(F[2])(x)) # 
-            IndexFunArray(T,g, size) 
-        end =#
-        g = (x) ->  weight .* ($(F[2])(x)) # 
+        g(x) = weight .* ($(F[2])(x)) # 
         IndexFunArray(T,g, size) 
-end
+    end
 
     #=
     # a version (by Felix) that allows a Vector as input
@@ -120,21 +102,27 @@ end
         IndexFunArray(T, g, size) 
     end
     =#
-    #=
     @eval function $(Symbol(:_, F[1]))(::Type{T}, size::NTuple{N, Int},
-        offset::IterType,   # a version that supports an iterable collection of tuples for offset and scale 
-        scale::IterType,
+        offset,   # a version that supports an iterable collection of tuples for offset and scale 
+        scale,
         dims=ntuple(+, N),
         accumulator = sum,
         weight=1) where{N, T} 
-        #print("Dispatch TupleTuple\n")
-        w = (x, offset, scale) -> $(F[2])(x) # adds offset and scale as requires parameters to the expression
+
+        offset = get_offset(size, offset)
+        scale_init = get_scale(size, scale)
+        scale = ntuple(i -> i ∈ dims ? scale_init[i] : zero(scale_init[1]), N)
+
+        offset2 = cast_iter(offset)
+        scale2 = cast_iter(scale)
+        weight2 = cast_iter(weight)
+        w = (x, offset, scale, weight3) -> weight3 .* $(F[2])(x) # adds offset and scale as requires parameters to the expression
         # the line below makes a function only depending on the index position but iterating over both, offsets and scales
-        fkt = (idx) -> accumulator(curry(wrap_zipped(w),idx),zip(offset,scale,weight))
+        fkt = (idx) -> accumulator(curry(wrap_zipped(w),idx),zip(offset2,scale2,weight2))
 
         IndexFunArray(T, fkt, size) 
     end
-
+#=
     @eval function  $(Symbol(:_, F[1]))(::Type{T}, size::NTuple{N, Int},
         offset::IterType,   # a version that supports an iterable collection of tuples for offset and scale 
         scale=ScaUnit,
@@ -164,7 +152,7 @@ end
                            scale=ScaUnit,
                            dims=ntuple(+, N), accumulator=sum, weight=1) where{N, T} 
         # $(F[1])(T, size, offset, scale, dims) 
-        #print("Dispatch T3\n")
+        # print("Dispatch T3\n")
         $(Symbol(:_, F[1]))(T, size, offset, scale, dims, accumulator, weight) 
     end
     
@@ -179,7 +167,7 @@ end
     @eval function $(F[1])(arr::AbstractArray{T, N}; 
                            offset=CtrFT, scale=ScaUnit, dims=ntuple(+, N), accumulator=sum, weight=1) where {T, N}
         T2 = default_type(T, $DEFAULT_T)                   
-        $(F[1])(T2, size(arr), scale=scale, offset=offset, accumulator=accumulator, weight=weight)
+        $(F[1])(T2, size(arr), scale=scale, offset=offset, dims=dims, accumulator=accumulator, weight=weight)
     end
 
     @eval export $(F[1])

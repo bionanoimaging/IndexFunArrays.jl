@@ -10,6 +10,7 @@ const DEFAULT_T = Float64
 const IterType = Union{NTuple{N,Tuple} where N, Vector, Matrix, Base.Iterators.Repeated}
 
 
+include("scaling_offset_types.jl")
 include("utils.jl")
 include("other_ifas.jl")
 # include docstrings
@@ -18,7 +19,6 @@ include("scalar_ifas.jl")
 include("window_ifas.jl")
 include("tuple_ifas.jl")
 include("ifa_type.jl")
-include("scaling_offset_types.jl")
 
 
 
