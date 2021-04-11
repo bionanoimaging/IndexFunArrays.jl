@@ -1,7 +1,7 @@
 name = "IndexFunArrays"
 uuid = "613c443e-d742-454e-bfc6-1d7f8dd76566"
 authors = ["Rainer Heintzmann <heintzmann@gmail.com>", "Felix Wechsler (roflmaostc) <fxw+git@mailbox.org>"]
-version = "0.1.4"
+version = "0.1.5"
 
 [deps]
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
