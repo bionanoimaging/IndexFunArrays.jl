@@ -7,7 +7,7 @@ export IndexFunArray
 export selectsizes, get_scale
 
 const DEFAULT_T = Float64
-const IterType = Union{NTuple{N,Tuple} where N, Vector, Base.Iterators.Repeated}
+const IterType = Union{NTuple{N,Tuple} where N, Vector, Matrix, Base.Iterators.Repeated}
 
 
 include("utils.jl")

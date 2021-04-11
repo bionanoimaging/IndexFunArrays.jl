@@ -39,6 +39,7 @@ get_offset(size, ::Type{CtrMid}) = (size.+1)./2.0
 get_offset(size, ::Type{CtrEnd}) = size.+0.0
 get_offset(size, t::Number) = ntuple(i -> t, length(size))
 get_offset(size, t::NTuple) = t
+# get_offset(size, t::IterType) = t
 
 
 
@@ -71,6 +72,7 @@ get_scale(size, ::Type{ScaFTEdge}) = 1 ./ (max.(size ./ 2, 1))
 # get_scale(size, ::Type{ScaRFTEdge}) = 1 ./ (max.(Base.setindex(size./ 2,size[1]-1,1), 1))
 get_scale(size, t::Number) = ntuple(i -> t, length(size)) 
 get_scale(size, t::NTuple) = t 
+# get_scale(size, t::IterType) = t
 
 function apply_tuple_list(f, t1,t2)  # applies a two-argument function to tubles and iterables of tuples
     return f(t1,t2)
