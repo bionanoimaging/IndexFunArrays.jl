@@ -4,9 +4,10 @@ using LinearAlgebra
 using Base.Iterators
 
 export IndexFunArray
-export selectsizes 
+export selectsizes, get_scale
 
 const DEFAULT_T = Float64
+const IterType = Union{NTuple{N,Tuple} where N, Vector, Base.Iterators.Repeated}
 
 
 include("utils.jl")

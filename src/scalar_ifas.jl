@@ -1,3 +1,5 @@
+apply_covariance = (x,M) -> sum(dot.(x,M*x))
+
 # List of functions and names we want to predefine
 function generate_functions_expr()
     # offset and scale is already wrapped in the generator function
@@ -9,8 +11,10 @@ function generate_functions_expr()
     x_expr5 = :(scale[5] .* (x[5] .- offset[5]))
     x_expr6 = :(prod(x .== offset))
     x_expr7 = :(cis(dot((x .- offset), scale)))
-    x_expr8 = :(exp(.- sum(abs2.(x .- offset).*scale))) # scale is 1/(2 sigma^2)
-    x_expr9 = :(exp(.- sum(abs2.(x .- offset).*scale)) ./ prod(sqrt.(pi ./ scale)))
+    x_expr8 = :(exp(.- norm((x .- offset).*scale))) # scale is 1/(2 sigma^2)
+    x_expr9 = :(exp(.- norm((x .- offset).*scale)) ./ prod(sqrt.(pi ./ abs2.(scale))))
+    x_expr10 = :(exp(.- apply_covariance((x .- offset), scale) ))
+    x_expr11 = :(exp(.- apply_covariance((x .- offset), scale)) ./ prod(sqrt.(pi ./ abs2(scale))))
 
     functions = [
         (:(rr2), :(x -> T(sum(abs2.($x_expr))))),
@@ -25,23 +29,24 @@ function generate_functions_expr()
         (:(exp_is),  :(x -> T($x_expr7))),  # exp(2pi i s (x-o)) # by modifying s, this becomes exp(i kx)
         (:(exp_sqr),  :(x -> T($x_expr8))),  # maximum-normalized Gaussian
         (:(exp_sqr_norm),  :(x -> T($x_expr9))),  # integral-normalized Gaussian (over infinite ROI)
+        (:(exp_sqr_cov),  :(x -> T($x_expr10))),  # Gaussian based on the covariance matrix
+        (:(exp_sqr_cov_norm),  :(x -> T($x_expr11))),  # normalized Gaussian based on the covariance matrix
     ]
     return functions
 end
 
-function wrap_fkt(f)
-    return (idx, offset, scale) -> f(idx)
+function wrap_fkt(f)  # encapsulates the expression in a proper function with index, offset and scale argument
+    return (idx, offset, scale) -> f(idx)  # Not that f contains offset and scale
 end
 
-function wrap_zipped(g)
-    return (idx, mytuple) -> g(idx,mytuple...)
+function wrap_zipped(g) # encapsulates a wrapped function as called with a sinle tuple of offset and scale
+    return (idx, mytuple) -> g(idx,mytuple...)  
 end
 
 curry(f, x) = (xs...) -> f(x, xs...)   # just a shorthand to remove x
 
 mat_to_tvec = (v) -> [Tuple(v[:,n]) for n in 1:size(v,2)] # converts a 2d matrix to a Vector of Tuples
 
-IterType = Union{NTuple{N,Tuple} where N, Vector, Base.Iterators.Repeated}
 # we automatically generate the functions for rr2, rr, ...
 # We set the types for the arguments correctly in the default cases
 for F in generate_functions_expr() 
@@ -50,7 +55,8 @@ for F in generate_functions_expr()
     @eval function $(Symbol(:_, F[1]))(::Type{T}, size::NTuple{N, Int},
                            offset,
                            scale,
-                           dims, accumulator) where{N, T} 
+                           dims, 
+                           accumulator) where{N, T} 
         offset = get_offset(size, offset)
         scale_init = get_scale(size, scale)
         scale = ntuple(i -> i ∈ dims ? scale_init[i] : zero(scale_init[1]), N)
@@ -81,7 +87,7 @@ for F in generate_functions_expr()
     @eval function $(Symbol(:_, F[1]))(::Type{T}, size::NTuple{N, Int},
         offset::IterType,   # a version that supports an iterable collection of tuples for offset and scale 
         scale::IterType,
-        dims=ntuple(+, N);
+        dims=ntuple(+, N),
         accumulator = sum) where{N, T} 
         #print("Dispatch TupleTuple\n")
         w = (x, offset, scale) -> $(F[2])(x) # adds offset and scale as requires parameters to the expression
@@ -93,11 +99,11 @@ for F in generate_functions_expr()
     @eval function  $(Symbol(:_, F[1]))(::Type{T}, size::NTuple{N, Int},
         offset::IterType,   # a version that supports an iterable collection of tuples for offset and scale 
         scale=ScaUnit,
-        dims=ntuple(+, N);
+        dims=ntuple(+, N),
         accumulator = sum) where{N, M, T} 
 
        # print("Dispatch T1\n")
-        $(Symbol(:_, F[1]))(T, size, offset, repeated(scale), dims; accumulator = accumulator)
+        $(Symbol(:_, F[1]))(T, size, offset, repeated(scale), dims, accumulator)
     end
 
     @eval function  $(Symbol(:_, F[1]))(::Type{T}, size::NTuple{N, Int},
@@ -107,7 +113,7 @@ for F in generate_functions_expr()
         accumulator = sum) where{N, M, T} 
 
         #print("Dispatch T2\n")
-        $(Symbol(:_, F[1]))(T, size, repeated(offset), scale, dims; accumulator = accumulator)
+        $(Symbol(:_, F[1]))(T, size, repeated(offset), scale, dims, accumulator)
     end
 
     # default functions with offset and scaling behavior
@@ -117,7 +123,7 @@ for F in generate_functions_expr()
                            dims=ntuple(+, N), accumulator=sum) where{N, T} 
         # $(F[1])(T, size, offset, scale, dims) 
         #print("Dispatch T3\n")
-        $(Symbol(:_, F[1]))(T, size, offset, scale, dims, accumulator=accumulator) 
+        $(Symbol(:_, F[1]))(T, size, offset, scale, dims, accumulator) 
     end
     
     # change order of offset and scale

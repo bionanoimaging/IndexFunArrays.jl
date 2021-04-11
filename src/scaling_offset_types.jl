@@ -72,3 +72,14 @@ get_scale(size, ::Type{ScaFTEdge}) = 1 ./ (max.(size ./ 2, 1))
 get_scale(size, t::Number) = ntuple(i -> t, length(size)) 
 get_scale(size, t::NTuple) = t 
 
+function apply_tuple_list(f, t1,t2)  # applies a two-argument function to tubles and iterables of tuples
+    return f(t1,t2)
+end
+
+function apply_tuple_list(f, t1,t2::IterType)
+    return Tuple([f(t1,a2) for a2 in t2])
+end
+
+function apply_tuple_list(f, t1::IterType,t2)
+    return Tuple([f(a1,t2) for a1 in t1])
+end
