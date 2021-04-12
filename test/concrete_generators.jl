@@ -22,8 +22,8 @@
 
     @testset "Test rr method" begin
    
-        offsets = [CtrFFT, CtrFT]
-        scales = [ScaFT, ScaUnit]
+        offsets = [(3,3), (5,2)]
+        scales = [(1.0,1.0), (2.0,0.5)]
         s = ((7,7))
         @test rr(s, offset=offsets, scale=scales) ≈ reduce(.+, rr(s, offset=o, scale=sc) for (o,sc) in zip(offsets,scales))
         

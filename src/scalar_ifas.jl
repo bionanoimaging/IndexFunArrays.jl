@@ -1,3 +1,5 @@
+apply_covariance = (x,M) -> sum(dot.(x,M*x))
+
 # List of functions and names we want to predefine
 function generate_functions_expr()
     # offset and scale is already wrapped in the generator function
@@ -11,6 +13,8 @@ function generate_functions_expr()
     x_expr7 = :(cis(dot((x .- offset), scale)))
     x_expr8 = :(exp(.- sum(abs2.(x .- offset).*scale))) # scale is 1/(2 sigma^2)
     x_expr9 = :(exp(.- sum(abs2.(x .- offset).*scale)) ./ prod(sqrt.(pi ./ scale)))
+    x_expr10 = :(exp(.- apply_covariance((x .- offset), scale) ))
+    x_expr11 = :(exp(.- apply_covariance((x .- offset), scale)) ./ prod(sqrt.(pi ./ abs2(scale))))
 
     functions = [
         (:(rr2), :(x -> T(sum(abs2.($x_expr))))),
@@ -25,28 +29,92 @@ function generate_functions_expr()
         (:(exp_is),  :(x -> T($x_expr7))),  # exp(2pi i s (x-o)) # by modifying s, this becomes exp(i kx)
         (:(exp_sqr),  :(x -> T($x_expr8))),  # maximum-normalized Gaussian
         (:(exp_sqr_norm),  :(x -> T($x_expr9))),  # integral-normalized Gaussian (over infinite ROI)
+        (:(exp_sqr_cov),  :(x -> T($x_expr10))),  # Gaussian based on the covariance matrix
+        (:(exp_sqr_cov_norm),  :(x -> T($x_expr11))),  # normalized Gaussian based on the covariance matrix
     ]
     return functions
 end
 
+function wrap_fkt(f)  # encapsulates the expression in a proper function with index, offset and scale argument
+    return (idx, offset, scale, weight) -> f(idx)  # Not that f contains offset and scale
+end
+
+function wrap_zipped(g) # encapsulates a wrapped function as called with a sinle tuple of offset and scale
+    return (idx, mytuple) -> g(idx,mytuple...)  
+end
+
+curry(f, x) = (xs...) -> f(x, xs...)   # just a shorthand to remove x
+
+## These functions ensure that also numbers can be iterated and zipped
+function cast_iter(vals::Matrix)
+    Tuple(Tuple(vals[:,n]) for n in 1:size(vals,2))
+    # Tuple(vals[:,axes(vals, 2)])
+end
+
+function cast_iter(vals::Vector{<:Number})
+    Tuple(vals)   # makes the matrix iterable, interpreting it as a series of vectors
+end
+
+function cast_iter(vals::IterType)
+    vals
+end
+
+function cast_iter(vals)
+    repeated(vals) # during the zip operation this type always yields the same value
+end
+
+function cast_number_iter(vals::Vector{<:Number})
+    Tuple(vals)   # makes the matrix iterable, interpreting it as a series of vectors
+end
+
+function cast_number_iter(vals::NTuple{N,<:Number} where N)
+    vals
+end
+
+function cast_number_iter(vals::Number)
+    repeated(vals) # during the zip operation this type always yields the same value
+end
+
+
+function optional_mat_to_iter(vals)  # only for matrices
+    vals
+end
+
+function optional_mat_to_iter(vals::Matrix)
+    cast_iter(vals)
+end
+
+mat_to_tvec(v) = [Tuple(v[:,n]) for n in 1:size(v,2)] # converts a 2d matrix to a Vector of Tuples
+
+function apply_dims(scale, dims, N)  # replaces scale entries not in dims with zeros
+    ntuple(i -> i ∈ dims ? scale[i] : zero(scale[1]), N)
+end
+
+function apply_dims(scales::IterType, dims, N)  # replaces scale entries not in dims with zeros
+    Tuple(ntuple(i -> i ∈ dims ? scale[i] : zero(scale[1]), N)  for scale in  scales)
+end
 
 # we automatically generate the functions for rr2, rr, ...
 # We set the types for the arguments correctly in the default cases
 for F in generate_functions_expr() 
 
-    # default functions with offset and scaling behavior
-    @eval function $(Symbol(F[1], :(base)))(::Type{T}, size::NTuple{N, Int},
-                           offset,
-                           scale,
-                           dims) where{N, T} 
+    # default functions with offset and scaling behavior. This version allows no list of numbers or tuples
+    @eval function $(Symbol(:_, F[1]))(::Type{T}, size::NTuple{N, Int},
+                           offset::Union{Type{<:Ctr}, Number, NTuple{N,Number}},
+                           scale::Union{Type{<:Sca}, Number, NTuple{N,Number}},
+                           dims, 
+                           accumulator,
+                           weight::Number) where{N, T} 
         offset = get_offset(size, offset)
         scale_init = get_scale(size, scale)
-        scale = ntuple(i -> i ∈ dims ? scale_init[i] : zero(scale_init[1]), N)
+        scale = apply_dims(scale_init, dims, N)
 
-        IndexFunArray(T, $(F[2]), size) 
+        g(x) = weight .* ($(F[2])(x)) # 
+        IndexFunArray(T,g, size) 
     end
 
-    # default functions with offset and scaling behavior
+    #=
+    # a version (by Felix) that allows a Vector as input
     @eval function $(Symbol(F[1], :(base)))(::Type{T}, size::NTuple{N, Int},
                            offset::Vector,
                            scale::Vector,
@@ -63,28 +131,74 @@ for F in generate_functions_expr()
         end
         IndexFunArray(T, g, size) 
     end
+    =#
+    @eval function $(Symbol(:_, F[1]))(::Type{T}, size::NTuple{N, Int},
+        offset,   # a version that supports an iterable collection of tuples for offset and scale 
+        scale,
+        dims=ntuple(+, N),
+        accumulator = sum,
+        weight=1) where{N, T} 
 
+        # its important to use different variable names due to a julia bug
+        offset_ = get_offset(size, offset)
+        scale_init = get_scale(size, scale)
+        scale_ = apply_dims(scale_init, dims, N)
+
+        offset2 = cast_iter(offset_)
+        scale2 = cast_iter(scale_)
+        weight2 = cast_number_iter(weight)
+        w = (x, offset, scale, weight3) -> weight3 .* $(F[2])(x) # adds offset and scale as requires parameters to the expression
+        # the line below makes a function only depending on the index position but iterating over both, offsets and scales
+        fkt = (idx) -> accumulator(curry(wrap_zipped(w),idx),zip(offset2,scale2,weight2))
+
+        IndexFunArray(T, fkt, size) 
+    end
+#=
+    @eval function  $(Symbol(:_, F[1]))(::Type{T}, size::NTuple{N, Int},
+        offset::IterType,   # a version that supports an iterable collection of tuples for offset and scale 
+        scale=ScaUnit,
+        dims=ntuple(+, N),
+        accumulator = sum,
+        weight=1) where{N, M, T} 
+
+       # print("Dispatch T1\n")
+        $(Symbol(:_, F[1]))(T, size, offset, repeated(scale), dims, accumulator, weight)
+    end
+
+    @eval function  $(Symbol(:_, F[1]))(::Type{T}, size::NTuple{N, Int},
+        offset,   # a version that supports an iterable collection of tuples for offset and scale 
+        scale::IterType,
+        dims=ntuple(+, N);
+        accumulator = sum,
+        weight=1) where{N, M, T} 
+
+        #print("Dispatch T2\n")
+        $(Symbol(:_, F[1]))(T, size, repeated(offset), scale, dims, accumulator, weight)
+    end
+    =#
 
     # default functions with offset and scaling behavior
     @eval function $(F[1])(::Type{T}, size::NTuple{N, Int};
                            offset=CtrFT,
                            scale=ScaUnit,
-                           dims=ntuple(+, N)) where{N, T} 
-        $(Symbol(F[1], :(base)))(T, size, offset, scale, dims) 
+                           dims=ntuple(+, N), accumulator=sum, weight=1) where{N, T} 
+        # $(F[1])(T, size, offset, scale, dims) 
+        # print("Dispatch T3\n")
+        $(Symbol(:_, F[1]))(T, size, offset, scale, dims, accumulator, weight) 
     end
     
     # change order of offset and scale
     @eval function $(F[1])(size::NTuple{N, Int}; 
-                           offset=CtrFT, scale=ScaUnit, dims=ntuple(+, N)) where {N}
+                           offset=CtrFT, scale=ScaUnit, dims=ntuple(+, N), accumulator=sum, weight=1) where {N}
         T = $DEFAULT_T
-        $(F[1])(T, size, scale=scale, offset=offset, dims=dims) 
+        $(F[1])(T, size, scale=scale, offset=offset, dims=dims, accumulator=accumulator, weight=weight) 
     end
 
     # convenient wrapper to provide an array as input
     @eval function $(F[1])(arr::AbstractArray{T, N}; 
-                           offset=CtrFT, scale=ScaUnit, dims=ntuple(+, N)) where {T, N}
+                           offset=CtrFT, scale=ScaUnit, dims=ntuple(+, N), accumulator=sum, weight=1) where {T, N}
         T2 = default_type(T, $DEFAULT_T)                   
-        $(F[1])(T2, size(arr), scale=scale, offset=offset)
+        $(F[1])(T2, size(arr), scale=scale, offset=offset, dims=dims, accumulator=accumulator, weight=weight)
     end
 
     @eval export $(F[1])

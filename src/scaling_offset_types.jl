@@ -38,9 +38,9 @@ get_offset(size, ::Type{CtrRFFT}) = size.*0 .+ 1.0
 get_offset(size, ::Type{CtrMid}) = (size.+1)./2.0
 get_offset(size, ::Type{CtrEnd}) = size.+0.0
 get_offset(size, t::Number) = ntuple(i -> t, length(size))
-get_offset(size, t::NTuple) = t
-
-
+get_offset(dummy, t::NTuple) = t
+get_offset(dummy, t::IterType) = t
+get_offset(dummy, t::Matrix) = Tuple(Tuple(t[:,n]) for n in 1:size(t,2))  # converts the matrix to an iterable collection for convenience
 
 abstract type Sca end # scaling of the array
 struct ScaUnit <: Sca end # pixel distance is one
@@ -63,12 +63,30 @@ Abstract type to indicate a scaling from which several other types subtype.
 """
 Sca
 
-get_scale(size, ::Type{ScaUnit}) = ntuple(_ -> one(Int), length(size))
-get_scale(size, ::Type{ScaNorm}) = 1 ./ (max.(size .- 1, 1)) 
-get_scale(size, ::Type{ScaFT}) = 0.5 ./ (max.(size ./ 2, 1))
+get_scale(sz, ::Type{ScaUnit}) = ntuple(_ -> one(Int), length(sz))
+get_scale(sz, ::Type{ScaNorm}) = 1 ./ (max.(sz .- 1, 1)) 
+get_scale(sz, ::Type{ScaFT}) = 0.5 ./ (max.(sz ./ 2, 1))
 # get_scale(size, ::Type{ScaRFT}) = 0.5 ./ (max.(Base.setindex(size./ 2,size[1]-1,1), 1))  # These scales are wrong! They need the information on the real-space size!
-get_scale(size, ::Type{ScaFTEdge}) = 1 ./ (max.(size ./ 2, 1))  
+get_scale(sz, ::Type{ScaFTEdge}) = 1 ./ (max.(sz ./ 2, 1))  
 # get_scale(size, ::Type{ScaRFTEdge}) = 1 ./ (max.(Base.setindex(size./ 2,size[1]-1,1), 1))
-get_scale(size, t::Number) = ntuple(i -> t, length(size)) 
-get_scale(size, t::NTuple) = t 
+get_scale(sz, t::Number) = ntuple(i -> t, length(sz)) 
+get_scale(dummy, t::NTuple) = t 
+get_scale(dummy, t::IterType) = t
+get_scale(dummy, t::Matrix) = Tuple(Tuple(t[:,n]) for n in 1:size(t,2))  # converts the matrix to an iterable collection for convenience
 
+function apply_tuple_list(f, t1,t2)  # applies a two-argument function to tubles and iterables of tuples
+    return f(t1,t2)
+end
+
+function apply_tuple_list(f, t1,t2::IterType)
+    return Tuple([f(t1,a2) for a2 in t2])
+end
+
+function apply_tuple_list(f, t1::IterType,t2)
+    res= Tuple([f(a1,t2) for a1 in t1])
+    return res
+end
+
+function apply_tuple_list(f, t1::IterType,t2::IterType)
+    return Tuple([f(a[1],a[2]) for a in zip(t1,t2)])
+end

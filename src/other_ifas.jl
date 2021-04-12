@@ -30,40 +30,49 @@ function cpx(arr::AbstractArray{T, N}; offset=CtrFT, scale=ScaUnit, dims=ntuple(
     cpx(T, size(arr), offset=offset, scale=scale, dims=dims)
 end
 
-function exp_ikx(::Type{T}, size::NTuple{N, Int}; shift_by=size.÷2, offset=CtrFT, scale=ScaFT, dims=ntuple(+, N)) where {N,T}
-    myscale = T.(-2pi .* get_scale(size, scale) .* shift_by)
-    return exp_is(T, size, scale = myscale, offset=offset, dims = dims)
+function exp_ikx(::Type{T}, size::NTuple{N, Int}; shift_by=size.÷2, offset=CtrFT, scale=ScaFT, dims=ntuple(+, N),
+                accumulator=sum, weight=1) where {N,T}
+    myscale = apply_tuple_list((x,y)-> T.(-2pi .* x .* y), get_scale(size, scale), optional_mat_to_iter(shift_by))
+    return exp_is(T, size, scale = myscale, offset=offset, dims = dims, accumulator=accumulator, weight=weight)
 end
 
-function exp_ikx(size::NTuple{N, Int}; shift_by=size.÷2, offset=CtrFT, scale=ScaFT, dims=ntuple(+, N)) where {N,T}
-    myscale = DEFAULT_T.(-2pi .* get_scale(size, scale) .* shift_by)
-    return exp_is(complex(DEFAULT_T), size, scale = myscale, offset=offset, dims = dims)
+function exp_ikx(size::NTuple{N, Int}; shift_by=size.÷2, offset=CtrFT, scale=ScaFT, dims=ntuple(+, N), accumulator=sum, weight=1) where {N,T}
+    myscale = apply_tuple_list((x,y)-> DEFAULT_T.(-2pi .* x .* y), get_scale(size, scale), optional_mat_to_iter(shift_by))
+    return exp_is(complex(DEFAULT_T), size, scale = myscale, offset=offset, dims = dims, accumulator=accumulator, weight=weight)
 end
 
-function exp_ikx(arr::AbstractArray{T, N}; shift_by=size(arr).÷2, offset=CtrFT, scale=ScaFT, dims=ntuple(+, N)) where {N,T}
-    return exp_is(complex(typeof(arr[1])),size(arr), scale = T.(-2pi .* get_scale(size(arr), scale) .* shift_by),  offset=offset, dims = dims)
+function exp_ikx(arr::AbstractArray{T, N}; shift_by=size(arr).÷2, offset=CtrFT, scale=ScaFT, dims=ntuple(+, N), accumulator=sum, weight=1) where {N,T}
+    myscale = apply_tuple_list((x,y)-> T.(-2pi .* x .* y), get_scale(size(arr), scale), optional_mat_to_iter(shift_by))
+    return exp_is(complex(typeof(arr[1])),size(arr), scale = myscale,  offset=offset, dims = dims, accumulator=accumulator)
 end
 
-function gaussian(::Type{T}, size::NTuple{N, Int}; sigma=1.0, offset=CtrFT, scale=ScaUnit, dims=ntuple(+, N)) where {N,T}
-    return exp_sqr(T, size, scale = T.(get_scale(size, scale) ./ (2 .* sigma)), offset=offset, dims = dims)
+# These versions of Gaussians interpret sigma as the standard-deviation along each axis separately
+function gaussian(::Type{T}, size::NTuple{N, Int}; sigma=1.0, offset=CtrFT, scale=ScaUnit, dims=ntuple(+, N), accumulator=sum, weight=1) where {N,T}
+    myscale = apply_tuple_list((x,y)-> T.(x ./( 2 .* y .*y)), get_scale(size, scale), optional_mat_to_iter(sigma))
+    return exp_sqr(T, size, scale = myscale, offset=offset, dims = dims, accumulator=accumulator, weight=weight)
 end
 
-function gaussian(size::NTuple{N, Int}; sigma=1.0, offset=CtrFT, scale=ScaUnit, dims=ntuple(+, N)) where {N,T}
-    return exp_sqr(DEFAULT_T, size, scale = DEFAULT_T.( get_scale(size, scale) ./ (2 .* sigma)), offset=offset, dims = dims)
+function gaussian(size::NTuple{N, Int}; sigma=1.0, offset=CtrFT, scale=ScaUnit, dims=ntuple(+, N), accumulator=sum, weight=1) where {N,T}
+    myscale = apply_tuple_list((x,y)-> DEFAULT_T.(x ./( 2 .* y .*y)), get_scale(size, scale), optional_mat_to_iter(sigma))
+    return exp_sqr(DEFAULT_T, size, scale = myscale, offset=offset, dims = dims, accumulator=accumulator, weight=weight)
 end
 
-function gaussian(arr::AbstractArray{T, N}; sigma=1.0, offset=CtrFT, scale=ScaUnit, dims=ntuple(+, N)) where {N,T}
-    return exp_sqr(arr, scale = T.(get_scale(size(arr), scale) ./ (2 .* sigma)),  offset=offset, dims = dims)
+function gaussian(arr::AbstractArray{T, N}; sigma=1.0, offset=CtrFT, scale=ScaUnit, dims=ntuple(+, N), accumulator=sum, weight=1) where {N,T}
+    myscale = apply_tuple_list((x,y)-> T.(x ./( 2 .*y.*y)), get_scale(size(arr), scale), optional_mat_to_iter(sigma))
+    return exp_sqr(arr, scale = myscale,  offset=offset, dims = dims, accumulator=accumulator, weight=weight)
 end
 
-function normal(::Type{T}, size::NTuple{N, Int}; sigma=1.0, offset=CtrFT, scale=ScaUnit, dims=ntuple(+, N)) where {N,T}
-    return exp_sqr_norm(T, size, scale = T.(get_scale(size, scale) ./ (2 .* sigma.* sigma)), offset=offset, dims = dims)
+function normal(::Type{T}, size::NTuple{N, Int}; sigma=1.0, offset=CtrFT, scale=ScaUnit, dims=ntuple(+, N), accumulator=sum, weight=1) where {N,T}
+    myscale = apply_tuple_list((x,y)-> T.(x ./( 2 .*y.*y)), get_scale(size, scale), optional_mat_to_iter(sigma))
+    return exp_sqr_norm(T, size, scale = myscale, offset=offset, dims = dims, accumulator=accumulator, weight=weight)
 end
 
-function normal(size::NTuple{N, Int}; sigma=1.0, offset=CtrFT, scale=ScaUnit, dims=ntuple(+, N)) where {N,T}
-    return exp_sqr_norm(DEFAULT_T, size, scale = DEFAULT_T.( get_scale(size, scale) ./ (2 .* sigma.* sigma)), offset=offset, dims = dims)
+function normal(size::NTuple{N, Int}; sigma=1.0, offset=CtrFT, scale=ScaUnit, dims=ntuple(+, N), accumulator=sum, weight=1) where {N,T}
+    myscale = apply_tuple_list((x,y)-> DEFAULT_T.(x ./( 2 .*y.*y)), get_scale(size, scale), optional_mat_to_iter(sigma))
+    return exp_sqr_norm(DEFAULT_T, size, scale = myscale, offset=offset, dims = dims, accumulator=accumulator, weight=weight)
 end
 
-function normal(arr::AbstractArray{T, N}; sigma=1.0, offset=CtrFT, scale=ScaUnit, dims=ntuple(+, N)) where {N,T}
-    return exp_sqr_norm(arr, scale = T.(get_scale(size(arr), scale) ./ (2 .* sigma .* sigma)),  offset=offset, dims = dims)
+function normal(arr::AbstractArray{T, N}; sigma=1.0, offset=CtrFT, scale=ScaUnit, dims=ntuple(+, N), accumulator=sum, weight=1) where {N,T}
+    myscale = apply_tuple_list((x,y)-> T.(x ./( 2 .*y.*y)), get_scale(size(arr), scale), optional_mat_to_iter(sigma))
+    return exp_sqr_norm(arr, scale = myscale,  offset=offset, dims = dims, accumulator=accumulator, weight=weight)
 end

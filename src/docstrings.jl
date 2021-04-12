@@ -74,7 +74,9 @@ cpx
     rr2([T=Float64], size::NTuple{N, Int};
         offset=CtrFT,
         dims=ntuple(+, N),
-        scale=ScaUnit)
+        scale=ScaUnit,
+        weight=1,
+        accumulator=sum)
 
 Calculates the squared radius to a reference pixel.
 In this case `CtrFT` is the center defined by the FFT convention.
@@ -85,8 +87,16 @@ Look at `?Ctr` and `?Sca` for all options.
 `dims` is a keyword argument to specifiy over which dimensions the
 operation will effectively happen.
 
+The arguments `offset`, and `scale` support list-mode, which means that
+supplying a tuple of tuples or a vector of tuples or a matrix causes the
+function to automatically generate a superposition of multiple versions of itself.
+The type of superposition is controlled by the `accumulator` argument. The relative strength
+of the individual superposition is controlled via the `weight` argument, which can be
+a tuple or vector. Have a look at the Voronoi-example below.
+
 Note that this function is based on a `IndexFunArray` and therefore does
 not allocate the full memory needed to represent the array.
+
 
 # Examples
 ```jldoctest
@@ -187,6 +197,15 @@ julia> y=rr2(selectsizes(x,(1,2)))
 Similarly you can also use dimensions 2 and 3 yielding an array of `size(y) == (1,6,5)`. 
 Note that the necessary modification to the `Base.size` function is currently provided by this package.
 
+## Using List-Mode Arguments
+The code below generates 160 Voronoi cells at random positions. The `accumulator` was set to  mimimum
+yielding in each pixel the square distance to the closest Voronoi center. See `gaussian` for another example
+of using list-mode arguments.
+```jldoctest
+julia> y = rr2((1000,1000),offset = (1000.0,1000.0) .* rand(2,160), accumulator=minimum);
+
+```
+    
 ---
     rr2(arr::AbstractArray; offset=CtrFt, scaling=ScaUnit)
 
@@ -200,7 +219,9 @@ rr2
     rr([T=Float64], size::NTuple{N, Int};
         offset=CtrFT,
         dims=ntuple(+, N),
-        scale=ScaUnit)
+        scale=ScaUnit,
+        weight=1,
+        accumulator=sum)
 
 See `rr2` for a description of all options.
 
@@ -231,7 +252,9 @@ rr
     xx([T=Float64], size::NTuple{N, Int};
         offset=CtrFT,
         dims=ntuple(+, N),
-        scale=ScaUnit)
+        scale=ScaUnit,
+        weight=1,
+        accumulator=sum)
 
 A distance ramp along first dimension.
 See `rr2` for a description of all options.
@@ -256,7 +279,9 @@ xx
     yy([T=Float64], size::NTuple{N, Int};
         offset=CtrFT,
         dims=ntuple(+, N),
-        scale=ScaUnit)
+        scale=ScaUnit,
+        weight=1,
+        accumulator=sum)
 
 A distance ramp along second dimension.
 See `rr2` for a description of all options.
@@ -282,7 +307,9 @@ yy
     zz([T=Float64], size::NTuple{N, Int};
         offset=CtrFT,
         dims=ntuple(+, N),
-        scale=ScaUnit)
+        scale=ScaUnit,
+        weight=1,
+        accumulator=sum)
 
 A distance ramp along third dimension.
 See `rr2` for a description of all options.
@@ -314,7 +341,9 @@ zz
     ee([T=Float64], size::NTuple{N, Int};
         offset=CtrFT,
         dims=ntuple(+, N),
-        scale=ScaUnit)
+        scale=ScaUnit,
+        weight=1,
+        accumulator=sum)
 
 A distance ramp along forth (element) dimension. This dimension is often used as a color or wavelength channel.
 See `rr2` for a description of all options.
@@ -346,7 +375,9 @@ ee
     tt([T=Float64], size::NTuple{N, Int};
         offset=CtrFT,
         dims=ntuple(+, N),
-        scale=ScaUnit)
+        scale=ScaUnit,
+        weight=1,
+        accumulator=sum)
 
 A distance ramp along fifth (time) dimension.
 See `rr2` for a description of all options.
@@ -378,7 +409,9 @@ tt
     phiphi([T=Float64], size::NTuple{N, Int};
         offset=CtrFT,
         dims=ntuple(+, N),
-        scale=ScaUnit)
+        scale=ScaUnit,
+        weight=1,
+        accumulator=sum)
 
 An azimutal spiral phase ramp using atan(). The azimuthal phase spans dimensions 1 and 2.
 See `rr2` for a description of all options.
@@ -404,7 +437,9 @@ phiphi
 
 """
     ramp(::Type{T}, dim::Int, dim_size::Int;
-    offset=CtrFT, scale=ScaUnit) where {T}
+        offset=CtrFT, scale=ScaUnit,
+        weight=1,
+        accumulator=sum) where {T}
 
 Generates a dim-dimensional ramp of size `dim_size` to be used for broadcasting through multidimensional expressions.
 `dim` highest dimension of the oriented array to be generated. This is also the ramp direction.
@@ -434,9 +469,13 @@ ramp
     delta([T=Float64], size::NTuple{N, Int};
         offset=CtrFT,
         dims=ntuple(+, N),
-        scale=ScaUnit)
+        scale=ScaUnit,
+        weight=1,
+        accumulator=sum)
 
-A `delta` peak positioned at offset. See `rr2()` for a description of all options. Note that `scale` does not influence the result.
+A `delta` peak positioned at offset. See `rr2()` for a description of all options. 
+Note that `scale` does not influence the result. Also note that this function operates on
+a comparison for equality, which means a sub-pixel offset of the delta results into zero.
 ```jldoctest
 julia> delta((5,5))
 5×5 IndexFunArray{Float64, 2, IndexFunArrays.var"#79#81"{Float64, Tuple{Float64, Float64}}}:
@@ -478,16 +517,22 @@ delta
         offset=CtrFT,
         sigma=1.0,
         dims=ntuple(+, N),
-        scale=ScaUnit)
+        scale=ScaUnit,
+        weight=1,
+        accumulator=sum)
 
 A gaussian peak positioned at offset. Note that the gaussian is NOT normalized by its integral, but by its maximum.
 For a version with a normalized integral, see `normal`.
+List-mode is supported also for the argument sigma. 
+See the final example below which generates 60 Gaussians at random positions with random strengths and width along X and Y.
 
 # Arguments:
-* `sigma`: the (standard deviation) width of the Gaussian
+* `sigma`: the (standard deviation) width of the Gaussian. If a tuple is supplied, each entry is interpreted as the width along the correspondin dimension. 
 * `offset`: the center position of the Gaussian. You can use a tuple or the indicators `CtrCorner`, `CtrEnd`, `CtrFT`, `CtrRFT` etc.
 * `scale`: the scale of the pixel. By default `ScaUnit` is assumed
 * `dims`: the dimensions over which to apply this function to.
+* `weight`: the strength of the result. Supports list-mode (see rr2 for documentation)
+* `accumulator`: the method used for superimposing list-mode data. Only applies in list-mode
 ```jldoctest
 julia> gaussian((5,5))
 5×5 IndexFunArray{Float64, 2, IndexFunArrays.var"#100#102"{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}}}:
@@ -513,7 +558,9 @@ julia> gaussian(Float32,(5,5),offset=CtrCorner)
    0.135335     0.082085     0.0183156   0.00150344  4.53999f-5
    0.011109     0.00673795   0.00150344  0.00012341  3.72665f-6
    0.000335463  0.000203468  4.53999f-5  3.72665f-6  1.12535f-7
-  
+
+julia> y = gaussian((100,100),offset = (100,100) .* rand(2,60), weight=rand(60), sigma=2.0 .*(0.3 .+rand(2,60)));
+
 ```
 
 ---
@@ -529,7 +576,9 @@ gaussian
         offset=CtrFT,
         sigma=1.0,
         dims=ntuple(+, N),
-        scale=ScaUnit)
+        scale=ScaUnit,
+        weight=1,
+        accumulator=sum)
 
 A gaussian peak positioned at offset. Note that this normal distribution (Gaussian) is normalized by its integral.
 For a version with normalized to the maximum, see `gaussian`.
@@ -539,6 +588,8 @@ For a version with normalized to the maximum, see `gaussian`.
 * `offset`: the center position of the Gaussian. You can use a tuple or the indicators `CtrCorner`, `CtrEnd`, `CtrFT`, `CtrRFT` etc.
 * `scale`: the scale of the pixel. By default `ScaUnit` is assumed
 * `dims`: the dimensions over which to apply this function to.
+* `weight`: the strength of the result. Supports list-mode (see rr2 for documentation)
+* `accumulator`: the method used for superimposing list-mode data. Only applies in list-mode
 ```jldoctest
 julia> normal((5,5))
 5×5 IndexFunArray{Float64, 2, IndexFunArrays.var"#107#109"{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}}}:
@@ -571,17 +622,24 @@ normal
         offset=CtrFT,
         shift_by=size.÷2
         dims=ntuple(+, N),
-        scale=ScaFT)
+        scale=ScaFT,
+        weight=1,
+        accumulator=sum)
 
 A complex-valued phase ramp according to `exp(-2pi i <k,x>)`. If applied as a multiplicative factor in Fourier space,
 it will lead to a shift of `x` pixels in real space. Note that this effect is actually realized by a change to the scaling parameter.
 The default shift is `size.÷2` which corresponds to `CtrFT`, however, the Ctr... arguments cannot be used for `shift_by`.
 
+The argument `shift_by` supports list-mode, which can be used to conveniently perform multiple shifts simulatneously.
+See the final example below, which generates delta peaks at randomized subpixel positions.
+
 # Arguments:
-* `shift_by`: the amount to shift by in real space.
 * `offset`: the center position of the Gaussian. You can use a tuple or the indicators `CtrCorner`, `CtrEnd`, `CtrFT`, `CtrRFT` etc.
+* `shift_by`: the amount to shift by in real space.
 * `scale`: the scale of the pixel. By default `ScaUnit` is assumed
 * `dims`: the dimensions over which to apply this function to.
+* `weight`: the strength of the result. Supports list-mode (see rr2 for documentation)
+* `accumulator`: the method used for superimposing list-mode data. Only applies in list-mode
 ```jldoctest
 julia> a = rr((4,3),offset=CtrCorner)
 4×3 IndexFunArray{Float64, 2, IndexFunArrays.var"#37#39"{Float64, Tuple{Float64, Float64}, Tuple{Int64, Int64}}}:
@@ -596,6 +654,9 @@ julia> using FourierTools; real(iffts(ffts(a).*exp_ikx(a, shift_by=(2.0,1.0))))
  3.60555   3.0          3.16228
  2.0      -2.22045e-16  1.0
  2.23607   1.0          1.41421
+
+ julia> using FourierTools; y = real(ift(exp_ikx((101,101),weight=rand(60), shift_by=101.0 .*rand(2,60))));
+
 ```
 
 ---

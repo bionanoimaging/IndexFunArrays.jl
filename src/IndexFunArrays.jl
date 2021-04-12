@@ -1,14 +1,16 @@
 module IndexFunArrays
 
 using LinearAlgebra
-
+using Base.Iterators
 
 export IndexFunArray
-export selectsizes 
+export selectsizes, get_scale
 
 const DEFAULT_T = Float64
+const IterType = Union{NTuple{N,Tuple} where N, Vector, Matrix, Base.Iterators.Repeated}
 
 
+include("scaling_offset_types.jl")
 include("utils.jl")
 include("other_ifas.jl")
 # include docstrings
@@ -17,8 +19,6 @@ include("scalar_ifas.jl")
 include("window_ifas.jl")
 include("tuple_ifas.jl")
 include("ifa_type.jl")
-include("scaling_offset_types.jl")
-
 
 
 # These are the type promotion rules, taken from float.jl but written in terms of types
