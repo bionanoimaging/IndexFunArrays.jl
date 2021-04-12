@@ -63,13 +63,13 @@ Abstract type to indicate a scaling from which several other types subtype.
 """
 Sca
 
-get_scale(size, ::Type{ScaUnit}) = ntuple(_ -> one(Int), length(size))
-get_scale(size, ::Type{ScaNorm}) = 1 ./ (max.(size .- 1, 1)) 
-get_scale(size, ::Type{ScaFT}) = 0.5 ./ (max.(size ./ 2, 1))
+get_scale(sz, ::Type{ScaUnit}) = ntuple(_ -> one(Int), length(sz))
+get_scale(sz, ::Type{ScaNorm}) = 1 ./ (max.(sz .- 1, 1)) 
+get_scale(sz, ::Type{ScaFT}) = 0.5 ./ (max.(sz ./ 2, 1))
 # get_scale(size, ::Type{ScaRFT}) = 0.5 ./ (max.(Base.setindex(size./ 2,size[1]-1,1), 1))  # These scales are wrong! They need the information on the real-space size!
-get_scale(size, ::Type{ScaFTEdge}) = 1 ./ (max.(size ./ 2, 1))  
+get_scale(sz, ::Type{ScaFTEdge}) = 1 ./ (max.(sz ./ 2, 1))  
 # get_scale(size, ::Type{ScaRFTEdge}) = 1 ./ (max.(Base.setindex(size./ 2,size[1]-1,1), 1))
-get_scale(size, t::Number) = ntuple(i -> t, length(size)) 
+get_scale(sz, t::Number) = ntuple(i -> t, length(sz)) 
 get_scale(dummy, t::NTuple) = t 
 get_scale(dummy, t::IterType) = t
 get_scale(dummy, t::Matrix) = Tuple(Tuple(t[:,n]) for n in 1:size(t,2))  # converts the matrix to an iterable collection for convenience
