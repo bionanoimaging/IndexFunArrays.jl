@@ -32,17 +32,17 @@ end
 
 function exp_ikx(::Type{T}, size::NTuple{N, Int}; shift_by=size.÷2, offset=CtrFT, scale=ScaFT, dims=ntuple(+, N),
                 accumulator=sum, weight=1) where {N,T}
-    myscale = apply_tuple_list((x,y)-> T.(-2pi .* x .* y), get_scale(size, scale), shift_by)
+    myscale = apply_tuple_list((x,y)-> T.(-2pi .* x .* y), get_scale(size, scale), optional_mat_to_iter(shift_by))
     return exp_is(T, size, scale = myscale, offset=offset, dims = dims, accumulator=accumulator, weight=weight)
 end
 
 function exp_ikx(size::NTuple{N, Int}; shift_by=size.÷2, offset=CtrFT, scale=ScaFT, dims=ntuple(+, N), accumulator=sum, weight=1) where {N,T}
-    myscale = apply_tuple_list((x,y)-> DEFAULT_T.(-2pi .* x .* y), get_scale(size, scale), shift_by)
+    myscale = apply_tuple_list((x,y)-> DEFAULT_T.(-2pi .* x .* y), get_scale(size, scale), optional_mat_to_iter(shift_by))
     return exp_is(complex(DEFAULT_T), size, scale = myscale, offset=offset, dims = dims, accumulator=accumulator, weight=weight)
 end
 
 function exp_ikx(arr::AbstractArray{T, N}; shift_by=size(arr).÷2, offset=CtrFT, scale=ScaFT, dims=ntuple(+, N), accumulator=sum, weight=1) where {N,T}
-    myscale = apply_tuple_list((x,y)-> T.(-2pi .* x .* y), get_scale(size, scale), shift_by)
+    myscale = apply_tuple_list((x,y)-> T.(-2pi .* x .* y), get_scale(size, scale), optional_mat_to_iter(shift_by))
     return exp_is(complex(typeof(arr[1])),size(arr), scale = myscale,  offset=offset, dims = dims, accumulator=accumulator)
 end
 
