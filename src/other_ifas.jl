@@ -46,32 +46,33 @@ function exp_ikx(arr::AbstractArray{T, N}; shift_by=size(arr).÷2, offset=CtrFT,
     return exp_is(complex(typeof(arr[1])),size(arr), scale = myscale,  offset=offset, dims = dims, accumulator=accumulator)
 end
 
+# These versions of Gaussians interpret sigma as the standard-deviation along each axis separately
 function gaussian(::Type{T}, size::NTuple{N, Int}; sigma=1.0, offset=CtrFT, scale=ScaUnit, dims=ntuple(+, N), accumulator=sum, weight=1) where {N,T}
-    myscale = apply_tuple_list((x,y)-> T.(x ./( 2 .* y .*y)), get_scale(size, scale), sigma)
+    myscale = apply_tuple_list((x,y)-> T.(x ./( 2 .* y .*y)), get_scale(size, scale), optional_mat_to_iter(sigma))
     return exp_sqr(T, size, scale = myscale, offset=offset, dims = dims, accumulator=accumulator, weight=weight)
 end
 
 function gaussian(size::NTuple{N, Int}; sigma=1.0, offset=CtrFT, scale=ScaUnit, dims=ntuple(+, N), accumulator=sum, weight=1) where {N,T}
-    myscale = apply_tuple_list((x,y)-> DEFAULT_T.(x ./( 2 .* y .*y)), get_scale(size, scale), sigma)
+    myscale = apply_tuple_list((x,y)-> DEFAULT_T.(x ./( 2 .* y .*y)), get_scale(size, scale), optional_mat_to_iter(sigma))
     return exp_sqr(DEFAULT_T, size, scale = myscale, offset=offset, dims = dims, accumulator=accumulator, weight=weight)
 end
 
 function gaussian(arr::AbstractArray{T, N}; sigma=1.0, offset=CtrFT, scale=ScaUnit, dims=ntuple(+, N), accumulator=sum, weight=1) where {N,T}
-    myscale = apply_tuple_list((x,y)-> T.(x ./( 2 .*y.*y)), get_scale(size, scale), sigma)
+    myscale = apply_tuple_list((x,y)-> T.(x ./( 2 .*y.*y)), get_scale(size, scale), optional_mat_to_iter(sigma))
     return exp_sqr(arr, scale = myscale,  offset=offset, dims = dims, accumulator=accumulator, weight=weight)
 end
 
 function normal(::Type{T}, size::NTuple{N, Int}; sigma=1.0, offset=CtrFT, scale=ScaUnit, dims=ntuple(+, N), accumulator=sum, weight=1) where {N,T}
-    myscale = apply_tuple_list((x,y)-> T.(x ./( 2 .*y.*y)), get_scale(size, scale), sigma)
+    myscale = apply_tuple_list((x,y)-> T.(x ./( 2 .*y.*y)), get_scale(size, scale), optional_mat_to_iter(sigma))
     return exp_sqr_norm(T, size, scale = myscale, offset=offset, dims = dims, accumulator=accumulator, weight=weight)
 end
 
 function normal(size::NTuple{N, Int}; sigma=1.0, offset=CtrFT, scale=ScaUnit, dims=ntuple(+, N), accumulator=sum, weight=1) where {N,T}
-    myscale = apply_tuple_list((x,y)-> DEFAULT_T.(x ./( 2 .*y.*y)), get_scale(size, scale), sigma)
+    myscale = apply_tuple_list((x,y)-> DEFAULT_T.(x ./( 2 .*y.*y)), get_scale(size, scale), optional_mat_to_iter(sigma))
     return exp_sqr_norm(DEFAULT_T, size, scale = myscale, offset=offset, dims = dims, accumulator=accumulator, weight=weight)
 end
 
 function normal(arr::AbstractArray{T, N}; sigma=1.0, offset=CtrFT, scale=ScaUnit, dims=ntuple(+, N), accumulator=sum, weight=1) where {N,T}
-    myscale = apply_tuple_list((x,y)-> T.(x ./( 2 .*y.*y)), get_scale(size, scale), sigma)
+    myscale = apply_tuple_list((x,y)-> T.(x ./( 2 .*y.*y)), get_scale(size, scale), optional_mat_to_iter(sigma))
     return exp_sqr_norm(arr, scale = myscale,  offset=offset, dims = dims, accumulator=accumulator, weight=weight)
 end

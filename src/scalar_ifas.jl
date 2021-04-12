@@ -45,12 +45,13 @@ end
 
 curry(f, x) = (xs...) -> f(x, xs...)   # just a shorthand to remove x
 
+## These functions ensure that also numbers can be iterated and zipped
 function cast_iter(vals::Matrix)
     Tuple(Tuple(vals[:,n]) for n in 1:size(vals,2))
     # Tuple(vals[:,axes(vals, 2)])
 end
 
-function cast_iter(vals::Vector{Number})
+function cast_iter(vals::Vector{<:Number})
     Tuple(vals)   # makes the matrix iterable, interpreting it as a series of vectors
 end
 
@@ -62,22 +63,51 @@ function cast_iter(vals)
     repeated(vals) # during the zip operation this type always yields the same value
 end
 
-mat_to_tvec = (v) -> [Tuple(v[:,n]) for n in 1:size(v,2)] # converts a 2d matrix to a Vector of Tuples
+function cast_number_iter(vals::Vector{<:Number})
+    Tuple(vals)   # makes the matrix iterable, interpreting it as a series of vectors
+end
+
+function cast_number_iter(vals::NTuple{N,<:Number} where N)
+    vals
+end
+
+function cast_number_iter(vals::Number)
+    repeated(vals) # during the zip operation this type always yields the same value
+end
+
+
+function optional_mat_to_iter(vals)  # only for matrices
+    vals
+end
+
+function optional_mat_to_iter(vals::Matrix)
+    cast_iter(vals)
+end
+
+mat_to_tvec(v) = [Tuple(v[:,n]) for n in 1:size(v,2)] # converts a 2d matrix to a Vector of Tuples
+
+function apply_dims(scale, dims, N)  # replaces scale entries not in dims with zeros
+    ntuple(i -> i ∈ dims ? scale[i] : zero(scale[1]), N)
+end
+
+function apply_dims(scales::IterType, dims, N)  # replaces scale entries not in dims with zeros
+    Tuple(ntuple(i -> i ∈ dims ? scale[i] : zero(scale[1]), N)  for scale in  scales)
+end
 
 # we automatically generate the functions for rr2, rr, ...
 # We set the types for the arguments correctly in the default cases
 for F in generate_functions_expr() 
 
-    # default functions with offset and scaling behavior
+    # default functions with offset and scaling behavior. This version allows no list of numbers or tuples
     @eval function $(Symbol(:_, F[1]))(::Type{T}, size::NTuple{N, Int},
-                           offset::Union{Type{<:Ctr}, Number, NTuple},
-                           scale::Union{Type{<:Sca}, Number, NTuple},
+                           offset::Union{Type{<:Ctr}, Number, NTuple{N,Number}},
+                           scale::Union{Type{<:Sca}, Number, NTuple{N,Number}},
                            dims, 
                            accumulator,
                            weight::Number) where{N, T} 
         offset = get_offset(size, offset)
         scale_init = get_scale(size, scale)
-        scale = ntuple(i -> i ∈ dims ? scale_init[i] : zero(scale_init[1]), N)
+        scale = apply_dims(scale_init, dims, N)
 
         g(x) = weight .* ($(F[2])(x)) # 
         IndexFunArray(T,g, size) 
@@ -109,13 +139,14 @@ for F in generate_functions_expr()
         accumulator = sum,
         weight=1) where{N, T} 
 
-        offset = get_offset(size, offset)
+        # its important to use different variable names due to a julia bug
+        offset_ = get_offset(size, offset)
         scale_init = get_scale(size, scale)
-        scale = ntuple(i -> i ∈ dims ? scale_init[i] : zero(scale_init[1]), N)
+        scale_ = apply_dims(scale_init, dims, N)
 
-        offset2 = cast_iter(offset)
-        scale2 = cast_iter(scale)
-        weight2 = cast_iter(weight)
+        offset2 = cast_iter(offset_)
+        scale2 = cast_iter(scale_)
+        weight2 = cast_number_iter(weight)
         w = (x, offset, scale, weight3) -> weight3 .* $(F[2])(x) # adds offset and scale as requires parameters to the expression
         # the line below makes a function only depending on the index position but iterating over both, offsets and scales
         fkt = (idx) -> accumulator(curry(wrap_zipped(w),idx),zip(offset2,scale2,weight2))
