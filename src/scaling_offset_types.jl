@@ -1,4 +1,4 @@
-export Sca,ScaUnit,ScaNorm,ScaFT,ScaFTEdge
+export Sca,ScaUnit,ScaNorm,ScaFT,ScaFTEdge, ScaMid
 export Ctr,CtrCorner,CtrFFT,CtrFT,CtrMid,CtrEnd, CtrRFFT,CtrRFT  # These do not work, as they need the size information about the real-space array
 
 
@@ -45,6 +45,7 @@ get_offset(dummy, t::Matrix) = Tuple(Tuple(t[:,n]) for n in 1:size(t,2))  # conv
 abstract type Sca end # scaling of the array
 struct ScaUnit <: Sca end # pixel distance is one
 struct ScaNorm <: Sca end # total size along each dimension normalized to 1.0
+struct ScaMid <: Sca end # such that the border pixel always reaches 1.0
 struct ScaFT <: Sca end # reciprocal Fourier coordinates
 struct ScaRFT <: Sca end # reciprocal Fourier coordinates for rFTs. 
 struct ScaFTEdge <: Sca end # such that the edge of the Fourier space is 1.0
@@ -58,13 +59,15 @@ Abstract type to indicate a scaling from which several other types subtype.
 # Possible subtypes
 * `ScaUnit`: No scaling of the indices 
 * `ScaNorm`: Total length along each dimension is normalized to 1
-* `ScaFT`: Reciprocal Fourier coordinates
+* `ScaMid`: Reaches 1.0 at the borders, if used in combination with `CtrMid`. Useful for keeping real-space symmetry.
+* `ScaFT`: Reciprocal Fourier coordinates compared to Nyquist sampling
 * `ScaFTEdge`: Such that the edge (in FFT sense) of the pixel is 1.0
 """
 Sca
 
 get_scale(sz, ::Type{ScaUnit}) = ntuple(_ -> one(Int), length(sz))
 get_scale(sz, ::Type{ScaNorm}) = 1 ./ (max.(sz .- 1, 1)) 
+get_scale(sz, ::Type{ScaMid}) = 1 ./ (max.((sz .- 1)./2, 1)) # reaches 1.0 at the outermost pixel. 
 get_scale(sz, ::Type{ScaFT}) = 0.5 ./ (max.(sz ./ 2, 1))
 # get_scale(size, ::Type{ScaRFT}) = 0.5 ./ (max.(Base.setindex(size./ 2,size[1]-1,1), 1))  # These scales are wrong! They need the information on the real-space size!
 get_scale(sz, ::Type{ScaFTEdge}) = 1 ./ (max.(sz ./ 2, 1))  

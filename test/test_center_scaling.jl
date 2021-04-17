@@ -29,6 +29,7 @@
         @test IndexFunArrays.get_scale((5, 4), ScaUnit) == (1, 1)
         @test IndexFunArrays.get_scale((6, 5), ScaNorm) == (0.2, 0.25)
         @test IndexFunArrays.get_scale((6, 5), ScaNorm) == (0.2, 0.25)
+        @test IndexFunArrays.get_scale((6, 5), ScaMid) == (0.4, 0.5)
         @test IndexFunArrays.get_scale((5,3), (2,11)) == (2,11)
 
         @test IndexFunArrays.get_scale((12, 1, 2), 2.123f0) == (2.123f0, 2.123f0, 2.123f0)

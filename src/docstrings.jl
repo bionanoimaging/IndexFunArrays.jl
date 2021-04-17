@@ -699,6 +699,7 @@ window_linear
                 offset=CtrFT, scale=ScaFTEdge, border_in=0.8, border_out=1.0, dims=ntuple(+, N))  
 
 A multidimensional radial window with a linear transition from zero at the borders (`border_out`) to one (`border_in`).
+Note that `border_in` and `border_out` need to be scalar values for `radial` type windows. The elypticity can be adjusted via the `scale` parameter.
 With the default offset and scale the borders are specified relative to the edge.
 ```jldoctest
 julia> window_radial_linear((4,5),border_in=0.0)
@@ -740,6 +741,7 @@ window_edge
                 offset=CtrFT, scale=ScaFTEdge, border_in=0.8, border_out=1.0, dims=ntuple(+, N))  
 
 A multidimensional radial window (disk) with a sudden transition half way between the borders (`border_out`) to one (`border_in`).
+Note that `border_in` and `border_out` need to be scalar values for `radial` type windows. The elypticity can be adjusted via the `scale` parameter.
 See `?window_radial_linear` for more details on the arguments.
 
 ---
@@ -772,6 +774,7 @@ window_hanning
                        offset=CtrFT, scale=ScaFTEdge, border_in=0.8, border_out=1.0, dims=ntuple(+, N))  
 
 A multidimensional radial window with a von Hann transition between the borders (`border_out`) to one (`border_in`).
+Note that `border_in` and `border_out` need to be scalar values for `radial` type windows. The elypticity can be adjusted via the `scale` parameter.
 See `?window_radial_linear` for more details on the arguments.
 
 ---
@@ -805,6 +808,7 @@ window_hamming
                           offset=CtrFT, scale=ScaFTEdge, border_in=0.8, border_out=1.0, dims=ntuple(+, N))  
 
 A multidimensional radial window with a Hamming transition between the borders (`border_out`) to one (`border_in`).
+Note that `border_in` and `border_out` need to be scalar values for `radial` type windows. The elypticity can be adjusted via the `scale` parameter.
 See `?window_radial_linear` for more details on the arguments.
 
 ---
@@ -837,6 +841,7 @@ window_blackman_harris
                           offset=CtrFT, scale=ScaFTEdge, border_in=0.8, border_out=1.0, dims=ntuple(+, N))  
 
 A multidimensional radial window with a Hamming transition according to Blackman/Harris between the borders (`border_out`) to one (`border_in`).
+Note that `border_in` and `border_out` need to be scalar values for `radial` type windows. The elypticity can be adjusted via the `scale` parameter.
 See `?window_radial_linear` for more details on the arguments.
 
 ---
@@ -846,3 +851,51 @@ This is a wrapper for
 `window_radial_blackman_harris(eltype(arr), size(arr), scaling=scaling, offset=offset, border_in=border_in, border_out=border_out)`.
 """
 window_radial_blackman_harris
+
+"""
+    window_gaussian([T=Float64], size::NTuple; 
+                          offset=CtrFT, scale=ScaFTEdge, border_in=0.8, border_out=1.0, dims=ntuple(+, N))  
+
+A multidimensional (separable) window with a  transition according to a decaying Gaussian between the borders (`border_out`) to one (`border_in`).
+By default the standard deviation `sigma` of the Gaussian is adjusted such that the `2 sigma` level is reached at `border_out`.
+However, this window is not clipped at the outer border, thus allowing the sigma to be adjusted by placing `border_out` closer to `border_in`.
+See `?window_linear` for more details on the arguments.
+```jldoctest
+julia> w1 = window_gaussian((9,9), border_in=(0.3,0.3), border_out=(0.6,1))
+9×9 IndexFunArray{Float64, 2, IndexFunArrays.var"#286#288"{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Tuple{Float64, Int64}}}:
+ 0.000109245  0.000259904  0.000413188  0.000449917  0.000449917  0.000449917  0.000413188  0.000259904  0.000109245
+ 0.012239     0.0291178    0.0462907    0.0504055    0.0504055    0.0504055    0.0462907    0.0291178    0.012239
+ 0.152725     0.363345     0.577637     0.628984     0.628984     0.628984     0.577637     0.363345     0.152725
+ 0.242811     0.57767      0.918365     1.0          1.0          1.0          0.918365     0.57767      0.242811
+ 0.242811     0.57767      0.918365     1.0          1.0          1.0          0.918365     0.57767      0.242811
+ 0.242811     0.57767      0.918365     1.0          1.0          1.0          0.918365     0.57767      0.242811
+ 0.152725     0.363345     0.577637     0.628984     0.628984     0.628984     0.577637     0.363345     0.152725
+ 0.012239     0.0291178    0.0462907    0.0504055    0.0504055    0.0504055    0.0462907    0.0291178    0.012239
+ 0.000109245  0.000259904  0.000413188  0.000449917  0.000449917  0.000449917  0.000413188  0.000259904  0.000109245
+```
+---
+window_gaussian(arr::AbstractArray;
+                          offset=CtrFT, scale=ScaFTEdge, border_in=0.8, border_out=1.0, dims=ntuple(+, N))  
+
+This is a wrapper for 
+`window_gaussian(eltype(arr), size(arr), scaling=scaling, offset=offset, border_in=border_in, border_out=border_out)`.
+"""
+window_gaussian
+
+"""
+    window_radial_gaussian([T=Float64], size::NTuple; 
+                          offset=CtrFT, scale=ScaFTEdge, border_in=0.8, border_out=1.0, dims=ntuple(+, N))  
+
+A multidimensional radial window with a Gaussian transition between the borders (`border_out`) to one (`border_in`).
+By default the standard deviation `sigma` of the Gaussian is adjusted such that the `2 sigma` level is reached at `border_out`.
+However, this window is not clipped at the outer border, thus allowing the sigma to be adjusted by placing `border_out` closer to `border_in`.
+Note that `border_in` and `border_out` are scalar values for `radial` type windows. The elypticity can be adjusted via the `scale` parameter.
+See `?window_radial_linear` for more details on the arguments.
+
+---
+window_radial_gaussian(arr::AbstractArray;
+                                  offset=CtrFT, scale=ScaFTEdge, border_in=0.8, border_out=1.0, dims=ntuple(+, N))
+This is a wrapper for 
+`window_radial_gaussian(eltype(arr), size(arr), scaling=scaling, offset=offset, border_in=border_in, border_out=border_out)`.
+"""
+window_radial_gaussian
