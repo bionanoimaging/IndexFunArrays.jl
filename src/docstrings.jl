@@ -660,12 +660,30 @@ julia> using FourierTools; real(iffts(ffts(a).*exp_ikx(a, shift_by=(2.0,1.0))))
 ```
 
 ---
-exp_ikx(arr::AbstractArray; offset=CtrFt, shift_by==size(arr).÷2, scaling=ScaUnit)
+    exp_ikx(arr::AbstractArray; offset=CtrFt, shift_by==size(arr).÷2, scaling=ScaUnit)
 
 This is a wrapper for 
 `exp_ikx(eltype(arr), size(arr), shift_by=shift_by, scaling=scaling, offset=offset)`.
 """
 exp_ikx
+
+"""
+    propagator(size::NTuple{N, Int}; Δz=1.0, shift_by=(0,0), k_max=0.5, offset=CtrFT, scale=ScaFT, dims=ntuple(+, N), accumulator=sum, weight=1) where {N,T}
+
+    A complex-valued phase which describes the `k_z= Δz * sqrt(1-k_x^2-k_y^2)` phase change upon free space propagation. 
+    
+    The argument `shift_by` and `Δz` arguments support list-mode, which can be used to conveniently perform multiple shifts simulatneously.
+    
+    # Arguments:
+    * `offset`: the center position of the Gaussian. You can use a tuple or the indicators `CtrCorner`, `CtrEnd`, `CtrFT`, `CtrRFT` etc.
+    * `Δz`: the amount to propagate along the third dimension z by in real space.
+    * `shift_by`: the amount to shift by in x and y spatial direct in real space.
+    * `scale`: the scale of the pixel. By default `ScaUnit` is assumed
+    * `dims`: the dimensions over which to apply this function to.
+    * `weight`: the strength of the result. Supports list-mode (see rr2 for documentation)
+    * `accumulator`: the method used for superimposing list-mode data. Only applies in list-mode
+    """
+propagator
 
 """
     window_linear([T=Float64], size::NTuple; 
