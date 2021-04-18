@@ -30,13 +30,14 @@ from which several other types subtype.
 """
 Ctr
 
-get_offset(size, ::Type{CtrCorner}) = size.*0 .+ 1.0
-get_offset(size, ::Type{CtrFT}) = size.÷2 .+ 1.0
-get_offset(size, ::Type{CtrRFT}) = Base.setindex(size.÷2,0,1) .+ 1.0
-get_offset(size, ::Type{CtrFFT}) = size.*0 .+ 1.0
-get_offset(size, ::Type{CtrRFFT}) = size.*0 .+ 1.0
-get_offset(size, ::Type{CtrMid}) = (size.+1)./2.0
-get_offset(size, ::Type{CtrEnd}) = size.+0.0
+# In the equations below, it is important to not use 1.0 or 0.0 as these would cause the result to be of type FLoat64
+get_offset(size, ::Type{CtrCorner}) = size.*0 .+ 1
+get_offset(size, ::Type{CtrFT}) = size.÷2 .+ 1
+get_offset(size, ::Type{CtrRFT}) = Base.setindex(size.÷2,0,1) .+ 1
+get_offset(size, ::Type{CtrFFT}) = size.*0 .+ 1
+get_offset(size, ::Type{CtrRFFT}) = size.*0 .+ 1
+get_offset(size, ::Type{CtrMid}) = (size.+1)./2
+get_offset(size, ::Type{CtrEnd}) = size.+0
 get_offset(size, t::Number) = ntuple(i -> t, length(size))
 get_offset(dummy, t::NTuple) = t
 get_offset(dummy, t::IterType) = t

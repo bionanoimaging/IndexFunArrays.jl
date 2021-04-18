@@ -74,7 +74,7 @@
 
     @testset "Test the ramp method" begin
         a = yy(Float64, (1, 5), offset = CtrCorner, scale = ScaUnit)
-        b = ramp(Float64, 2, 5, offset = CtrCorner, scale = ScaUnit)
+        b = ramp(Int64, 2, 5, offset = CtrCorner, scale = ScaUnit)
         @test a == [0,1,2,3,4]'
         @test size(ramp(7,7)) == (1,1,1,1,1,1,7)
     end

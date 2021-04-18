@@ -15,6 +15,8 @@ function generate_functions_expr()
     x_expr9 = :(exp(.- sum(abs2.(x .- offset).*scale)) ./ prod(sqrt.(pi ./ scale)))
     x_expr10 = :(exp(.- apply_covariance((x .- offset), scale) ))
     x_expr11 = :(exp(.- apply_covariance((x .- offset), scale)) ./ prod(sqrt.(pi ./ abs2(scale))))
+    x_expr12 = :(abs2(scale[1] .* (x[1] .- offset[1]))+abs2(scale[2] .* (x[2] .- offset[2])))
+    x_expr13 = :((x[1] .- offset[1]).* scale[1] .+ (x[2] .- offset[2]) .* scale[2])
 
     functions = [
         (:(rr2), :(x -> T(sum(abs2.($x_expr))))),
@@ -26,6 +28,8 @@ function generate_functions_expr()
         (:(tt),  :(x -> T($x_expr5))),
         (:(delta),  :(x -> T($x_expr6))),
         (:(phiphi), :(x -> T(atan.($x_expr2, $x_expr1)))),  # this is the arcus tangens of y/x yielding a spiral phase ramp
+        (:(phase_kz), :(x -> T(sqrt.(max(1 .- $x_expr12,0))))),  # can be used for constucting a free-space propagator in optics
+        (:(phase_kxy), :(x -> T($x_expr13))),  # useful for xy shifting
         (:(exp_is),  :(x -> T($x_expr7))),  # exp(2pi i s (x-o)) # by modifying s, this becomes exp(i kx)
         (:(exp_sqr),  :(x -> T($x_expr8))),  # maximum-normalized Gaussian
         (:(exp_sqr_norm),  :(x -> T($x_expr9))),  # integral-normalized Gaussian (over infinite ROI)

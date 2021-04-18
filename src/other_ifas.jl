@@ -1,4 +1,4 @@
-export idx, cpx, exp_ikx
+export idx, cpx, exp_ikx, propagator
 export gaussian, normal
 export ramp
 
@@ -7,7 +7,7 @@ function ramp(::Type{T}, dim::Int, dim_size::Int;
     size = single_dim_size(dim,dim_size)
     offset = get_offset(size, offset)
     scale_n = get_scale(size, scale)
-    f = ((x) -> scale_n[dim] .* (x[dim] .- offset[dim]))
+    f = ((x) -> T.(scale_n[dim] .* (x[dim] .- offset[dim])))
     IndexFunArray(T, f, size) 
 end
 
@@ -44,6 +44,31 @@ end
 function exp_ikx(arr::AbstractArray{T, N}; shift_by=size(arr).÷2, offset=CtrFT, scale=ScaFT, dims=ntuple(+, N), accumulator=sum, weight=1) where {N,T}
     myscale = apply_tuple_list((x,y)-> T.(-2pi .* x .* y), get_scale(size(arr), scale), optional_mat_to_iter(shift_by))
     return exp_is(complex(typeof(arr[1])),size(arr), scale = myscale,  offset=offset, dims = dims, accumulator=accumulator)
+end
+
+function propagator(::Type{T}, size::NTuple{N, Int}; Δz=1.0, shift_by=0, k_max=0.5, offset=CtrFT, scale=ScaFT, dims=ntuple(+, N),
+    accumulator=sum, weight=1) where {N,T}
+myscale = apply_tuple_list((x,y)-> T.(x ./ y), get_scale(size, scale), optional_mat_to_iter(k_max))
+myscale2 = apply_tuple_list((x,y)-> T.(-2pi .* x .* y), get_scale(size(arr), scale), optional_mat_to_iter(shift_by))
+return cispi.((2 .*Δz) .* 
+    phase_kz(T, size, scale = myscale, offset=offset, dims = dims, accumulator=accumulator, weight=weight) .+
+    2 .* phase_kxy(T, size, scale = myscale2, offset=offset, dims = dims, accumulator=accumulator, weight=weight))
+end
+
+function propagator(size::NTuple{N, Int}; Δz=1.0,  k_max=0.5, shift_by=0, offset=CtrFT, scale=ScaFT, dims=ntuple(+, N), accumulator=sum, weight=1) where {N,T}
+myscale = apply_tuple_list((x,y)-> DEFAULT_T.(x ./ y), get_scale(size, scale), optional_mat_to_iter(k_max))
+myscale2 = apply_tuple_list((x,y)-> DEFAULT_T.(-2pi .* x .* y), get_scale(size, scale), optional_mat_to_iter(shift_by))
+return cispi.((2 .*Δz) .* 
+        phase_kz(DEFAULT_T, size, scale = myscale, offset=offset, dims = dims, accumulator=accumulator, weight=weight) .+
+        2 .* phase_kxy(DEFAULT_T, size, scale = myscale2, offset=offset, dims = dims, accumulator=accumulator, weight=weight))
+    end
+
+function propagator(arr::AbstractArray{T, N}; Δz=1.0, k_max=0.5, shift_by=0, offset=CtrFT, scale=ScaFT, dims=ntuple(+, N), accumulator=sum, weight=1) where {N,T}
+myscale = apply_tuple_list((x,y)-> T.(x ./ y), get_scale(size(arr), scale), optional_mat_to_iter(k_max))
+myscale2 = apply_tuple_list((x,y)-> T.(-2pi .* x .* y), get_scale(size(arr), scale), optional_mat_to_iter(shift_by))
+return cispi.((2 .*Δz) .* 
+        phase_kz(typeof(arr[1]),size(arr), scale = myscale,  offset=offset, dims = dims, accumulator=accumulator) .+
+        2 .* phase_kxy(typeof(arr[1]), size, scale = myscale2, offset=offset, dims = dims, accumulator=accumulator, weight=weight))
 end
 
 # These versions of Gaussians interpret sigma as the standard-deviation along each axis separately
