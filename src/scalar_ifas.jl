@@ -1,5 +1,9 @@
 apply_covariance = (x,M) -> sum(dot.(x,M*x))
 
+optional_posZ(x::NTuple{1,T}, offset::NTuple{1,T}) where {T,N} = 1
+optional_posZ(x::NTuple{2,T}, offset::NTuple{2,T}) where {T,N} = 1
+optional_posZ(x::NTuple{N,T}, offset::NTuple{N,T}) where {T,N} = x[3]-offset[3]
+
 # List of functions and names we want to predefine
 function generate_functions_expr()
     # offset and scale is already wrapped in the generator function
@@ -28,7 +32,7 @@ function generate_functions_expr()
         (:(tt),  :(x -> T($x_expr5))),
         (:(delta),  :(x -> T($x_expr6))),
         (:(phiphi), :(x -> T(atan.($x_expr2, $x_expr1)))),  # this is the arcus tangens of y/x yielding a spiral phase ramp
-        (:(phase_kz), :(x -> T(sqrt.(max(1 .- $x_expr12,0))))),  # can be used for constucting a free-space propagator in optics
+        (:(phase_kz), :(x -> T(optional_posZ(x,offset).*sqrt.(max(1 .- $x_expr12,0))))),  # can be used for constucting a free-space propagator in optics
         (:(phase_kxy), :(x -> T($x_expr13))),  # useful for xy shifting
         (:(exp_is),  :(x -> T($x_expr7))),  # exp(2pi i s (x-o)) # by modifying s, this becomes exp(i kx)
         (:(exp_sqr),  :(x -> T($x_expr8))),  # maximum-normalized Gaussian
