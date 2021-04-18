@@ -678,11 +678,18 @@ exp_ikx
     * `offset`: the center position of the Gaussian. You can use a tuple or the indicators `CtrCorner`, `CtrEnd`, `CtrFT`, `CtrRFT` etc.
     * `Δz`: the amount to propagate along the third dimension z by in real space.
     * `shift_by`: the amount to shift by in x and y spatial direct in real space.
+    * `k_max`: indicates the sampling relative to the Nyquist frequency. In optics this should be `pixelpitch./λ` with the `pixelpitch` as a tuple and the wavelength `λ = n*λ₀` in the medium.
     * `scale`: the scale of the pixel. By default `ScaUnit` is assumed
     * `dims`: the dimensions over which to apply this function to.
     * `weight`: the strength of the result. Supports list-mode (see rr2 for documentation)
     * `accumulator`: the method used for superimposing list-mode data. Only applies in list-mode
-    """
+---
+propagator(arr::AbstractArray; Δz=1.0, shift_by=(0,0), k_max=0.5, offset=CtrFt, scaling=ScaUnit)
+
+This is a wrapper for 
+`propagator(eltype(arr), size(arr), Δz=Δz, shift_by=shift_by, k_max=k_max, scaling=scaling, offset=offset)`.
+
+"""
 propagator
 
 """
