@@ -121,25 +121,6 @@ for F in generate_functions_expr()
         IndexFunArray(T,g, size) 
     end
 
-    #=
-    # a version (by Felix) that allows a Vector as input
-    @eval function $(Symbol(F[1], :(base)))(::Type{T}, size::NTuple{N, Int},
-                           offset::Vector,
-                           scale::Vector,
-                           dims) where{N, T}
-        offsets_a = get_offset.(Ref(size), offset)
-        scales_a = get_scale.(Ref(size), scale)
-        
-        g(x) = begin
-            res = zero(T)
-            for (offset, scale) in zip(offsets_a, scales_a)
-                res += $(F[2])(x)
-            end
-            return res
-        end
-        IndexFunArray(T, g, size) 
-    end
-    =#
     @eval function $(Symbol(:_, F[1]))(::Type{T}, size::NTuple{N, Int},
         offset,   # a version that supports an iterable collection of tuples for offset and scale 
         scale,
@@ -161,30 +142,6 @@ for F in generate_functions_expr()
 
         IndexFunArray(T, fkt, size) 
     end
-#=
-    @eval function  $(Symbol(:_, F[1]))(::Type{T}, size::NTuple{N, Int},
-        offset::IterType,   # a version that supports an iterable collection of tuples for offset and scale 
-        scale=ScaUnit,
-        dims=ntuple(+, N),
-        accumulator = sum,
-        weight=1) where{N, M, T} 
-
-       # print("Dispatch T1\n")
-        $(Symbol(:_, F[1]))(T, size, offset, repeated(scale), dims, accumulator, weight)
-    end
-
-    @eval function  $(Symbol(:_, F[1]))(::Type{T}, size::NTuple{N, Int},
-        offset,   # a version that supports an iterable collection of tuples for offset and scale 
-        scale::IterType,
-        dims=ntuple(+, N);
-        accumulator = sum,
-        weight=1) where{N, M, T} 
-
-        #print("Dispatch T2\n")
-        $(Symbol(:_, F[1]))(T, size, repeated(offset), scale, dims, accumulator, weight)
-    end
-    =#
-
     # default functions with offset and scaling behavior
     @eval function $(F[1])(::Type{T}, size::NTuple{N, Int};
                            offset=CtrFT,
