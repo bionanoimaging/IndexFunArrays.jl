@@ -13,6 +13,8 @@ function generate_functions_expr()
     x_expr3 = :(scale[3] .* (x[3] .- offset[3]))
     x_expr4 = :(scale[4] .* (x[4] .- offset[4]))
     x_expr5 = :(scale[5] .* (x[5] .- offset[5]))
+    x_expr14 = :(maximum(abs.(scale .* (x .- offset)))) # useful for rectangular things
+    x_expr15 = :(minimum(abs.(scale .* (x .- offset))))
     x_expr6 = :(prod(x .== offset))
     x_expr7 = :(cis(dot((x .- offset), scale)))
     x_expr8 = :(exp(.- sum(abs2.(x .- offset).*scale))) # scale is 1/(2 sigma^2)
@@ -30,6 +32,8 @@ function generate_functions_expr()
         (:(zz),  :(x -> T($x_expr3))),
         (:(ee),  :(x -> T($x_expr4))),
         (:(tt),  :(x -> T($x_expr5))),
+        (:(idx_min),  :(x -> T($x_expr15))),
+        (:(idx_max),  :(x -> T($x_expr14))),
         (:(delta),  :(x -> T($x_expr6))),
         (:(phiphi), :(x -> T(atan.($x_expr2, $x_expr1)))),  # this is the arcus tangens of y/x yielding a spiral phase ramp
         (:(phase_kz), :(x -> T(optional_posZ(x,offset).*sqrt.(max(1 .- $x_expr12,0))))),  # can be used for constucting a free-space propagator in optics

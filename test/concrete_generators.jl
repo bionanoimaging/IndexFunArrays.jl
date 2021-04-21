@@ -72,6 +72,14 @@
         @test xx(Int, (3, 5), offset = CtrCorner, scale = ScaUnit) == [0 0 0 0 0; 1 1 1 1 1; 2 2 2 2 2] 
     end
 
+    @testset "Test idx_min and idx_max methods" begin
+        sz = (13, 15)
+        a = idx_min(Int, sz , offset = CtrCorner, scale = ScaUnit)
+        b = idx_max(Int, sz, offset = CtrCorner, scale = ScaUnit)
+        a == min.(xx(sz, offset = CtrCorner), yy(sz, offset = CtrCorner))
+        b == max.(xx(sz, offset = CtrCorner), yy(sz, offset = CtrCorner))
+    end
+
     @testset "Test the ramp method" begin
         a = yy(Float64, (1, 5), offset = CtrCorner, scale = ScaUnit)
         b = ramp(Int64, 2, 5, offset = CtrCorner, scale = ScaUnit)
