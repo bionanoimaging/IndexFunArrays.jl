@@ -6,7 +6,7 @@
     
     
     function test_arr(arr, f, T, s)
-        @test typeof(arr[s...]) == T
+        @test eltype(arr) == T
         @test last(arr) ≈ sqrt(sum(abs2.((s))))
         @test arr.size == s
         @test first(arr) ≈ sqrt(sum(abs2.((ntuple(x -> 1, length(s))))))
