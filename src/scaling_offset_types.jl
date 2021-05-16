@@ -78,6 +78,15 @@ get_scale(dummy, t::NTuple) = t
 get_scale(dummy, t::IterType) = t
 get_scale(dummy, t::Matrix) = Tuple(Tuple(t[:,n]) for n in 1:size(t,2))  # converts the matrix to an iterable collection for convenience
 
+"""
+    apply_tuple_list(f, t1,t2) 
+    applies a two-argument function to tubles and iterables of tuples
+Example:
+```jldoctest
+julia> IndexFunArrays.apply_tuple_list.(.*,2.0,((1.0,2.0),(2.0,3.0),(3.0,3.5),(4.0,5.5)))
+((2.0, 4.0), (4.0, 6.0), (6.0, 7.0), (8.0, 11.0))
+```
+"""
 function apply_tuple_list(f, t1,t2)  # applies a two-argument function to tubles and iterables of tuples
     return f(t1,t2)
 end

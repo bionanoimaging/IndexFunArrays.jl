@@ -98,12 +98,12 @@ end
 
 mat_to_tvec(v) = [Tuple(v[:,n]) for n in 1:size(v,2)] # converts a 2d matrix to a Vector of Tuples
 
-function apply_dims(scale, dims, N)  # replaces scale entries not in dims with zeros
-    ntuple(i -> i ∈ dims ? scale[i] : zero(scale[1]), N)
+function apply_dims(scale2, dims, N)  # replaces scale entries not in dims with zeros
+    ntuple(i -> i ∈ dims ? scale2[i] : zero(scale2[1]), N)
 end
 
 function apply_dims(scales::IterType, dims, N)  # replaces scale entries not in dims with zeros
-    Tuple(ntuple(i -> i ∈ dims ? scale[i] : zero(scale[1]), N)  for scale in  scales)
+    Tuple(ntuple(i -> i ∈ dims ? scale3[i] : zero(scale3[1]), N)  for scale3 in  scales)
 end
 
 # we automatically generate the functions for rr2, rr, ...

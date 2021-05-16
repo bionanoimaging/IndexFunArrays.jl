@@ -19,6 +19,7 @@ include("scalar_ifas.jl")
 include("window_ifas.jl")
 include("tuple_ifas.jl")
 include("ifa_type.jl")
+include("derivative_support.jl")
 
 
 # These are the type promotion rules, taken from float.jl but written in terms of types
