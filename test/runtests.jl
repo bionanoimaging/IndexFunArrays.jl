@@ -18,7 +18,8 @@ include("utils.jl")
     @test arr[2] == arr[12] == arr[2, 2] == 2
     
     arr2 = similar(arr, (11, 11))
-    @test arr2[2] == arr2[13] == arr2[2, 2] == 2
+    @test size(arr2) == (11,11) 
+    @test eltype(arr2) == eltype(arr) 
 
     for s in [(10,), (10,1,2), (100, 100), (20,2,2,2,2)]
         @test s == size(IndexFunArray(ComplexF32, x -> zero(ComplexF32), s))
