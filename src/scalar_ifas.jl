@@ -99,11 +99,11 @@ end
 mat_to_tvec(v) = [Tuple(v[:,n]) for n in 1:size(v,2)] # converts a 2d matrix to a Vector of Tuples
 
 function apply_dims(scale2, dims, N)  # replaces scale entries not in dims with zeros
-    ntuple(i -> i ∈ dims ? scale2[i] : zero(scale2[1]), N)
+    ntuple(i -> i ∈ dims ? scale2[i] : zero(eltype(scale2)), N)  # zero(scale2[1])
 end
 
 function apply_dims(scales::IterType, dims, N)  # replaces scale entries not in dims with zeros
-    Tuple(ntuple(i -> i ∈ dims ? scale3[i] : zero(scale3[1]), N)  for scale3 in  scales)
+    Tuple(ntuple(i -> i ∈ dims ? scale3[i] : zero(eltype(scale3)), N)  for scale3 in  scales)
 end
 
 # we automatically generate the functions for rr2, rr, ...
@@ -112,14 +112,14 @@ for F in generate_functions_expr()
 
     # default functions with offset and scaling behavior. This version allows no list of numbers or tuples
     @eval function $(Symbol(:_, F[1]))(::Type{T}, size::NTuple{N, Int},
-                           offset::Union{Type{<:Ctr}, Number, NTuple{N,Number}},
-                           scale::Union{Type{<:Sca}, Number, NTuple{N,Number}},
+                           offset::Union{Type{<:Ctr}, Number, NTuple{N,Number}, Vector{<:Number}},
+                           scale::Union{Type{<:Sca}, Number, NTuple{N,Number}, Vector{<:Number}},
                            dims, 
                            accumulator,
                            weight::Number) where{N, T} 
         offset = get_offset(size, offset)
         scale_init = get_scale(size, scale)
-        scale = apply_dims(scale_init, dims, N)
+        scale = apply_dims(scale_init, dims, N) # replaces scale entries not in dims with zeros
 
         g(x) = weight .* ($(F[2])(x)) # 
         IndexFunArray(T,g, size) 
@@ -138,6 +138,7 @@ for F in generate_functions_expr()
         scale_ = apply_dims(scale_init, dims, N)
 
         offset2 = cast_iter(offset_)
+        # @show offset2
         scale2 = cast_iter(scale_)
         weight2 = cast_number_iter(weight)
         w = (x, offset, scale, weight3) -> weight3 .* $(F[2])(x) # adds offset and scale as requires parameters to the expression

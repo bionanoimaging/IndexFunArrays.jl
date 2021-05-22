@@ -87,19 +87,27 @@ julia> IndexFunArrays.apply_tuple_list.(.*,2.0,((1.0,2.0),(2.0,3.0),(3.0,3.5),(4
 ((2.0, 4.0), (4.0, 6.0), (6.0, 7.0), (8.0, 11.0))
 ```
 """
-function apply_tuple_list(f, t1,t2)  # applies a two-argument function to tubles and iterables of tuples
+function apply_tuple_list(f, t1, t2)  # applies a two-argument function to tubles and iterables of tuples
     return f(t1,t2)
 end
 
-function apply_tuple_list(f, t1,t2::IterType)
+function apply_tuple_list(f, t1, t2::Nothing)  # applies a two-argument function to tubles and iterables of tuples
+    return t2
+end
+
+function apply_tuple_list(f, t1::Nothing, t2)  # applies a two-argument function to tubles and iterables of tuples
+    return t1
+end
+
+function apply_tuple_list(f, t1, t2::IterType)
     return Tuple([f(t1,a2) for a2 in t2])
 end
 
-function apply_tuple_list(f, t1::IterType,t2)
+function apply_tuple_list(f, t1::IterType, t2)
     res= Tuple([f(a1,t2) for a1 in t1])
     return res
 end
 
-function apply_tuple_list(f, t1::IterType,t2::IterType)
+function apply_tuple_list(f, t1::IterType, t2::IterType)
     return Tuple([f(a[1],a[2]) for a in zip(t1,t2)])
 end

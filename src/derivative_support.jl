@@ -22,20 +22,20 @@ function ChainRulesCore.rrule(::Type{IndexFunArray}, # ::typeof(IndexFunArray)
     gen::F,
     sz::NTuple{N, Int},  # This is the standard constructor, abeit not the direct contructor
     ) where {T,F,N}
-    @show "Hi! In Chair Rule!"
     val_grad(idx) = Zygote._pullback(gen, idx)[2](1.0) # [2](1.0)
     # @show  val_grad([1,1])[1]  # this is a named tuple
     # gradgen(idx) = val_grad(idx)[1][:a] # (val_grad(x)[2](1.0))[2] # mygrad(x)[1][1] # 
-    @show mySymbols=keys(val_grad(sz)[1])
-    @show gradgen(idx) = val_grad(idx)[1] # (val_grad(x)[2](1.0))[2] # mygrad(x)[1][1] # 
+    mySymbols=keys(val_grad(sz)[1])
+    gradgen(idx) = val_grad(idx)[1] # (val_grad(x)[2](1.0))[2] # mygrad(x)[1][1] # 
     function IFA_pullback(ΔΩ)   # Zygote._pullback(f,pi/2.0)[2](1.0) # 1.0 is only the seed
         Fcts = ((idx)-> val_grad(idx)[1][aSymbol] for aSymbol in mySymbols)
-        print("oja:\n\n")
+        # Fcts = ((idx)-> ΔΩ[idx...] .* val_grad(idx)[1][aSymbol] for aSymbol in mySymbols)
+        # TupleVals = (IndexFunArray(typeof(Fun(sz)), Fun, sz) for Fun in Fcts) # {T,N,typeof(Fun)} yields a tuple of values
         TupleVals = (apply_tuple_list.(.*,ΔΩ,IndexFunArray(typeof(Fun(sz)), Fun, sz)) for Fun in Fcts) # {T,N,typeof(Fun)} yields a tuple of values
         # TupleVals = (collect(ΔΩ .* IndexFunArray(typeof(Fun(sz)), Fun, sz)) for Fun in Fcts) # {T,N,typeof(Fun)} yields a tuple of values
         @show TupleVals
         print("ojo:\n\n")
-        ∂gen = NamedTuple{mySymbols}(TupleVals) # converts the value tuple into a named tuple with the appropriate type names
+        ∂gen = NamedTuple{mySymbols}(collect(TupleVals)) # converts the value tuple into a named tuple with the appropriate type names
         @show typeof(∂gen)
         @show ∂gen
         print("oji:\n\n")

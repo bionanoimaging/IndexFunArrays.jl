@@ -64,10 +64,20 @@ Base.size(A::IndexFunArray) = A.size
 
 # similar requires to be "mutable".
 # So we might remove this 
-Base.similar(A::IndexFunArray, ::Type{T}, size::Dims) where {T} = IndexFunArray(A.generator, size)
+Base.similar(A::IndexFunArray, ::Type{T}, size::Dims) where {T} = 
+    Array{eltype(A)}(undef, size...) # IndexFunArray(A.generator, size)
 
-# calculate the entry according to the index
-Base.getindex(A::IndexFunArray{T,N}, I::Vararg{B, N}) where {T,N, B} = return A.generator(I)
+# calculate the entry according to a vector of Int indices e.g. [1,2,3]
+Base.getindex(A::IndexFunArray{T,N}, I::Vararg{Int, N}) where {T,N} = 
+    return A.generator(I)
+
+# calculate the entry according to colons e.g. [:,:,:]
+# Base.getindex(A::IndexFunArray{T,N}, c::Vararg{Colon, N}) where {T,N} = 
+# return A # just return the array itself
+
+# calculate the entry according to colons e.g. [:]
+# Base.getindex(A::IndexFunArray{T,N}, c::Colon) where {T,N} = 
+# return collect(Base.Iterators.flatten(A)) # just return the 1D version. You can collect, if needed.
 
 # not supported
 Base.setindex!(A::IndexFunArray{T,N}, v, I::Vararg{B,N}) where {T,N, B} = begin 

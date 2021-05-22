@@ -1,3 +1,9 @@
+using Zygote, IndexFunArrays
+f(of,s) = sum(xx((10,),offset=of, scale=s))  # Float64(idx[1]+idx[2])*
+f(2.2,(3.3,))
+gradient(f, (1,), (2,))
+
+kdsjfls 
 using View5D, IndexFunArrays
 
 sz = (50,50)
@@ -11,9 +17,9 @@ data =  mygaussians(offsets);
 
 loss(of) = sum(abs2.(data .- mygaussians(of)))  # a loss function
 loss(offsets)  # is zero
+gradient(loss,(41,37))
 
 using Zygote, IndexFunArrays
-# gradient(loss,offsets)
 
 # f(idx,of,sc) = (idx[1].*sc - of[1] + of[2])^2
 function c(of,sc)
@@ -27,8 +33,12 @@ gradient(loss,(2.2,1.3),1.2)
 
 using Zygote, IndexFunArrays
 f(of,s) = sum(xx((10,),offset=of, scale=s))  # Float64(idx[1]+idx[2])*
-f(2.2,3.3)
-gradient(f, 1, 2)
+f(2.2,(3.3,))
+gradient(f, 1, (2,))
+
+f(of) = sum(xx((10,),offset=of))  # Float64(idx[1]+idx[2])*
+f(2.2)
+gradient(f, 1)
 
 
 ntuple(i -> i ∈ dims ? scale[i] : zero(scale[1]), N)
