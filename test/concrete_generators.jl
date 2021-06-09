@@ -188,6 +188,15 @@ end
         @test sum(abs.(window_half_cos((1, 14), border_in = 0, border_out = 1) .- [0.0  0.222521  0.433884  0.62349  0.781831  0.900969  0.974928  1.0  0.974928  0.900969  0.781831  0.62349  0.433884  0.222521])) < 1e-5
     end
 
+    @testset "box" begin
+        sz = (77,202)
+        boxsize = (14,99)
+        sc = (1.3,2.3)
+        @test box(sz,boxsize) == (abs.(xx(sz)) .< (boxsize[1]./2)) .* (abs.(yy(sz)) .< (boxsize[2]./2))
+        @test box(sz,boxsize,scale=sc) == (abs.(xx(sz,scale=sc)) .< (boxsize[1]./2)) .* (abs.(yy(sz,scale=sc)) .< (boxsize[2]./2))
+        @test box(sz,boxsize, offset=CtrCorner) == (abs.(xx(sz, offset=CtrCorner)) .< (boxsize[1]./2)) .* (abs.(yy(sz, offset=CtrCorner)) .< (boxsize[2]./2))
+    end
+
 end
 
 

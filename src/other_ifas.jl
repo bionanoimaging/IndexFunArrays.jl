@@ -1,6 +1,6 @@
 export idx, cpx, exp_ikx, propagator
 export gaussian, normal
-export ramp
+export ramp, box
 
 function ramp(::Type{T}, dim::Int, dim_size::Int;
     offset=CtrFT, scale=ScaUnit) where {T}
@@ -92,12 +92,20 @@ function normal(::Type{T}, size::NTuple{N, Int}; sigma=1.0, offset=CtrFT, scale=
     return exp_sqr_norm(T, size, scale = myscale, offset=offset, dims = dims, accumulator=accumulator, weight=weight)
 end
 
-function normal(size::NTuple{N, Int}; sigma=1.0, offset=CtrFT, scale=ScaUnit, dims=ntuple(+, N), accumulator=sum, weight=1) where {N,T}
+function normal(sz::NTuple{N, Int}; sigma=1.0, offset=CtrFT, scale=ScaUnit, dims=ntuple(+, N), accumulator=sum, weight=1) where {N}
     myscale = apply_tuple_list((x,y)-> DEFAULT_T.(x ./( 2 .*y.*y)), get_scale(size, scale), optional_mat_to_iter(sigma))
-    return exp_sqr_norm(DEFAULT_T, size, scale = myscale, offset=offset, dims = dims, accumulator=accumulator, weight=weight)
+    return exp_sqr_norm(DEFAULT_T, sz, scale = myscale, offset=offset, dims = dims, accumulator=accumulator, weight=weight)
 end
 
 function normal(arr::AbstractArray{T, N}; sigma=1.0, offset=CtrFT, scale=ScaUnit, dims=ntuple(+, N), accumulator=sum, weight=1) where {N,T}
     myscale = apply_tuple_list((x,y)-> T.(x ./( 2 .*y.*y)), get_scale(size(arr), scale), optional_mat_to_iter(sigma))
     return exp_sqr_norm(arr, scale = myscale,  offset=offset, dims = dims, accumulator=accumulator, weight=weight)
+end
+
+function box(sz::NTuple{N, Int}, boxsize; scale=ScaUnit, offset=CtrFT) where {N}
+    return idx_max(sz,scale=get_scale(sz, scale) ./ boxsize, offset=offset) .< 0.5
+end
+
+function box(arr::AbstractArray{T, N}, boxsize; scale=ScaUnit, offset=CtrFT) where {N,T}
+    return idx_max(sz,scale=get_scale(size(arr), scale) ./ boxsize, offset=offset) .< 0.5
 end
