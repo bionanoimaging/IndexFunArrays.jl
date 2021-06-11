@@ -980,3 +980,76 @@ This is a wrapper for
 `window_radial_gaussian(eltype(arr), size(arr), scaling=scaling, offset=offset, border_in=border_in, border_out=border_out)`.
 """
 window_radial_gaussian
+
+"""
+    box([::Type{T}], size::NTuple, boxsize; offset=CtrFT, scale=ScaFTEdge, dims=ntuple(+, N))  
+
+A multidimensional box, being one inside and zero outside. `boxsize` defines the outer dimensions of the box in the sense that a comparison is documentation
+with the distance to the center being smaller than half the `boxsize` value. Note that the default offset leads to even sizes being rounded down (see example below).
+The default result datatype is Float64.
+```jldoctest
+julia> box((10,10),(3,6))
+10×10 Matrix{Float64}:
+ 0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0
+ 0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0
+ 0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0
+ 0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0
+ 0.0  0.0  0.0  1.0  1.0  1.0  1.0  1.0  0.0  0.0
+ 0.0  0.0  0.0  1.0  1.0  1.0  1.0  1.0  0.0  0.0
+ 0.0  0.0  0.0  1.0  1.0  1.0  1.0  1.0  0.0  0.0
+ 0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0
+ 0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0
+ 0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0
+```
+---
+box(arr::AbstractArray, boxsize; offset=CtrFT, scale=ScaUnit, dims=ntuple(+, N))  
+
+This is a wrapper for 
+`box(eltype(arr), size(arr), boxsize; scaling=scaling, offset=offset)`.
+"""
+box
+
+"""
+    disc([::Type{T}], size::NTuple, disc_radius; offset=CtrFT, scale=ScaFTEdge, dims=ntuple(+, N))  
+
+A multidimensional disc (i.e. a disk in 2D and a filled sphere in 3D), being one inside and zero outside. `disc_radius` defines the radius of the disc. 
+The default result datatype is Float64. An alternative to generating a disc would be the edge-window.
+```jldoctest
+julia> disc((10,10),(3,5))
+10×10 Matrix{Float64}:
+ 0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0
+ 0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0
+ 0.0  0.0  0.0  0.0  0.0  1.0  0.0  0.0  0.0  0.0
+ 0.0  0.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0  0.0
+ 0.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0
+ 1.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0
+ 0.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0
+ 0.0  0.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0  0.0
+ 0.0  0.0  0.0  0.0  0.0  1.0  0.0  0.0  0.0  0.0
+ 0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0
+
+ julia> disc((15,8),(0.5,0.5),scale=ScaFT)
+15×8 Matrix{Float64}:
+ 0.0  0.0  0.0  1.0  1.0  1.0  0.0  0.0
+ 0.0  0.0  1.0  1.0  1.0  1.0  1.0  0.0
+ 0.0  0.0  1.0  1.0  1.0  1.0  1.0  0.0
+ 0.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0
+ 0.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0
+ 0.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0
+ 0.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0
+ 1.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0
+ 0.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0
+ 0.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0
+ 0.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0
+ 0.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0
+ 0.0  0.0  1.0  1.0  1.0  1.0  1.0  0.0
+ 0.0  0.0  1.0  1.0  1.0  1.0  1.0  0.0
+ 0.0  0.0  0.0  1.0  1.0  1.0  0.0  0.0
+```
+---
+disc(arr::AbstractArray, disc_radius; offset=CtrFT, scale=ScaUnit, dims=ntuple(+, N))  
+
+This is a wrapper for 
+`disc(eltype(arr), size(arr), disc_radius; scaling=scaling, offset=offset)`.
+"""
+disc

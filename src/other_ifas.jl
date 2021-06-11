@@ -1,6 +1,6 @@
 export idx, cpx, exp_ikx, propagator
 export gaussian, normal
-export ramp, box
+export ramp, box, disc
 
 function ramp(::Type{T}, dim::Int, dim_size::Int;
     offset=CtrFT, scale=ScaUnit) where {T}
@@ -102,10 +102,35 @@ function normal(arr::AbstractArray{T, N}; sigma=1.0, offset=CtrFT, scale=ScaUnit
     return exp_sqr_norm(arr, scale = myscale,  offset=offset, dims = dims, accumulator=accumulator, weight=weight)
 end
 
-function box(sz::NTuple{N, Int}, boxsize; scale=ScaUnit, offset=CtrFT) where {N}
-    return idx_max(sz,scale=get_scale(sz, scale) ./ boxsize, offset=offset) .< 0.5
+function box(::Type{T}, sz::NTuple{N, Int}, boxsize; offset=CtrFT, scale=ScaUnit, dims=ntuple(+, N)) where {N,T}
+    return convert.(T,idx_max(sz,scale=get_scale(sz, scale) ./ boxsize, offset=offset, dims=dims) .< 0.5)
 end
 
-function box(arr::AbstractArray{T, N}, boxsize; scale=ScaUnit, offset=CtrFT) where {N,T}
-    return idx_max(sz,scale=get_scale(size(arr), scale) ./ boxsize, offset=offset) .< 0.5
+function box(sz::NTuple{N, Int}, boxsize; offset=CtrFT, scale=ScaUnit, dims=ntuple(+, N)) where {N}
+    box(DEFAULT_T, sz, boxsize; offset=offset, scale=scale, dims=dims)
+end
+
+function box(::Type{TR}, arr::AbstractArray{T, N}, boxsize; offset=CtrFT, scale=ScaUnit, dims=ntuple(+, N)) where {N,T,TR}
+    return convert.(T, idx_max(size(arr),scale=get_scale(size(arr), scale) ./ boxsize, offset=offset, dims=dims) .< 0.5)
+end
+
+function box(arr::AbstractArray{T, N}, boxsize; offset=CtrFT, scale=ScaUnit, dims=ntuple(+, N)) where {N,T}
+    box(eltype(arr), arr, boxsize; offset=offset, scale=scale, dims=dims)
+end
+
+
+function disc(::Type{T}, sz::NTuple{N, Int}, disc_radius; offset=CtrFT, scale=ScaUnit, dims=ntuple(+, N)) where {N,T}
+    return convert.(T,rr2(sz,scale=get_scale(sz, scale) ./ disc_radius, offset=offset, dims=dims) .<= 1.0)
+end
+
+function disc(sz::NTuple{N, Int}, disc_radius; offset=CtrFT, scale=ScaUnit, dims=ntuple(+, N)) where {N}
+    disc(DEFAULT_T, sz, disc_radius; offset=offset, scale=scale, dims=dims)
+end
+
+function disc(::Type{TR}, arr::AbstractArray{T, N}, disc_radius; offset=CtrFT, scale=ScaUnit, dims=ntuple(+, N)) where {N,T,TR}
+    return convert.(T, rr2(size(arr),scale=get_scale(size(arr), scale) ./ disc_radius, offset=offset, dims=dims) .<= 1.0)
+end
+
+function disc(arr::AbstractArray{T, N}, disc_radius; offset=CtrFT, scale=ScaUnit, dims=ntuple(+, N)) where {N,T}
+    disc(eltype(arr), arr, disc_radius; offset=offset, scale=scale, dims=dims)
 end
