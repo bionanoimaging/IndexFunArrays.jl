@@ -64,8 +64,8 @@ Base.size(A::IndexFunArray) = A.size
 
 # similar requires to be "mutable".
 # So we might remove this 
-Base.similar(A::IndexFunArray, ::Type{T}, size::Dims) where {T} = 
-    Array{eltype(A)}(undef, size...) # IndexFunArray(A.generator, size)
+Base.similar(A::IndexFunArray, ::Type{T}=eltype(A), size::Dims=size(A)) where {T} = 
+    Array{T}(undef, size...) # IndexFunArray(A.generator, size)
 
 # calculate the entry according to a vector of Int indices e.g. [1,2,3]
 Base.getindex(A::IndexFunArray{T,N}, I::Vararg{Int, N}) where {T,N} = 
