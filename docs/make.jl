@@ -6,6 +6,7 @@ makedocs(modules = [IndexFunArrays],
          sitename = "IndexFunArrays.jl", 
          pages = Any[
             "IndexFunArrays.jl" => "index.md",
+            "Misc" => "misc.md",
             "Distance Functions" => "distance.md",
             "Window Functions" => "window.md",
          ]

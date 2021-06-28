@@ -11,4 +11,6 @@ IndexFunArrays.window_radial_blackman_harris
 IndexFunArrays.window_blackman_harris
 IndexFunArrays.window_radial_edge
 IndexFunArrays.window_linear
+IndexFunArrays.window_radial_gaussian
+IndexFunArrays.window_gaussian
 ```
