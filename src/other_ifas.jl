@@ -49,7 +49,7 @@ end
 function propagator(::Type{T}, size::NTuple{N, Int}; Δz=1.0, shift_by=0, k_max=0.5, offset=CtrFT, scale=ScaFT, dims=ntuple(+, N),
     accumulator=sum, weight=1) where {N,T}
 myscale = apply_tuple_list((x,y)-> T.(x ./ y), get_scale(size, scale), optional_mat_to_iter(k_max))
-myscale2 = apply_tuple_list((x,y)-> T.(-2pi .* x .* y), get_scale(size(arr), scale), optional_mat_to_iter(shift_by))
+myscale2 = apply_tuple_list((x,y)-> T.(-2pi .* x .* y), get_scale(size, scale), optional_mat_to_iter(shift_by))
 return cispi.((2 .*Δz) .* 
     phase_kz(T, size, scale = myscale, offset=offset, dims = dims, accumulator=accumulator, weight=weight) .+
     2 .* phase_kxy(T, size, scale = myscale2, offset=offset, dims = dims, accumulator=accumulator, weight=weight))
