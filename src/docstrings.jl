@@ -724,6 +724,25 @@ This is a wrapper for
 exp_ikx
 
 """
+    phase_kz([T=Float64], size::NTuple{N, Int};
+    offset=CtrFT,
+    shift_by=size.÷2
+    dims=ntuple(+, N),
+    scale=ScaFT,
+    weight=1,
+    accumulator=sum)
+    Calculates a propagation phase (without the 2pi factor!) for a given z-position, which can be defined via a 3rd entry in the `offset` supplied to the function.
+    By default, Nyquist sampling it is assumed such that the lateral k_xy corresponds to the XY border in frequency space at the edge of the Ewald circle.
+    However, via the xy `scale` entries the k_max can be set appropriately. The propagation equation uses 
+    offset[3] .* sqrt.(1-kxy_rel^2) as the propagation phase. Therefore the Z-propagation distance (offset[3]) has to be specified in units of the wavelength in the medium (`λ = n*λ₀`).
+    Note that since the phase is normalized to 1 instead of 2pi, you need to use this phase in the following sense: `cispi.(2.*phase_kz(...))`.
+    For other arguments look at similar scaler IndexFunArray functions such as rr.
+
+See also: `propagator()`
+"""
+phase_kz
+
+"""
     propagator(size::NTuple{N, Int}; Δz=1.0, shift_by=(0,0), k_max=0.5, offset=CtrFT, scale=ScaFT, dims=ntuple(+, N), accumulator=sum, weight=1) where {N,T}
 
     A complex-valued phase which describes the `k_z= Δz * sqrt(1-k_x^2-k_y^2)` phase change upon free space propagation. 
@@ -732,7 +751,7 @@ exp_ikx
     
     # Arguments:
     * `offset`: the center position of the Gaussian. You can use a tuple or the indicators `CtrCorner`, `CtrEnd`, `CtrFT`, `CtrRFT` etc.
-    * `Δz`: the amount to propagate along the third dimension z by in real space.
+    * `Δz`: the amount to propagate along the third dimension z by in real space in units of the wavelength in the medium (`λ = n*λ₀`).  
     * `shift_by`: the amount to shift by in x and y spatial direct in real space.
     * `k_max`: indicates the sampling relative to the Nyquist frequency. In optics this should be `pixelpitch./λ` with the `pixelpitch` as a tuple and the wavelength `λ = n*λ₀` in the medium.
     * `scale`: the scale of the pixel. By default `ScaUnit` is assumed
