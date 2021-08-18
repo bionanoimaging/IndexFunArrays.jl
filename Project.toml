@@ -1,7 +1,7 @@
 name = "IndexFunArrays"
 uuid = "613c443e-d742-454e-bfc6-1d7f8dd76566"
 authors = ["Rainer Heintzmann <heintzmann@gmail.com>", "Felix Wechsler (roflmaostc) <fxw+git@mailbox.org>"]
-version = "0.2.1"
+version = "0.2.2"
 
 [deps]
 ChainRulesCore = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
