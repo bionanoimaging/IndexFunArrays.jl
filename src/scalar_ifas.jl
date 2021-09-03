@@ -174,4 +174,25 @@ for F in generate_functions_expr()
     @eval export $(F[1])
 end 
 
+export axes1d
 
+function axes1d(::Type{T}, size::NTuple{N, Int}; offset=CtrFT, scale=ScaUnit, dims=ntuple(+, N), keepdims=false) where {T,N}
+    offset = get_offset(size, offset)
+    scale_init = get_scale(size, scale)
+    scale = apply_dims(scale_init, dims, N) # replaces scale entries not in dims with zeros
+    if keepdims
+        @show offset
+        (ramp(T, d, size[d]; offset=offset[d],scale=scale[d]) for d in dims)
+    else
+        (xx(T, (size[d],); offset=offset[d], scale=scale[d]) for d in dims)
+    end
+end
+
+function axes1d(size::NTuple{N, Int}; offset=CtrFT, scale=ScaUnit, dims=ntuple(+, N), keepdims=false) where {N}
+    T = DEFAULT_T
+    axes1d(T, size; offset=offset, scale=scale, dims=dims, keepdims=keepdims)
+end
+
+function axes1d(arr::AbstractArray{T, N}; offset=CtrFT, scale=ScaUnit, dims=ntuple(+, N), keepdims=false) where {T, N}
+    axes1d(size(arr); offset=offset, scale=scale, dims=dims, keepdims=keepdims)
+end

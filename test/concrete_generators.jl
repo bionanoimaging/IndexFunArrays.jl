@@ -202,7 +202,20 @@ end
         @test disc(sz,disc_rad, offset=CtrCorner) ≈ (rr(sz, offset=CtrCorner) .<= disc_rad)
         @test disc(zeros(sz),disc_rad, offset=CtrCorner) ≈ (rr(sz, offset=CtrCorner) .<= disc_rad)
     end
-
+    @testset "axes1d" begin
+        sz = (2,3,4)
+        x,y,z = axes1d(sz, offset=(0,0,0))
+        @test x == 1:sz[1]
+        @test y == 1:sz[2]
+        @test z == 1:sz[3]
+        x,y,z = axes1d(sz, offset=CtrCorner, keepdims=true)
+        @test size(x) == (sz[1],)
+        @test size(y) == (1,sz[2])
+        @test size(z) == (1,1,sz[3])
+        @test x[:] == 0:sz[1]-1
+        @test y[:] == 0:sz[2]-1
+        @test z[:] == 0:sz[3]-1
+    end
 end
 
 
