@@ -631,7 +631,6 @@ gaussian
     normal([T=Float64], size::NTuple{N, Int};
         offset=CtrFT,
         sigma=1.0,
-        dims=ntuple(+, N),
         scale=ScaUnit,
         weight=1,
         accumulator=sum)
@@ -643,7 +642,6 @@ For a version with normalized to the maximum, see `gaussian`.
 * `sigma`: the (standard deviation) width of the Gaussian
 * `offset`: the center position of the Gaussian. You can use a tuple or the indicators `CtrCorner`, `CtrEnd`, `CtrFT`, `CtrRFT` etc.
 * `scale`: the scale of the pixel. By default `ScaUnit` is assumed
-* `dims`: the dimensions over which to apply this function to.
 * `weight`: the strength of the result. Supports list-mode (see rr2 for documentation)
 * `accumulator`: the method used for superimposing list-mode data. Only applies in list-mode
 ```jldoctest
@@ -960,7 +958,8 @@ A multidimensional (separable) window with a  transition according to a decaying
 By default the standard deviation `sigma` of the Gaussian is adjusted such that the `2 sigma` level is reached at `border_out`.
 However, this window is not clipped at the outer border, thus allowing the sigma to be adjusted by placing `border_out` closer to `border_in`.
 See `?window_linear` for more details on the arguments.
-```jldoctest
+
+    ```jldoctest
 julia> w1 = window_gaussian((9,9), border_in=(0.3,0.3), border_out=(0.6,1))
 9×9 IndexFunArray{Float64, 2, IndexFunArrays.var"#286#288"{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Tuple{Float64, Int64}}}:
  0.000109245  0.000259904  0.000413188  0.000449917  0.000449917  0.000449917  0.000413188  0.000259904  0.000109245
@@ -974,8 +973,9 @@ julia> w1 = window_gaussian((9,9), border_in=(0.3,0.3), border_out=(0.6,1))
  0.000109245  0.000259904  0.000413188  0.000449917  0.000449917  0.000449917  0.000413188  0.000259904  0.000109245
 ```
 ---
-window_gaussian(arr::AbstractArray;
-                          offset=CtrFT, scale=ScaFTEdge, border_in=0.8, border_out=1.0, dims=ntuple(+, N))  
+
+    window_gaussian(arr::AbstractArray;
+                          offset=CtrFT, scale=ScaFTEdge, border_in=0.8, border_out=1.0, dims=ntuple(+, N)) 
 
 This is a wrapper for 
 `window_gaussian(eltype(arr), size(arr), scaling=scaling, offset=offset, border_in=border_in, border_out=border_out)`.

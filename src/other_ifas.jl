@@ -93,7 +93,7 @@ function normal(::Type{T}, size::NTuple{N, Int}; sigma=1.0, offset=CtrFT, scale=
 end
 
 function normal(sz::NTuple{N, Int}; sigma=1.0, offset=CtrFT, scale=ScaUnit, dims=ntuple(+, N), accumulator=sum, weight=1) where {N}
-    myscale = apply_tuple_list((x,y)-> DEFAULT_T.(x ./( 2 .*y.*y)), get_scale(size, scale), optional_mat_to_iter(sigma))
+    myscale = apply_tuple_list((x,y)-> DEFAULT_T.(x ./( 2 .*y.*y)), get_scale(sz, scale), optional_mat_to_iter(sigma))
     return exp_sqr_norm(DEFAULT_T, sz, scale = myscale, offset=offset, dims = dims, accumulator=accumulator, weight=weight)
 end
 

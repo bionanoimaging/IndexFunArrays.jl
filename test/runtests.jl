@@ -7,6 +7,7 @@ using BenchmarkTools
 BenchmarkTools.DEFAULT_PARAMETERS.samples = 2
 BenchmarkTools.DEFAULT_PARAMETERS.evals = 2
 
+include("other_ifas.jl")
 include("test_center_scaling.jl")
 include("constructors.jl")
 include("concrete_generators.jl")
