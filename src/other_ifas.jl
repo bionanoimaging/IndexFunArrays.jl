@@ -102,35 +102,38 @@ function normal(arr::AbstractArray{T, N}; sigma=1.0, offset=CtrFT, scale=ScaUnit
     return exp_sqr_norm(arr, scale = myscale,  offset=offset, dims = dims, accumulator=accumulator, weight=weight)
 end
 
-function box(::Type{T}, sz::NTuple{N, Int}, boxsize; offset=CtrFT, scale=ScaUnit, dims=ntuple(+, N)) where {N,T}
-    return convert.(T,idx_max(sz,scale=get_scale(sz, scale) ./ boxsize, offset=offset, dims=dims) .< 0.5)
+function box(::Type{T}, sz::NTuple{N, Int}, boxsize=sz./2; offset=CtrFT, scale=ScaUnit, dims=ntuple(+, N)) where {N,T}
+    myscale = get_scale(sz, scale)
+    # with the quarterpixel offset we achieve the correct integer behaviour
+    offset = get_offset(sz, offset) .- 0.25 
+    return box1(T, sz, scale = myscale .* 2 ./ boxsize, offset=offset, dims = dims)
 end
 
-function box(sz::NTuple{N, Int}, boxsize; offset=CtrFT, scale=ScaUnit, dims=ntuple(+, N)) where {N}
+function box(sz::NTuple{N, Int}, boxsize=sz./2; offset=CtrFT, scale=ScaUnit, dims=ntuple(+, N)) where {N}
     box(DEFAULT_T, sz, boxsize; offset=offset, scale=scale, dims=dims)
 end
 
-function box(::Type{TR}, arr::AbstractArray{T, N}, boxsize; offset=CtrFT, scale=ScaUnit, dims=ntuple(+, N)) where {N,T,TR}
-    return convert.(T, idx_max(size(arr),scale=get_scale(size(arr), scale) ./ boxsize, offset=offset, dims=dims) .< 0.5)
+function box(::Type{TR}, arr::AbstractArray{T, N}, boxsize=size(arr)./2; offset=CtrFT, scale=ScaUnit, dims=ntuple(+, N)) where {N,T,TR}
+    return box(TR, size(arr), boxsize; offset=offset, scale=scale, dims=dims)
 end
 
-function box(arr::AbstractArray{T, N}, boxsize; offset=CtrFT, scale=ScaUnit, dims=ntuple(+, N)) where {N,T}
-    box(eltype(arr), arr, boxsize; offset=offset, scale=scale, dims=dims)
+function box(arr::AbstractArray{T, N}, boxsize=size(arr)./2; offset=CtrFT, scale=ScaUnit, dims=ntuple(+, N)) where {N,T}
+    box(eltype(arr), size(arr), boxsize; offset=offset, scale=scale, dims=dims)
 end
 
-
-function disc(::Type{T}, sz::NTuple{N, Int}, disc_radius; offset=CtrFT, scale=ScaUnit, dims=ntuple(+, N)) where {N,T}
-    return convert.(T,rr2(sz,scale=get_scale(sz, scale) ./ disc_radius, offset=offset, dims=dims) .<= 1.0)
+function disc(::Type{T}, sz::NTuple{N, Int}, disc_radius=sz./2; offset=CtrFT, scale=ScaUnit, dims=ntuple(+, N)) where {N,T}
+    myscale = get_scale(sz, scale)
+    return disc1(T, sz, scale = myscale ./ disc_radius, offset=offset, dims = dims)
 end
 
-function disc(sz::NTuple{N, Int}, disc_radius; offset=CtrFT, scale=ScaUnit, dims=ntuple(+, N)) where {N}
-    disc(DEFAULT_T, sz, disc_radius; offset=offset, scale=scale, dims=dims)
+function disc(sz::NTuple{N, Int}, disc_radius=sz./2; offset=CtrFT, scale=ScaUnit, dims=ntuple(+, N)) where {N}
+    return disc(DEFAULT_T, sz, disc_radius; offset=offset, scale=scale, dims=dims)
 end
 
-function disc(::Type{TR}, arr::AbstractArray{T, N}, disc_radius; offset=CtrFT, scale=ScaUnit, dims=ntuple(+, N)) where {N,T,TR}
-    return convert.(T, rr2(size(arr),scale=get_scale(size(arr), scale) ./ disc_radius, offset=offset, dims=dims) .<= 1.0)
+function disc(::Type{TR}, arr::AbstractArray{T, N}, disc_radius=size(arr)./2; offset=CtrFT, scale=ScaUnit, dims=ntuple(+, N)) where {N,T,TR}
+    return disc(TR, size(arr), disc_radius; offset=offset, scale=scale, dims=dims)
 end
 
-function disc(arr::AbstractArray{T, N}, disc_radius; offset=CtrFT, scale=ScaUnit, dims=ntuple(+, N)) where {N,T}
+function disc(arr::AbstractArray{T, N}, disc_radius=size(arr)./2; offset=CtrFT, scale=ScaUnit, dims=ntuple(+, N)) where {N,T}
     disc(eltype(arr), arr, disc_radius; offset=offset, scale=scale, dims=dims)
 end

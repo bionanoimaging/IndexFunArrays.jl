@@ -154,8 +154,6 @@ end
 
 @testset "Test window functions" begin
 
-
-
     # simple window_hanning test
     @testset "window_hanning window test" begin
         window_hanning((10, ), border_in=0, border_out=1) ≈ sinpi.(range(0, 1, length=11)[1:end-1]).^2
@@ -192,15 +190,20 @@ end
         sz = (77,202)
         boxsize = (14,99)
         sc = (1.3,2.3)
-        @test box(sz,boxsize) == (abs.(xx(sz)) .< (boxsize[1]./2)) .* (abs.(yy(sz)) .< (boxsize[2]./2))
-        @test box(zeros(sz),boxsize,scale=sc) == (abs.(xx(sz,scale=sc)) .< (boxsize[1]./2)) .* (abs.(yy(sz,scale=sc)) .< (boxsize[2]./2))
-        @test box(sz,boxsize, offset=CtrCorner) == (abs.(xx(sz, offset=CtrCorner)) .< (boxsize[1]./2)) .* (abs.(yy(sz, offset=CtrCorner)) .< (boxsize[2]./2))
-        @test box(zeros(sz),boxsize, offset=CtrCorner) == (abs.(xx(sz, offset=CtrCorner)) .< (boxsize[1]./2)) .* (abs.(yy(sz, offset=CtrCorner)) .< (boxsize[2]./2))
+        @test box(sz,boxsize) == (abs.(xx(sz) .+ 0.25) .< (boxsize[1]./2)) .* (abs.(yy(sz) .+ 0.25) .< (boxsize[2]./2))
+        @test box(zeros(sz),boxsize,scale=sc) == (abs.(xx(sz,scale=sc) .+ 0.25) .< (boxsize[1]./2)) .* (abs.(yy(sz,scale=sc) .+ 0.25) .< (boxsize[2]./2))
+        @test box(sz,boxsize, offset=CtrCorner) == (abs.(xx(sz, offset=CtrCorner) .+ 0.25) .< (boxsize[1]./2)) .* (abs.(yy(sz, offset=CtrCorner) .+ 0.25) .< (boxsize[2]./2))
+        @test box(zeros(sz),boxsize, offset=CtrCorner) == (abs.(xx(sz, offset=CtrCorner) .+ 0.25) .< (boxsize[1]./2)) .* (abs.(yy(sz, offset=CtrCorner) .+ 0.25) .< (boxsize[2]./2))
+        @test box((10,10)) == box((10,10),(5,5))
+        @test sum(box((10,12))) == 5*6
+        @test sum(box1((10,12), scale=0.3)) == 49
         disc_rad = 33.0
         @test disc(sz,disc_rad) ≈ (rr(sz) .<= disc_rad)
         @test disc(zeros(sz),disc_rad,scale=sc) ≈ (rr(sz, scale=sc) .<= disc_rad)
         @test disc(sz,disc_rad, offset=CtrCorner) ≈ (rr(sz, offset=CtrCorner) .<= disc_rad)
         @test disc(zeros(sz),disc_rad, offset=CtrCorner) ≈ (rr(sz, offset=CtrCorner) .<= disc_rad)
+        @test sum(disc((10,12))) == 89
+        @test sum(disc1((10,11), scale=0.3)) == 37
     end
     @testset "axes1d" begin
         sz = (2,3,4)

@@ -1001,25 +1001,53 @@ This is a wrapper for
 window_radial_gaussian
 
 """
-    box([::Type{T}], size::NTuple, boxsize; offset=CtrFT, scale=ScaFTEdge, dims=ntuple(+, N))  
+    box1([T=Float64], size::NTuple{N, Int};
+        offset=CtrFT,
+        dims=ntuple(+, N),
+        scale=ScaUnit)
 
-A multidimensional box, being one inside and zero outside. `boxsize` defines the outer dimensions of the box in the sense that a comparison is documentation
-with the distance to the center being smaller than half the `boxsize` value. Note that the default offset leads to even sizes being rounded down (see example below).
+See `rr2` for a description of all options.
+
+Returns an IndexFunArray with being one if any lateral distance of a pixel to the center is smaller than or equal to 1.0. This function is used more as a helper function for the function
+`box` which warrants the box length to agree to a specified box size. This function calculates on a pixel by pixel basis, which means that
+you have to apply a subpixel offset, if you want boxes with even-sized pixel width. The size of the box can be regulated by the `scale` parameter.
+See `box` for a more convenient version.
+"""
+box1
+
+
+"""
+    box([::Type{T}], size::NTuple, boxsize=size./2; offset=CtrFT, scale=ScaFTEdge, dims=ntuple(+, N))  
+
+A multidimensional box, being one inside and zero outside. `boxsize` defines the outer dimensions of the box.
+To obtain box sizes for integer pixels that correspond to the Fourier-space centers both for the array and the box,
+an additional offset of 0.25 pixels is automatically applied and box pixels are one if less or equal to half the boxsize along
+this dimension.
 The default result datatype is Float64.
 ```jldoctest
 julia> box((10,10),(3,6))
-10×10 Matrix{Float64}:
+10×10 IndexFunArray{Float64, 2, IndexFunArrays.var"#g#182"{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}}:
  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0
  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0
  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0
  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0
- 0.0  0.0  0.0  1.0  1.0  1.0  1.0  1.0  0.0  0.0
- 0.0  0.0  0.0  1.0  1.0  1.0  1.0  1.0  0.0  0.0
- 0.0  0.0  0.0  1.0  1.0  1.0  1.0  1.0  0.0  0.0
+ 0.0  0.0  1.0  1.0  1.0  1.0  1.0  1.0  0.0  0.0
+ 0.0  0.0  1.0  1.0  1.0  1.0  1.0  1.0  0.0  0.0
+ 0.0  0.0  1.0  1.0  1.0  1.0  1.0  1.0  0.0  0.0
  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0
  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0
  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0
-```
+
+ julia> box((7,8))
+ 7×8 IndexFunArray{Float64, 2, IndexFunArrays.var"#g#182"{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}}:
+  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0
+  0.0  0.0  1.0  1.0  1.0  1.0  0.0  0.0
+  0.0  0.0  1.0  1.0  1.0  1.0  0.0  0.0
+  0.0  0.0  1.0  1.0  1.0  1.0  0.0  0.0
+  0.0  0.0  1.0  1.0  1.0  1.0  0.0  0.0
+  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0
+  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0
+ ```
 ---
 box(arr::AbstractArray, boxsize; offset=CtrFT, scale=ScaUnit, dims=ntuple(+, N))  
 
@@ -1029,13 +1057,27 @@ This is a wrapper for
 box
 
 """
+    disc1([T=Float64], size::NTuple{N, Int};
+        offset=CtrFT,
+        dims=ntuple(+, N),
+        scale=ScaUnit)
+
+See `rr2` for a description of all options.
+
+Returns an IndexFunArray with the radius to the center is smaller than or equal to 1.0. This function is used more as a helper function for the function
+`disc`. The radius of the disc can be regulated by the `scale` parameter.
+See `disc` for a more convenient version.
+"""
+disc1
+
+"""
     disc([::Type{T}], size::NTuple, disc_radius; offset=CtrFT, scale=ScaFTEdge, dims=ntuple(+, N))  
 
 A multidimensional disc (i.e. a disk in 2D and a filled sphere in 3D), being one inside and zero outside. `disc_radius` defines the radius of the disc. 
 The default result datatype is Float64. An alternative to generating a disc would be the edge-window.
 ```jldoctest
 julia> disc((10,10),(3,5))
-10×10 Matrix{Float64}:
+10×10 IndexFunArray{Float64, 2, IndexFunArrays.var"#g#194"{Float64, Tuple{Int64, Int64}, Tuple{Float64, Float64}, Int64}}:
  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0
  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0
  0.0  0.0  0.0  0.0  0.0  1.0  0.0  0.0  0.0  0.0
@@ -1047,12 +1089,10 @@ julia> disc((10,10),(3,5))
  0.0  0.0  0.0  0.0  0.0  1.0  0.0  0.0  0.0  0.0
  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0
 
- julia> disc((15,8),(0.5,0.5),scale=ScaFT)
-15×8 Matrix{Float64}:
+ julia> disc((11,8),(0.5,0.5),scale=ScaFT)
+11×8 IndexFunArray{Float64, 2, IndexFunArrays.var"#g#194"{Float64, Tuple{Int64, Int64}, Tuple{Float64, Float64}, Int64}}:
  0.0  0.0  0.0  1.0  1.0  1.0  0.0  0.0
  0.0  0.0  1.0  1.0  1.0  1.0  1.0  0.0
- 0.0  0.0  1.0  1.0  1.0  1.0  1.0  0.0
- 0.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0
  0.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0
  0.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0
  0.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0
@@ -1060,8 +1100,6 @@ julia> disc((10,10),(3,5))
  0.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0
  0.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0
  0.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0
- 0.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0
- 0.0  0.0  1.0  1.0  1.0  1.0  1.0  0.0
  0.0  0.0  1.0  1.0  1.0  1.0  1.0  0.0
  0.0  0.0  0.0  1.0  1.0  1.0  0.0  0.0
 ```
