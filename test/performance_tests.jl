@@ -4,7 +4,10 @@
     @testset "idx performance" begin
         function f(s, T)
             res = @benchmark idx($T, $s) samples = 2 evals = 2;
-            @test res.memory < 500
+            @show res.memory
+            # in previous versions it was like 448 but now (e.g. 1.6.5 and
+            # 1.7.1) it is different on CI. we relax it to 600. 
+            @test res.memory < 600
             
             res = @benchmark exp.(sum.(idx($T, $s))) samples = 2 evals = 2;
             res2 = @benchmark randn($T, $s) samples=2 evals = 2
