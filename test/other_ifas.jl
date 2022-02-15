@@ -7,7 +7,6 @@
 end
 
 
-
 @testset "Gaussian function, normed to 1" begin
     arr = 1 / √(2π)^2 / 1 * exp.(.- rr2((5,5)) / 2 .* 1^2)
     arr ./= maximum(arr)
