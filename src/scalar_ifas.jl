@@ -183,7 +183,6 @@ function axes1d(::Type{T}, size::NTuple{N, Int}; offset=CtrFT, scale=ScaUnit, di
     scale_init = get_scale(size, scale)
     scale = apply_dims(scale_init, dims, N) # replaces scale entries not in dims with zeros
     if keepdims
-        @show offset
         (ramp(T, d, size[d]; offset=offset[d],scale=scale[d]) for d in dims)
     else
         (xx(T, (size[d],); offset=offset[d], scale=scale[d]) for d in dims)

@@ -46,7 +46,7 @@ function exp_ikx(arr::AbstractArray{T, N}; shift_by=size(arr).÷2, offset=CtrFT,
     return exp_is(complex(eltype(arr)),size(arr), scale = myscale,  offset=offset, dims = dims, accumulator=accumulator)
 end
 
-function propagator(::Type{T}, size::NTuple{N, Int}; Δz=1.0, shift_by=0, k_max=0.5, offset=CtrFT, scale=ScaFT, dims=ntuple(+, N),
+function propagator(::Type{T}, size::NTuple{N, Int}; Δz=one(T), shift_by=0, k_max=T(0.5), offset=CtrFT, scale=ScaFT, dims=ntuple(+, N),
     accumulator=sum, weight=1) where {N,T}
 myscale = apply_tuple_list((x,y)-> T.(x ./ y), get_scale(size, scale), optional_mat_to_iter(k_max))
 myscale2 = apply_tuple_list((x,y)-> T.(-2pi .* x .* y), get_scale(size, scale), optional_mat_to_iter(shift_by))
@@ -55,7 +55,7 @@ return cispi.((2 .*Δz) .*
     2 .* phase_kxy(T, size, scale = myscale2, offset=offset, dims = dims, accumulator=accumulator, weight=weight))
 end
 
-function propagator(size::NTuple{N, Int}; Δz=1.0,  k_max=0.5, shift_by=0, offset=CtrFT, scale=ScaFT, dims=ntuple(+, N), accumulator=sum, weight=1) where {N,T}
+function propagator(size::NTuple{N, Int}; Δz=one(DEFAULT_T),  k_max=DEFAULT_T(0.5), shift_by=0, offset=CtrFT, scale=ScaFT, dims=ntuple(+, N), accumulator=sum, weight=1) where {N,T}
 myscale = apply_tuple_list((x,y)-> DEFAULT_T.(x ./ y), get_scale(size, scale), optional_mat_to_iter(k_max))
 myscale2 = apply_tuple_list((x,y)-> DEFAULT_T.(-2pi .* x .* y), get_scale(size, scale), optional_mat_to_iter(shift_by))
 return cispi.((2 .*Δz) .* 
@@ -63,7 +63,7 @@ return cispi.((2 .*Δz) .*
         2 .* phase_kxy(DEFAULT_T, size, scale = myscale2, offset=offset, dims = dims, accumulator=accumulator, weight=weight))
     end
 
-function propagator(arr::AbstractArray{T, N}; Δz=1.0, k_max=0.5, shift_by=0, offset=CtrFT, scale=ScaFT, dims=ntuple(+, N), accumulator=sum, weight=1) where {N,T}
+function propagator(arr::AbstractArray{T, N}; Δz=one(T), k_max=T(0.5), shift_by=0, offset=CtrFT, scale=ScaFT, dims=ntuple(+, N), accumulator=sum, weight=1) where {N,T}
 myscale = apply_tuple_list((x,y)-> T.(x ./ y), get_scale(size(arr), scale), optional_mat_to_iter(k_max))
 myscale2 = apply_tuple_list((x,y)-> T.(-2pi .* x .* y), get_scale(size(arr), scale), optional_mat_to_iter(shift_by))
 return cispi.((2 .*Δz) .* 
