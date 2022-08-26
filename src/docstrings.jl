@@ -724,15 +724,15 @@ exp_ikx
 """
     phase_kz([T=Float64], size::NTuple{N, Int};
     offset=CtrFT,
-    shift_by=size.÷2
     dims=ntuple(+, N),
     scale=ScaFT,
     weight=1,
     accumulator=sum)
-    Calculates a propagation phase (without the 2pi factor!) for a given z-position, which can be defined via a 3rd entry in the `offset` supplied to the function.
-    By default, Nyquist sampling it is assumed such that the lateral k_xy corresponds to the XY border in frequency space at the edge of the Ewald circle.
-    However, via the xy `scale` entries the k_max can be set appropriately. The propagation equation uses 
-    offset[3] .* sqrt.(1-kxy_rel^2) as the propagation phase. Therefore the Z-propagation distance (offset[3]) has to be specified in units of the wavelength in the medium (`λ = n*λ₀`).
+    Calculates a propagation phase (without the 2pi factor!) for a z-step of one.
+    The relative sampling of `k_max_rel` you should supply `xy_scale = 2 ./ (k_max_rel .* sz[1:2])` as the scale argument.
+    To achieve Nyquist sampling for the complex field, i.e. the Ewald-circle touching the side of the array, this would be `scale=2 ./ sz[1:2]`.
+    The propagation equation uses 
+    Δz .* sqrt.(1-kxy_rel^2) as the propagation phase. Therefore the Z-propagation distance Δz has to be specified in units of the wavelength in the medium (`λ = n*λ₀`).
     Note that since the phase is normalized to 1 instead of 2pi, you need to use this phase in the following sense: `cispi.(2.*phase_kz(...))`.
     For other arguments look at similar scaler IndexFunArray functions such as rr.
 

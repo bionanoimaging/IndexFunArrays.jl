@@ -38,7 +38,7 @@ function generate_functions_expr()
         (:(idx_max),  :(x -> T($x_expr14))),
         (:(delta),  :(x -> T($x_expr6))),
         (:(phiphi), :(x -> T(atan.($x_expr2, $x_expr1)))),  # this is the arcus tangens of y/x yielding a spiral phase ramp
-        (:(phase_kz), :(x -> T(optional_posZ(x,offset) .* sqrt.(max.(one(T) .- $x_expr12,zero(T)))))),  # can be used for constucting a free-space propagator in optics
+        (:(phase_kz), :(x -> T(optional_posZ(x,offset) .* sqrt.(max.(one(T) .- $x_expr12, zero(T)))))),  # can be used for constucting a free-space propagator in optics
         (:(phase_kxy), :(x -> T($x_expr13))),  # useful for xy shifting
         (:(exp_is),  :(x -> T($x_expr7))),  # exp(2pi i s (x-o)) # by modifying s, this becomes exp(i kx)
         (:(exp_sqr),  :(x -> T($x_expr8))),  # maximum-normalized Gaussian
