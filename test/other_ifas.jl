@@ -25,7 +25,11 @@ end
 @testset "Test scaling" begin
     @test gaussian((10, 10), sigma=1, scale=1) ≈ gaussian((10, 10), sigma=3, scale=3)
     @test normal((10, 10), sigma=1, scale=1) ≈ normal((10, 10), sigma=3, scale=3)
-    
+
+    @test !any(isnan.(gaussian((10, 10), sigma=(1,0), scale=1))) 
+    @test !any(isnan.(normal((10, 10), sigma=(0,1), scale=1.5)))
+    @test sum(normal((10, 10), sigma=(0,1), scale=1)) - 1 < 1e-5
+    @test maximum(gaussian((10, 10), sigma=(0,1), scale=0.8, offset=(2,3))) == 1.0
 end
 
 

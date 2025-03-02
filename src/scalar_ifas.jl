@@ -4,6 +4,8 @@ optional_posZ(x::NTuple{1,T}, offset::NTuple{1,T}) where {T} = one(T)
 optional_posZ(x::NTuple{2,T}, offset::NTuple{2,T}) where {T} = one(T)
 optional_posZ(x::NTuple{N,T}, offset::NTuple{N,T}) where {T,N} = x[3]-offset[3]
 
+abs2_scale(xo, scale) = ifelse(isinf(scale), abs2(xo) / eps(typeof(scale)), abs2(xo)*scale)
+
 # List of functions and names we want to predefine
 function generate_functions_expr()
     # offset and scale is already wrapped in the generator function
@@ -17,8 +19,10 @@ function generate_functions_expr()
     x_expr15 = :(minimum(abs.(scale .* (x .- offset))))
     x_expr6 = :(prod(x .== offset))
     x_expr7 = :(cis(dot((x .- offset), scale)))
-    x_expr8 = :(exp(.- sum(abs2.(x .- offset).*scale))) # scale is 1/(2 sigma^2)
-    x_expr9 = :(exp(.- sum(abs2.(x .- offset).*scale)) ./ prod(sqrt.(pi ./ scale)))
+    # x_expr8 = :(exp(.- sum(abs2.(x .- offset).*scale))) # scale is 1/(2 sigma^2)
+    # x_expr9 = :(exp(.- sum(abs2.(x .- offset).*scale)) ./ prod(sqrt.(pi ./ scale)))
+    x_expr8 = :(exp(.- sum(abs2_scale.(x .- offset, scale)))) # scale is 1/(2 sigma^2)
+    x_expr9 = :(exp(.- sum(abs2_scale.(x .- offset, scale))) ./ prod(ifelse.(isinf.(scale), 1, sqrt.(pi ./ scale))))
     x_expr10 = :(exp(.- apply_covariance((x .- offset), scale) ))
     x_expr11 = :(exp(.- apply_covariance((x .- offset), scale)) ./ prod(sqrt.(pi ./ abs2(scale))))
     x_expr12 = :(abs2.(scale[1] .* (x[1] .- offset[1])) .+ abs2.(scale[2] .* (x[2] .- offset[2])))

@@ -579,6 +579,7 @@ delta
 
 A gaussian peak positioned at offset. Note that the gaussian is NOT normalized by its integral, but by its maximum.
 For a version with a normalized integral, see `normal`.
+Note that direction of `sigma` which are zero lead to a delta-like behaviour in this direction, which is only visible if the offset is strictly integer.
 List-mode is supported also for the argument sigma. 
 See the final example below which generates 60 Gaussians at random positions with random strengths and width along X and Y.
 
@@ -635,7 +636,9 @@ gaussian
         weight=1,
         accumulator=sum)
 
-A gaussian peak positioned at offset. Note that this normal distribution (Gaussian) is normalized by its integral.
+A gaussian peak positioned at offset. Note that this normal distribution (Gaussian) is normalized by its integral by a theoretical continuous normalization factor.
+Note that this does not mean that the sum of the result is 1. Large discrepancies can occur of the sigma is very small or large.
+Note also that direction of `sigma` which are zero lead to a delta-like behaviour in this direction, which is only visible if the offset is strictly integer.
 For a version with normalized to the maximum, see `gaussian`.
 
 # Arguments:
