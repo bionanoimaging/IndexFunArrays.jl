@@ -102,8 +102,6 @@ function optional_mat_to_iter(vals::Matrix)
     cast_iter(vals)
 end
 
-mat_to_tvec(v) = [Tuple(v[:,n]) for n in 1:size(v,2)] # converts a 2d matrix to a Vector of Tuples
-
 function apply_dims(scale2, dims, N)  # replaces scale entries not in dims with zeros
     ntuple(i -> i ∈ dims ? scale2[i] : zero(eltype(scale2)), N)  # zero(scale2[1])
 end
